@@ -1,4 +1,4 @@
-package org.transportracker.api.initializer;
+package org.transportracker.api.config.initializer;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.NonNull;
