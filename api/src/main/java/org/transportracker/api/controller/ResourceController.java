@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class ResourceController {
 
-    @GetMapping("/protected")
+    @GetMapping("/protegida")
     public String protectedResource(@AuthenticationPrincipal Jwt jwt) {
         // Extraer roles de realm_access.roles
         Object roles = jwt.getClaimAsMap("realm_access") != null 
@@ -24,7 +24,7 @@ public class ResourceController {
                ", Authorities: " + authorities;
     }
 
-    @GetMapping("/public")
+    @GetMapping("/publica")
     public String publicResource() {
         return "Este es un recurso público, no se requiere autenticación.";
     }
