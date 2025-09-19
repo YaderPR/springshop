@@ -1,4 +1,4 @@
-package org.transportracker.api.config;
+package org.springshop.api.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,22 +20,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/public").permitAll()
+        http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/protected").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN", "ROLE_MANAGER")
-                .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt
-                    .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                )
-            );
+                .requestMatchers("/api/*").authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())));
         return http.build();
     }
 
     @Bean
-    
     public JwtDecoder jwtDecoder(@Value("${ISSUER_URI}") String issuerUri) {
         return JwtDecoders.fromIssuerLocation(issuerUri);
     }
@@ -49,8 +43,8 @@ public class SecurityConfig {
             List<String> roles = (List<String>) jwt.getClaimAsMap("realm_access").get("roles");
             // Convertir roles a GrantedAuthority con prefijo ROLE_
             return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .collect(Collectors.toList());
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                    .collect(Collectors.toList());
         });
         return converter;
     }

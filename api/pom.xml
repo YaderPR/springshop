@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
+		<!-- lookup parent from repository -->
 	</parent>
 	<artifactId>api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -33,42 +34,42 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		    <!-- JPA / Hibernate -->
+		<!-- JPA / Hibernate -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>    
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
 		<!-- PostgreSQL Driver -->
 		<dependency>
-        	<groupId>org.postgresql</groupId>
-        	<artifactId>postgresql</artifactId>
-        	<scope>runtime</scope>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<!-- Validaciones (ej: @NotNull, @Email) -->
-    	<dependency>
-        	<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-validation</artifactId>
-    	</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
 
-    	<!-- Herramientas útiles (logs, utils) -->
-    	<dependency>
-        	<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-log4j2</artifactId>
-    	</dependency>
+		<!-- Herramientas útiles (logs, utils) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
+		</dependency>
 
-    	<!-- Documentación de APIs con Swagger/OpenAPI -->
-    	<dependency>
-        	<groupId>org.springdoc</groupId>
-        	<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        	<version>2.3.0</version>
-    	</dependency>
+		<!-- Documentación de APIs con Swagger/OpenAPI -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.3.0</version>
+		</dependency>
 
-    	<!-- Migraciones de base de datos (Liquibase) -->
-    	<dependency>
-        	<groupId>org.liquibase</groupId>
-        	<artifactId>liquibase-core</artifactId>
+		<!-- Migraciones de base de datos (Liquibase) -->
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
 			<scope>test</scope>
-    	</dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -93,16 +94,23 @@
 		</dependency>
 		<!-- OAuth2 Resource Server -->
 		<dependency>
-    		<groupId>org.springframework.boot</groupId>
-    		<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
 
 		<!-- JWT support -->
 		<dependency>
-    		<groupId>org.springframework.security</groupId>
-   			<artifactId>spring-security-oauth2-jose</artifactId>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-jose</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.40</version>
 		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>
