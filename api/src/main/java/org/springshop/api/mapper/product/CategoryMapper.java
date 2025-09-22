@@ -1,4 +1,4 @@
-package org.springshop.api.mapper;
+package org.springshop.api.mapper.product;
 
 import org.springshop.api.dto.product.CategoryRequestDTO;
 import org.springshop.api.dto.product.CategoryResponseDTO;
@@ -36,6 +36,6 @@ public class CategoryMapper {
 
         return dto;
     }
-    
+
 }
 

@@ -1,6 +1,5 @@
 // WorkoutAccessoryRequestDTO.java
 package org.springshop.api.dto.product.workoutaccessory;
-
 import org.springshop.api.dto.product.ProductRequestDTO;
 
 import lombok.Data;

@@ -2,7 +2,6 @@
 package org.springshop.api.dto.product.apparel;
 
 import org.springshop.api.dto.product.ProductRequestDTO;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

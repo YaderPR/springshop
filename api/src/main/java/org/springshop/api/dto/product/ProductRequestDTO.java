@@ -19,8 +19,7 @@ public class ProductRequestDTO {
 
     @NotBlank
     private String imageUrl;
-
-    @NotNull
+    
     private Integer categoryId; // se recibe el id de la categoría
 }
 

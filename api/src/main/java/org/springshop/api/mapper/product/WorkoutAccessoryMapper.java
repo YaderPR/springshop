@@ -1,4 +1,4 @@
-package org.springshop.api.mapper;
+package org.springshop.api.mapper.product;
 
 import org.springshop.api.model.product.WorkoutAccessory;
 import org.springshop.api.dto.product.workoutaccessory.WorkoutAccessoryRequestDTO;

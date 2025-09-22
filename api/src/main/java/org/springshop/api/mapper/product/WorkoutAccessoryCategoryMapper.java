@@ -1,4 +1,4 @@
-package org.springshop.api.mapper;
+package org.springshop.api.mapper.product;
 
 import org.springshop.api.dto.product.workoutaccessory.WorkoutAccessoryCategoryRequestDTO;
 import org.springshop.api.dto.product.workoutaccessory.WorkoutAccessoryCategoryResponseDTO;
@@ -19,6 +19,10 @@ public class WorkoutAccessoryCategoryMapper {
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         return dto;
+    }
+
+    public static void updateEntity(WorkoutAccessoryCategory existing, WorkoutAccessoryCategoryRequestDTO dto) {
+        existing.setName(dto.getName());
     }
 }
 
