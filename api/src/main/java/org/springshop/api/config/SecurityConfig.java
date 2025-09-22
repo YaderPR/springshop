@@ -21,8 +21,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/protected").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN", "ROLE_MANAGER")
-                .requestMatchers("/api/*").authenticated())
+                .requestMatchers("/api/**").authenticated() // solo JWT válido
+                .anyRequest().permitAll())
+                // .requestMatchers("/api/protected").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN",
+                // "ROLE_MANAGER")
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())));

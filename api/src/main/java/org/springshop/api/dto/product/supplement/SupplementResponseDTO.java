@@ -1,5 +1,5 @@
 // SuplementResponseDTO.java
-package org.springshop.api.dto.product.suplement;
+package org.springshop.api.dto.product.supplement;
 
 import org.springshop.api.dto.product.ProductResponseDTO;
 
@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SuplementResponseDTO extends ProductResponseDTO {
+public class SupplementResponseDTO extends ProductResponseDTO {
     private String brand;
     private String flavor;
     private String size;

@@ -13,8 +13,8 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
-@Table(name = "suplements")
-public class Suplement extends Product {
+@Table(name = "supplements")
+public class Supplement extends Product {
     @Column(name = "brand", nullable = false, length = 100)
     private String brand; //Marca
     @Column(name = "flavor", length = 50)
@@ -31,7 +31,7 @@ public class Suplement extends Product {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        Suplement suplement = (Suplement) obj;
+        Supplement suplement = (Supplement) obj;
         return super.id != null && Objects.equals(super.id, suplement.id);
     }
     @Override

@@ -35,7 +35,7 @@ public class Product {
     @Column(name = "image_url", nullable = false, length = 200)
     private String imageUrl;
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id", nullable = true)
     private Category category;
     @Override
     public boolean equals(Object obj) {

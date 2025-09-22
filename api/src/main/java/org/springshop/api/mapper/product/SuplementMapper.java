@@ -1,15 +1,15 @@
-package org.springshop.api.mapper;
+package org.springshop.api.mapper.product;
 
-import org.springshop.api.model.product.Suplement;
-import org.springshop.api.dto.product.suplement.SuplementRequestDTO;
-import org.springshop.api.dto.product.suplement.SuplementResponseDTO;
+import org.springshop.api.model.product.Supplement;
+import org.springshop.api.dto.product.supplement.SupplementRequestDTO;
+import org.springshop.api.dto.product.supplement.SupplementResponseDTO;
 import org.springshop.api.model.product.Category;
 
 public class SuplementMapper {
 
-    public static SuplementResponseDTO toDTO(Suplement suplement) {
+    public static SupplementResponseDTO toDTO(Supplement suplement) {
         if (suplement == null) return null;
-        SuplementResponseDTO dto = new SuplementResponseDTO();
+        SupplementResponseDTO dto = new SupplementResponseDTO();
         dto.setId(suplement.getId());
         dto.setName(suplement.getName());
         dto.setDescription(suplement.getDescription());
@@ -27,9 +27,9 @@ public class SuplementMapper {
         return dto;
     }
 
-    public static Suplement toEntity(SuplementRequestDTO dto, Category category) {
+    public static Supplement toEntity(SupplementRequestDTO dto, Category category) {
         if (dto == null) return null;
-        Suplement suplement = new Suplement();
+        Supplement suplement = new Supplement();
         suplement.setName(dto.getName());
         suplement.setDescription(dto.getDescription());
         suplement.setPrice(dto.getPrice());
@@ -45,7 +45,7 @@ public class SuplementMapper {
         suplement.setWarnings(dto.getWarnings());
         return suplement;
     }
-    public static void updateEntity(Suplement existing, SuplementRequestDTO dto, Category category) {
+    public static void updateEntity(Supplement existing, SupplementRequestDTO dto, Category category) {
         ProductMapper.updateEntity(existing, dto, category);
         existing.setBrand(dto.getBrand());
         existing.setFlavor(dto.getFlavor());

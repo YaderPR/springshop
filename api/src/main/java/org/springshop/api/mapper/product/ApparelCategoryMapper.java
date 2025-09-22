@@ -1,4 +1,4 @@
-package org.springshop.api.mapper;
+package org.springshop.api.mapper.product;
 
 import org.springshop.api.dto.product.apparel.ApparelCategoryRequestDTO;
 import org.springshop.api.dto.product.apparel.ApparelCategoryResponseDTO;
@@ -8,9 +8,9 @@ public class ApparelCategoryMapper {
 
     public static ApparelCategory toEntity(ApparelCategoryRequestDTO dto) {
         if (dto == null) return null;
-        ApparelCategory categoryApparel = new ApparelCategory();
-        categoryApparel.setName(dto.getName());
-        return categoryApparel;
+        ApparelCategory apparelCategory = new ApparelCategory();
+        apparelCategory.setName(dto.getName());
+        return apparelCategory;
     }
 
     public static ApparelCategoryResponseDTO toResponseDTO(ApparelCategory entity) {
@@ -19,5 +19,9 @@ public class ApparelCategoryMapper {
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         return dto;
+    }
+
+    public static void updateEntity(ApparelCategory existing, ApparelCategoryRequestDTO dto) {
+        existing.setName(dto.getName());
     }
 }

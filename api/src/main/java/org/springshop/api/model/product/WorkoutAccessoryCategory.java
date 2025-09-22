@@ -25,7 +25,7 @@ public class WorkoutAccessoryCategory {
     private Integer id;
     @Column(name = "name", nullable = false, length = 100)
     private String name;
-    @OneToMany(mappedBy = "workoutAccesoryCategory")
+    @OneToMany(mappedBy = "workoutAccessoryCategory")
     private Set<WorkoutAccessory> workoutAccessories;
     public WorkoutAccessoryCategory(String name) {
         this.name = name;
