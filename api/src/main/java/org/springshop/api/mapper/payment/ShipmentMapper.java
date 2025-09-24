@@ -3,18 +3,19 @@ package org.springshop.api.mapper.payment;
 
 import org.springshop.api.dto.payment.ShipmentRequestDto;
 import org.springshop.api.dto.payment.ShipmentResponseDto;
+import org.springshop.api.model.order.Order;
 import org.springshop.api.model.payment.Shipment;
 
 public class ShipmentMapper {
 
     // Convierte de RequestDto -> Entidad
-    public static Shipment toEntity(ShipmentRequestDto dto) {
+    public static Shipment toEntity(ShipmentRequestDto dto, Order order) {
         if (dto == null) return null;
-
         Shipment shipment = new Shipment();
         shipment.setTrackingNumber(dto.getTrackingNumber());
         shipment.setCarrier(dto.getCarrier());
         shipment.setStatus(dto.getStatus());
+        shipment.setOrder(order);
         return shipment;
     }
 
@@ -35,6 +36,16 @@ public class ShipmentMapper {
         }
 
         return dto;
+    }
+    public static void updateEntity(Shipment existing, ShipmentRequestDto requestDto, Order order) {
+        if(existing == null || requestDto == null) return;
+        existing.setCarrier(requestDto.getCarrier());
+        existing.setTrackingNumber(requestDto.getTrackingNumber());
+        existing.setStatus(requestDto.getStatus());
+        existing.setShippedAt(requestDto.getShippedAt());
+        existing.setDeliveredAt(requestDto.getDeliveredAt());
+        existing.setOrder(order);
+
     }
 }
 

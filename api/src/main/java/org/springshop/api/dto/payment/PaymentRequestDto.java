@@ -21,6 +21,6 @@ public class PaymentRequestDto {
     private PaymentStatus status;
 
     @NotNull
-    private Long orderId; // referencia a la orden
+    private Integer orderId; // referencia a la orden
 }
 

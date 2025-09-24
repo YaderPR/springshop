@@ -1,5 +1,7 @@
 package org.springshop.api.dto.payment;
 
+import java.time.LocalDateTime;
+
 import org.springshop.api.model.payment.ShipmentStatus;
 
 import jakarta.validation.constraints.NotBlank;
@@ -18,8 +20,11 @@ public class ShipmentRequestDto {
     private String carrier; // DHL, FedEx, UPS...
 
     @NotNull
-    private Long orderId; // referencia a la orden
+    private Integer orderId; // referencia a la orden
 
     private ShipmentStatus status;
+
+    private LocalDateTime deliveredAt;
+    private LocalDateTime shippedAt;
 }
 

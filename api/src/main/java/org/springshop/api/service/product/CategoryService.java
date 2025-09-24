@@ -32,8 +32,7 @@ public class CategoryService {
     }
     // Crear una nueva categoria
     public CategoryResponseDTO createCategory(CategoryRequestDTO dto) {
-        Category category = CategoryMapper.toEntity(dto);
-        Category saved = categoryRepository.save(category);
+        Category saved = categoryRepository.save(CategoryMapper.toEntity(dto));
         return CategoryMapper.toResponseDTO(saved);
     }
     // Actualizar una categoria existente

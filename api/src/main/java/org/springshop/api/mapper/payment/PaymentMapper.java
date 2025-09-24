@@ -2,18 +2,19 @@ package org.springshop.api.mapper.payment;
 
 import org.springshop.api.dto.payment.PaymentRequestDto;
 import org.springshop.api.dto.payment.PaymentResponseDto;
+import org.springshop.api.model.order.Order;
 import org.springshop.api.model.payment.Payment;
 
 public class PaymentMapper {
 
     // Convierte de RequestDto -> Entidad
-    public static Payment toEntity(PaymentRequestDto dto) {
+    public static Payment toEntity(PaymentRequestDto dto, Order order) {
         if (dto == null) return null;
-
         Payment payment = new Payment();
         payment.setAmount(dto.getAmount());
         payment.setMethod(dto.getMethod());
         payment.setStatus(dto.getStatus());
+        payment.setOrder(order);
         return payment;
     }
 
@@ -34,6 +35,9 @@ public class PaymentMapper {
         }
 
         return dto;
+    }
+    public static void updateEntity(Payment existing, PaymentRequestDto dto, Order order) {
+
     }
 }
 

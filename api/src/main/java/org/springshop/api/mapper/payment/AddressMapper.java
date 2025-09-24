@@ -3,11 +3,12 @@ package org.springshop.api.mapper.payment;
 import org.springshop.api.dto.payment.AddressRequestDto;
 import org.springshop.api.dto.payment.AddressResponseDto;
 import org.springshop.api.model.payment.Address;
+import org.springshop.api.model.user.User;
 
 public class AddressMapper {
 
     // Convierte de RequestDto -> Entidad
-    public static Address toEntity(AddressRequestDto dto) {
+    public static Address toEntity(AddressRequestDto dto, User user) {
         if (dto == null) return null;
 
         Address address = new Address();
@@ -17,6 +18,7 @@ public class AddressMapper {
         address.setCountry(dto.getCountry());
         address.setZipCode(dto.getZipCode());
         address.setPhoneNumber(dto.getPhoneNumber());
+        address.setUser(user);
         return address;
     }
 
@@ -38,5 +40,15 @@ public class AddressMapper {
         }
 
         return dto;
+    }
+    public static void updateEntity(Address existing, AddressRequestDto requestDto, User user) {
+        existing.setCity(requestDto.getCity());
+        existing.setCountry(requestDto.getCountry());
+        existing.setState(requestDto.getState());
+        existing.setStreet(requestDto.getStreet());
+        existing.setZipCode(requestDto.getZipCode());
+        existing.setPhoneNumber(requestDto.getPhoneNumber());
+        existing.setCountry(requestDto.getCountry());
+        existing.setUser(user);
     }
 }

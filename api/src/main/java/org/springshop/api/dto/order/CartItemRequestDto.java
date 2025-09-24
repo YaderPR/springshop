@@ -9,6 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CartItemRequestDto {
     private Integer productId;
+    private Integer cartId;
     private Integer quantity;
     private Double price;
 }

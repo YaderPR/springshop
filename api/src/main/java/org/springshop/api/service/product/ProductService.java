@@ -76,12 +76,15 @@ public class ProductService {
             category = categoryRepository.findById(dto.getCategoryId())
                     .orElseThrow(() -> new EntityNotFoundException("Category not found with id " + dto.getCategoryId()));
         }
-
         ProductMapper.updateEntity(existing, dto, category);
-        return ProductMapper.toDTO(existing);
+        Product updatedProduct = productRepository.save(existing);
+        return ProductMapper.toDTO(updatedProduct);
     }
 
     public void deleteProduct(Integer id) {
+        if(!productRepository.existsById(id)) {
+            throw new EntityNotFoundException("Product not found with id: " + id);
+        }
         productRepository.deleteById(id);
     }
 
@@ -134,12 +137,15 @@ public class ProductService {
             apparelCategory = apparelCategoryRepository.findById(dto.getApparelCategoryId())
                     .orElseThrow(() -> new EntityNotFoundException("ApparelCategory not found with id " + dto.getApparelCategoryId()));
         }
-
         ApparelMapper.updateEntity((Apparel) existing, dto, category, apparelCategory);
-        return ApparelMapper.toDTO((Apparel) existing);
+        Apparel updatedApparel = (Apparel) productRepository.save(existing);
+        return ApparelMapper.toDTO(updatedApparel);
     }
 
     public void deleteApparel(Integer id) {
+        if(!productRepository.existsById(id)) {
+            throw new EntityNotFoundException("Apparel not found with id: " + id);
+        }
         productRepository.deleteById(id);
     }
 
@@ -194,10 +200,14 @@ public class ProductService {
         }
 
         WorkoutAccessoryMapper.updateEntity((WorkoutAccessory) existing, dto, category, accessoryCategory);
-        return WorkoutAccessoryMapper.toDTO((WorkoutAccessory) existing);
+        WorkoutAccessory updatedWorkoutAccessory = (WorkoutAccessory) productRepository.save(existing); 
+        return WorkoutAccessoryMapper.toDTO(updatedWorkoutAccessory);
     }
 
     public void deleteWorkoutAccessory(Integer id) {
+        if(!productRepository.existsById(id)) {
+            throw new EntityNotFoundException("WorkoutAccessory not found with id: " + id);
+        }
         productRepository.deleteById(id);
     }
 
@@ -228,7 +238,7 @@ public class ProductService {
                 .map(p -> SuplementMapper.toDTO((Supplement) p));
     }
 
-    public SupplementResponseDTO updateSuplement(Integer id, SupplementRequestDTO dto) {
+    public SupplementResponseDTO updateSuplementById(Integer id, SupplementRequestDTO dto) {
         Product existing = productRepository.findById(id)
                 .filter(p -> p instanceof Supplement)
                 .orElseThrow(() -> new EntityNotFoundException("Suplement not found with id " + id));
@@ -240,10 +250,14 @@ public class ProductService {
         }
 
         SuplementMapper.updateEntity((Supplement) existing, dto, category);
-        return SuplementMapper.toDTO((Supplement) existing);
+        Supplement updatedSupplement = (Supplement) productRepository.save(existing);
+        return SuplementMapper.toDTO(updatedSupplement);
     }
 
-    public void deleteSuplement(Integer id) {
+    public void deleteSuplementById(Integer id) {
+        if(!productRepository.existsById(id)) {
+            throw new EntityNotFoundException("Supplement not found with id: " + id);
+        }
         productRepository.deleteById(id);
     }
 }

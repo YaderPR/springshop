@@ -1,6 +1,5 @@
 package org.springshop.api.mapper.order;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springshop.api.dto.order.CartItemRequestDto;
@@ -14,17 +13,17 @@ import org.springshop.api.model.user.User;
 
 public class CartMapper {
 
-    public static Cart toEntity(CartRequestDto dto, User user, Set<CartItem> items) {
+    public static Cart toEntity(CartRequestDto dto, User user) {
         if (dto == null)
             return null;
 
         Cart cart = new Cart();
         cart.setUser(user);
-        cart.setItems(items);
+        //cart.setItems(items);
         return cart;
     }
 
-    public static CartItem toEntity(CartItemRequestDto dto, Product product) {
+    public static CartItem toEntity(CartItemRequestDto dto, Product product, Cart cart) {
         if (dto == null)
             return null;
 
@@ -32,6 +31,7 @@ public class CartMapper {
         item.setProduct(product);
         item.setQuantity(dto.getQuantity());
         item.setPrice(dto.getPrice());
+        item.setCart(cart);
         return item;
     }
 
@@ -57,6 +57,7 @@ public class CartMapper {
         dto.setProductId(item.getProduct().getId());
         dto.setQuantity(item.getQuantity());
         dto.setPrice(item.getPrice());
+        dto.setCartId(item.getCart().getId());
 
         return dto;
     }

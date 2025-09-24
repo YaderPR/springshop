@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class PaymentResponseDto {
 
-    private Long id;
+    private Integer id;
 
     private String method;
 

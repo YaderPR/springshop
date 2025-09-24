@@ -25,7 +25,7 @@ public class Shipment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String trackingNumber; // número de seguimiento de la empresa de envíos
 

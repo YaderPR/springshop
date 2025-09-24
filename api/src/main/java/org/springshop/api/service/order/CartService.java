@@ -33,27 +33,30 @@ public class CartService {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
     }
 
     public CartResponseDto createCart(CartRequestDto dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + dto.getUserId()));
-
-        Set<CartItem> items = dto.getItems() != null
-                ? dto.getItems().stream()
-                        .map(itemDto -> {
-                            Product product = productRepository.findById(itemDto.getProductId())
-                                    .orElseThrow(() -> new EntityNotFoundException(
-                                            "Product not found with id: " + itemDto.getProductId()));
-                            return CartMapper.toEntity(itemDto, product);
-                        })
-                        .collect(Collectors.toSet())
-                : null;
-
-        Cart cart = CartMapper.toEntity(dto, user, items);
+        Cart cart = CartMapper.toEntity(dto, user);
         cart = cartRepository.save(cart);
 
         return CartMapper.toResponseDto(cart);
+    }
+    public CartItemResponseDto createCartItem(CartItemRequestDto requestDto) {
+        Cart cart = cartRepository.findById(requestDto.getCartId()).orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + requestDto.getCartId()));
+        Product product = productRepository.findById(requestDto.getProductId()).orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + requestDto.getProductId()));
+        CartItem cartItem = cartItemRepository.save(CartMapper.toEntity(requestDto, product, cart));
+        return CartMapper.toResponseDto(cartItem);
+    }
+    public List<CartItemResponseDto> getCartItemsByCartId(Integer id) {
+        if(!cartRepository.existsById(id)) {
+                throw new EntityNotFoundException("Cart not found with id: " + id);
+        }
+        List<CartItem> cartItems = cartItemRepository.findAllByCartId(id);
+        return cartItems.stream().map(CartMapper::toResponseDto).collect(Collectors.toList());
+
     }
     public List<CartResponseDto> getAllCarts() {
         List<Cart> carts = cartRepository.findAll();
@@ -79,21 +82,8 @@ public class CartService {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + dto.getUserId()));  
 
-        Set<CartItem> items = dto.getItems() != null
-                ? dto.getItems().stream()
-                        .map(itemDto -> {
-                            Product product = productRepository.findById(itemDto.getProductId())
-                                    .orElseThrow(() -> new EntityNotFoundException(
-                                            "Product not found with id: " + itemDto.getProductId()));
-                            return CartMapper.toEntity(itemDto, product);
-                        })
-                        .collect(Collectors.toSet())
-                : null;
 
         cart.setUser(user);
-        if (items != null) {
-            cart.setItems(items);
-        }
 
         cart = cartRepository.save(cart);
         return CartMapper.toResponseDto(cart);
@@ -104,10 +94,9 @@ public class CartService {
 
         Product product = productRepository.findById(itemDto.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + itemDto.getProductId()));
-        CartItem item = CartMapper.toEntity(itemDto, product);
-        item.setCart(cart);
-        item = cartItemRepository.save(item);
-        return CartMapper.toResponseDto(item);
+        CartItem savedItem = CartMapper.toEntity(itemDto, product, cart);
+        savedItem = cartItemRepository.save(savedItem);
+        return CartMapper.toResponseDto(savedItem);
     }
     public void removeItemFromCart(Integer cartId, Integer itemId) {
         Cart cart = cartRepository.findById(cartId)

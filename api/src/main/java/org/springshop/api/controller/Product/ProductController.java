@@ -139,12 +139,12 @@ public class ProductController {
     @PutMapping("/supplements/{id}")
     public ResponseEntity<SupplementResponseDTO> updateSupplement(@PathVariable("id") Integer id,
             @RequestBody SupplementRequestDTO dto) {
-        return wrapOrNotFound(Optional.of(productService.updateSuplement(id, dto)));
+        return wrapOrNotFound(Optional.of(productService.updateSuplementById(id, dto)));
     }
 
     @DeleteMapping("/supplements/{id}")
     public ResponseEntity<Void> deleteSupplement(@PathVariable("id") Integer id) {
-        productService.deleteSuplement(id);
+        productService.deleteSuplementById(id);
         return ResponseEntity.noContent().build();
     }
 

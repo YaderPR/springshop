@@ -1,5 +1,6 @@
 package org.springshop.api.controller.order;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -12,14 +13,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springshop.api.dto.order.CartItemRequestDto;
+import org.springshop.api.dto.order.CartItemResponseDto;
 import org.springshop.api.dto.order.CartRequestDto;
 import org.springshop.api.dto.order.CartResponseDto;
 import org.springshop.api.service.order.CartService;
 
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/api/carts")
 public class CartController {
-    CartService cartService;
+    private final static String BASE_URL = "/api/carts";
+    private CartService cartService;
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
@@ -35,9 +38,14 @@ public class CartController {
     public CartResponseDto createCart(@RequestBody CartRequestDto dto) {
         return cartService.createCart(dto);
     }
+    @PostMapping("/{id}")
+    public ResponseEntity<CartItemResponseDto> createCartItem(@PathVariable Integer id, @RequestBody CartItemRequestDto requestDto) {
+        CartItemResponseDto responseDto = cartService.createCartItem(requestDto);
+        return ResponseEntity.created(URI.create(BASE_URL + "/" + id + "/" + responseDto.getId())).body(responseDto);
+    }
     @PutMapping("/{id:\\d+}")
     public CartResponseDto updateCart(@PathVariable Integer id, @RequestBody CartRequestDto items) {
-        return cartService.updateCart(id, items );
+        return cartService.updateCart(id, items);
     }
     @PutMapping("/{id:\\d+}/items/{itemId:\\d+}")
     public CartResponseDto updateCartItem(@PathVariable Integer id, @PathVariable Integer itemId, @RequestBody CartItemRequestDto item) {

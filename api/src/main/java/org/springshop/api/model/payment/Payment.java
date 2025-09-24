@@ -25,7 +25,7 @@ public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String method; // CARD, PAYPAL, CASH_ON_DELIVERY, etc.
 

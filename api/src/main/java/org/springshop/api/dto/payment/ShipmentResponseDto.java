@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class ShipmentResponseDto {
 
-    private Long id;
+    private Integer id;
 
     private String trackingNumber;
 
