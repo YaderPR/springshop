@@ -1,3 +1,4 @@
+// ProductRequestDTO.java (CORRECTO)
 package org.springshop.api.dto.product;
 
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +21,5 @@ public class ProductRequestDTO {
     @NotBlank
     private String imageUrl;
     
-    private Integer categoryId; // se recibe el id de la categoría
+    private Integer categoryId; 
 }
-

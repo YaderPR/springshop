@@ -110,6 +110,12 @@
 			<artifactId>lombok</artifactId>
 			<version>1.18.40</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.stripe/stripe-java -->
+		<dependency>
+    		<groupId>com.stripe</groupId>
+    		<artifactId>stripe-java</artifactId>
+    		<version>29.5.0</version>
+		</dependency>
 	</dependencies>
 
 

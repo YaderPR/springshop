@@ -7,10 +7,9 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-public class CartItemRequestDto {
-    private Integer productId;
-    private Integer cartId;
+public class CartItemUpdateRequestDto {
+    private Integer productId; // Si permites cambiar el producto en un ítem existente
     private Integer quantity;
-    private Double price;
+    // ELIMINADO: price (viene del Servidor/Product)
 }
 

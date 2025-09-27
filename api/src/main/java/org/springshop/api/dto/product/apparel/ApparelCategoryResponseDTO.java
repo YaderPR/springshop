@@ -1,3 +1,4 @@
+// ApparelCategoryResponseDTO.java (CORRECTO)
 package org.springshop.api.dto.product.apparel;
 
 import lombok.Data;

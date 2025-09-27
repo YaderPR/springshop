@@ -1,16 +1,11 @@
+// Archivo: org.springshop.api.controller.product.ProductController.java (Refinado)
 package org.springshop.api.controller.product;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springshop.api.dto.product.ProductResponseDTO;
 import org.springshop.api.dto.product.ProductRequestDTO;
-import org.springshop.api.dto.product.apparel.ApparelRequestDTO;
-import org.springshop.api.dto.product.apparel.ApparelResponseDTO;
-import org.springshop.api.dto.product.supplement.SupplementRequestDTO;
-import org.springshop.api.dto.product.supplement.SupplementResponseDTO;
-import org.springshop.api.dto.product.workoutaccessory.WorkoutAccessoryRequestDTO;
-import org.springshop.api.dto.product.workoutaccessory.WorkoutAccessoryResponseDTO;
-import org.springshop.api.service.product.ProductService;
+import org.springshop.api.service.product.ProductService; 
 
 import java.net.URI;
 import java.util.List;
@@ -21,134 +16,65 @@ import java.util.Optional;
 public class ProductController {
 
     private final ProductService productService;
-    private static final String BASE_URL = "/api/products";
+    // Eliminamos BASE_URL ya que la URI puede construirse directamente.
 
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
-    // -------------------- PRODUCT --------------------
+    // -------------------- PRODUCTO GENÉRICO (CRUD completo) --------------------
+    
+    // ✅ 1. Crear Producto (POST /api/products)
     @PostMapping
     public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody ProductRequestDTO dto) {
         ProductResponseDTO response = productService.createProduct(dto);
-        return ResponseEntity.created(URI.create(BASE_URL + "/" + response.getId()))
-                .body(response);
+        
+        // Uso de URI.create para crear el path absoluto de forma más dinámica.
+        URI location = URI.create("/api/products/" + response.getId()); 
+        return ResponseEntity.created(location).body(response);
     }
 
+    // ✅ 2. Obtener Todos (GET /api/products)
     @GetMapping
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
+    // ✅ 3. Obtener por ID (GET /api/products/{id})
     @GetMapping("/{id:\\d+}")
-    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable("id") Integer id) {
+    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Integer id) {
+        // Mejor práctica: usar el método auxiliar para Optional.
         return wrapOrNotFound(productService.getProductById(id));
     }
 
+    // ✅ 4. Actualizar (PUT /api/products/{id})
     @PutMapping("/{id:\\d+}")
-    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable("id") Integer id,
+    public ResponseEntity<ProductResponseDTO> updateProduct(
+            @PathVariable Integer id,
             @RequestBody ProductRequestDTO dto) {
-        return wrapOrNotFound(Optional.of(productService.updateProduct(id, dto)));
+        
+        // Dado que el servicio lanza EntityNotFoundException si el ID no existe, 
+        // no necesitamos envolverlo en Optional aquí.
+        // Si el servicio lanza una excepción (404), Spring lo manejará con @ControllerAdvice.
+        ProductResponseDTO updatedDto = productService.updateProduct(id, dto);
+        return ResponseEntity.ok(updatedDto);
     }
 
+    // ✅ 5. Eliminar (DELETE /api/products/{id})
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Integer id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
+        // El servicio lanza 404 si no existe (ya que usa findProductOrThrow), 
+        // y si tiene éxito, devolvemos 204.
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
-    // -------------------- APPAREL --------------------
-    @PostMapping("/apparels")
-    public ResponseEntity<ApparelResponseDTO> createApparel(@RequestBody ApparelRequestDTO dto) {
-        ApparelResponseDTO response = productService.createApparel(dto);
-        return ResponseEntity.created(URI.create(BASE_URL + "/apparels/" + response.getId()))
-                .body(response);
-    }
-
-    @GetMapping("/apparels")
-    public ResponseEntity<List<ApparelResponseDTO>> getAllApparels() {
-        return ResponseEntity.ok(productService.getAllApparels());
-    }
-
-    @GetMapping("/apparels/{id}")
-    public ResponseEntity<ApparelResponseDTO> getApparelById(@PathVariable("id") Integer id) {
-        return wrapOrNotFound(productService.getApparelById(id));
-    }
-
-    @PutMapping("/apparels/{id}")
-    public ResponseEntity<ApparelResponseDTO> updateApparel(@PathVariable("id") Integer id,
-            @RequestBody ApparelRequestDTO dto) {
-        return wrapOrNotFound(Optional.of(productService.updateApparel(id, dto)));
-    }
-
-    @DeleteMapping("/apparels/{id}")
-    public ResponseEntity<Void> deleteApparel(@PathVariable("id") Integer id) {
-        productService.deleteApparel(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // -------------------- WORKOUT ACCESSORIES --------------------
-    @PostMapping("/workout-accessories")
-    public ResponseEntity<WorkoutAccessoryResponseDTO> createWorkoutAccessory(
-            @RequestBody WorkoutAccessoryRequestDTO dto) {
-        WorkoutAccessoryResponseDTO response = productService.createWorkoutAccessory(dto);
-        return ResponseEntity.created(URI.create(BASE_URL + "/workout-accessories/" + response.getId()))
-                .body(response);
-    }
-
-    @GetMapping("/workout-accessories")
-    public ResponseEntity<List<WorkoutAccessoryResponseDTO>> getAllWorkoutAccessories() {
-        return ResponseEntity.ok(productService.getAllWorkoutAccessories());
-    }
-
-    @GetMapping("/workout-accessories/{id}")
-    public ResponseEntity<WorkoutAccessoryResponseDTO> getWorkoutAccessoryById(@PathVariable("id") Integer id) {
-        return wrapOrNotFound(productService.getWorkoutAccessoryById(id));
-    }
-
-    @PutMapping("/workout-accessories/{id}")
-    public ResponseEntity<WorkoutAccessoryResponseDTO> updateWorkoutAccessory(@PathVariable("id") Integer id,
-            @RequestBody WorkoutAccessoryRequestDTO dto) {
-        return wrapOrNotFound(Optional.of(productService.updateWorkoutAccessory(id, dto)));
-    }
-
-    @DeleteMapping("/workout-accessories/{id}")
-    public ResponseEntity<Void> deleteWorkoutAccessory(@PathVariable("id") Integer id) {
-        productService.deleteWorkoutAccessory(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // -------------------- SUPPLEMENTS --------------------
-    @PostMapping("/supplements")
-    public ResponseEntity<SupplementResponseDTO> createSupplement(@RequestBody SupplementRequestDTO dto) {
-        SupplementResponseDTO response = productService.createSuplement(dto);
-        return ResponseEntity.created(URI.create(BASE_URL + "/supplements/" + response.getId()))
-                .body(response);
-    }
-
-    @GetMapping("/supplements")
-    public ResponseEntity<List<SupplementResponseDTO>> getAllSupplements() {
-        return ResponseEntity.ok(productService.getAllSuplements());
-    }
-
-    @GetMapping("/supplements/{id}")
-    public ResponseEntity<SupplementResponseDTO> getSupplementById(@PathVariable("id") Integer id) {
-        return wrapOrNotFound(productService.getSuplementById(id));
-    }
-
-    @PutMapping("/supplements/{id}")
-    public ResponseEntity<SupplementResponseDTO> updateSupplement(@PathVariable("id") Integer id,
-            @RequestBody SupplementRequestDTO dto) {
-        return wrapOrNotFound(Optional.of(productService.updateSuplementById(id, dto)));
-    }
-
-    @DeleteMapping("/supplements/{id}")
-    public ResponseEntity<Void> deleteSupplement(@PathVariable("id") Integer id) {
-        productService.deleteSuplementById(id);
-        return ResponseEntity.noContent().build();
-    }
-
     // -------------------- HELPER --------------------
+    
+    /**
+     * Convierte un Optional<T> en una respuesta HTTP, devolviendo 200 OK si está presente 
+     * o 404 Not Found si está vacío.
+     */
     private <T> ResponseEntity<T> wrapOrNotFound(Optional<T> maybeResponse) {
         return maybeResponse.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

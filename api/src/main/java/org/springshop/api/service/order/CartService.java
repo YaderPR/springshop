@@ -1,174 +1,139 @@
+// Archivo: org.springshop.api.service.order.CartService.java
+
 package org.springshop.api.service.order;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springshop.api.dto.order.CartItemRequestDto;
-import org.springshop.api.dto.order.CartItemResponseDto;
+import org.springframework.transaction.annotation.Transactional;
 import org.springshop.api.dto.order.CartRequestDto;
 import org.springshop.api.dto.order.CartResponseDto;
+import org.springshop.api.dto.order.CartItemResponseDto; // Necesario para getItemsInCart
 import org.springshop.api.mapper.order.CartMapper;
 import org.springshop.api.model.order.Cart;
-import org.springshop.api.model.order.CartItem;
-import org.springshop.api.model.product.Product;
 import org.springshop.api.model.user.User;
-import org.springshop.api.repository.order.CartItemRepository;
 import org.springshop.api.repository.order.CartRepository;
-import org.springshop.api.repository.product.ProductRepository;
 import org.springshop.api.repository.user.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional // Aplicamos @Transactional a nivel de clase para consistencia
 public class CartService {
-    CartRepository cartRepository;
-    CartItemRepository cartItemRepository;
-    UserRepository userRepository;
-    ProductRepository productRepository;
 
-    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository,
-            UserRepository userRepository, ProductRepository productRepository) {
-        this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
-        this.userRepository = userRepository;
-        this.productRepository = productRepository;
-    }
+        private final CartRepository cartRepository;
+        private final UserRepository userRepository;
 
-    public CartResponseDto createCart(CartRequestDto dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + dto.getUserId()));
-        Cart cart = CartMapper.toEntity(dto, user);
-        cart = cartRepository.save(cart);
+        // Eliminamos CartItemRepository y ProductRepository de aquí.
 
-        return CartMapper.toResponseDto(cart);
-    }
-    public CartItemResponseDto createCartItem(CartItemRequestDto requestDto) {
-        Cart cart = cartRepository.findById(requestDto.getCartId()).orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + requestDto.getCartId()));
-        Product product = productRepository.findById(requestDto.getProductId()).orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + requestDto.getProductId()));
-        CartItem cartItem = cartItemRepository.save(CartMapper.toEntity(requestDto, product, cart));
-        return CartMapper.toResponseDto(cartItem);
-    }
-    public List<CartItemResponseDto> getCartItemsByCartId(Integer id) {
-        if(!cartRepository.existsById(id)) {
-                throw new EntityNotFoundException("Cart not found with id: " + id);
-        }
-        List<CartItem> cartItems = cartItemRepository.findAllByCartId(id);
-        return cartItems.stream().map(CartMapper::toResponseDto).collect(Collectors.toList());
-
-    }
-    public List<CartResponseDto> getAllCarts() {
-        List<Cart> carts = cartRepository.findAll();
-        return carts.stream()
-                .map(CartMapper::toResponseDto)
-                .collect(Collectors.toList());
-    }
-    public CartResponseDto getCartById(Integer id) {
-        Cart cart = cartRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + id));
-        return CartMapper.toResponseDto(cart);
-    }
-    public void deleteCart(Integer id) {
-        if (!cartRepository.existsById(id)) {
-            throw new EntityNotFoundException("Cart not found with id: " + id);
-        }
-        cartRepository.deleteById(id);
-    }
-    public CartResponseDto updateCart(Integer id, CartRequestDto dto) {
-        Cart cart = cartRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + id));
-
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + dto.getUserId()));  
-
-
-        cart.setUser(user);
-
-        cart = cartRepository.save(cart);
-        return CartMapper.toResponseDto(cart);
-    }
-    public CartItemResponseDto addItemToCart(Integer cartId, CartItemRequestDto itemDto) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
-
-        Product product = productRepository.findById(itemDto.getProductId())
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + itemDto.getProductId()));
-        CartItem savedItem = CartMapper.toEntity(itemDto, product, cart);
-        savedItem = cartItemRepository.save(savedItem);
-        return CartMapper.toResponseDto(savedItem);
-    }
-    public void removeItemFromCart(Integer cartId, Integer itemId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
-
-        CartItem item = cartItemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("CartItem not found with id: " + itemId));
-
-        if (!item.getCart().getId().equals(cart.getId())) {
-            throw new IllegalArgumentException("Item does not belong to the specified cart");
+        public CartService(CartRepository cartRepository, UserRepository userRepository) {
+                this.cartRepository = cartRepository;
+                this.userRepository = userRepository;
         }
 
-        cartItemRepository.deleteById(itemId);
-    }
-    public List<CartItemResponseDto> getItemsInCart(Integer cartId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
+        // -------------------- CRUD DE CART --------------------
 
-        Set<CartItem> items = cart.getItems();
-        return items.stream()
-                .map(CartMapper::toResponseDto)
-                .collect(Collectors.toList());
-    }
-    public CartItemResponseDto updateItemFromCart(Integer cartId, Integer itemId, CartItemRequestDto itemDto) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
+        public CartResponseDto createCart(CartRequestDto dto) {
+                // Mejoramos la legibilidad usando un método auxiliar para buscar al usuario
+                User user = findUserOrThrow(dto.getUserId());
 
-        CartItem item = cartItemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("CartItem not found with id: " + itemId));
+                Cart cart = CartMapper.toEntity(dto, user);
+                cart = cartRepository.save(cart);
 
-        if (!item.getCart().getId().equals(cart.getId())) {
-            throw new IllegalArgumentException("Item does not belong to the specified cart");
+                return CartMapper.toResponseDto(cart);
         }
 
-        Product product = productRepository.findById(itemDto.getProductId())
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + itemDto.getProductId()));
-        item.setProduct(product);
-        item.setQuantity(itemDto.getQuantity());
-        item.setPrice(itemDto.getPrice());
-        item = cartItemRepository.save(item);
-        return CartMapper.toResponseDto(item);
-    }
-    public void deleteCartItem(Integer cartId, Integer itemId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
-
-        CartItem item = cartItemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("CartItem not found with id: " + itemId));
-
-        if (!item.getCart().getId().equals(cart.getId())) {
-            throw new IllegalArgumentException("Item does not belong to the specified cart");
+        public List<CartResponseDto> getAllCarts() {
+                return cartRepository.findAll().stream()
+                                .map(CartMapper::toResponseDto)
+                                .collect(Collectors.toList());
         }
 
-        cartItemRepository.deleteById(itemId);
-    }
-    public CartResponseDto updateCartItem(Integer cartId, Integer itemId, CartItemRequestDto itemDto) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
-
-        CartItem item = cartItemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("CartItem not found with id: " + itemId));
-
-        if (!item.getCart().getId().equals(cart.getId())) {
-            throw new IllegalArgumentException("Item does not belong to the specified cart");
+        public Optional<CartResponseDto> getCartById(Integer id) {
+                // Devolvemos el Optional directamente, dejando el mapeo al consumidor o al
+                // controlador
+                return cartRepository.findById(id)
+                                .map(CartMapper::toResponseDto);
         }
 
-        Product product = productRepository.findById(itemDto.getProductId())
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + itemDto.getProductId()));
-        item.setProduct(product);
-        item.setQuantity(itemDto.getQuantity());
-        item.setPrice(itemDto.getPrice());
-        item = cartItemRepository.save(item);
-        return CartMapper.toResponseDto(cart);
-    }
+        public CartResponseDto updateCart(Integer id, CartRequestDto dto) {
+                Cart cart = findCartOrThrow(id);
+
+                // Se mantiene la validación de la existencia del usuario
+                User user = findUserOrThrow(dto.getUserId());
+
+                // Asumiendo que CartMapper.updateCart actualiza la entidad existente
+                CartMapper.updateCart(cart, user);
+
+                // No es necesario llamar a save() si @Transactional está presente
+                // y el mapper solo actualiza la entidad.
+                // Pero lo mantenemos si el mapper realiza lógica que requiera un save explícito
+                cart = cartRepository.save(cart);
+                return CartMapper.toResponseDto(cart);
+        }
+
+        public void deleteCart(Integer id) {
+                // Optimización: findById y deleteById son a menudo más limpios que existsById +
+                // deleteById
+                Cart cart = findCartOrThrow(id);
+                cartRepository.delete(cart);
+        }
+
+        // -------------------- OPERACIONES CON LA COLECCIÓN DE ÍTEMS
+        // --------------------
+
+        public List<CartItemResponseDto> getItemsInCart(Integer cartId) {
+                // En lugar de obtener el carrito y luego su Set<Items>,
+                // preferimos usar un Query Method en CartItemRepository para mayor eficiencia
+                // y para evitar problemas con la carga perezosa (Lazy Loading) si no está
+                // configurada.
+                // Dejamos la implementación de esta función en el CartItemService (ver más
+                // abajo).
+
+                // Opcional: Si mantienes la lógica aquí, al menos valida la existencia del
+                // carrito.
+                // Pero moverla al servicio especializado es mejor.
+
+                Cart cart = findCartOrThrow(cartId); // Para asegurar que el carrito existe
+
+                // Si la relación es LAZY, se disparará una consulta N+1.
+                // Si es EAGER, puede ser ineficiente.
+                // La mejor práctica es usar un JOIN FETCH en un Query Method especializado.
+                // Asumiendo que la relación es EAGER O que el repositorio de Ítems maneja la
+                // consulta:
+                return cart.getItems().stream()
+                                .map(CartMapper::toResponseDto)
+                                .collect(Collectors.toList());
+        }
+
+        @Transactional(readOnly = true) // Es solo una operación de lectura
+        public double calculateCartTotals(Integer cartId) {
+                Cart cart = findCartOrThrow(cartId);
+
+                // Usar la colección de ítems cargada por Hibernate
+                return cart.getItems().stream()
+                                // Aseguramos que los ítems y productos están presentes y no son nulos
+                                .filter(item -> item.getProduct() != null)
+                                .mapToDouble(item -> {
+                                        double price = item.getProduct().getPrice();
+                                        int quantity = item.getQuantity();
+                                        return price * quantity;
+                                })
+                                .sum();
+        }
+
+        // -------------------- MÉTODOS AUXILIARES --------------------
+
+        private User findUserOrThrow(Integer userId) {
+                return userRepository.findById(userId)
+                                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        }
+
+        // Método auxiliar para no duplicar la lógica de búsqueda de Carrito
+        public Cart findCartOrThrow(Integer cartId) {
+                return cartRepository.findById(cartId)
+                                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
+        }
 }

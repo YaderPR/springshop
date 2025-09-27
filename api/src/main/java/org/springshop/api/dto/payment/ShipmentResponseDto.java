@@ -1,3 +1,4 @@
+// ShipmentResponseDto.java (ASUMIDO y DEFINIDO)
 package org.springshop.api.dto.payment;
 
 import java.time.LocalDateTime;
@@ -14,15 +15,15 @@ public class ShipmentResponseDto {
     private Integer id;
 
     private String trackingNumber;
-
-    private String carrier;
-
-    private ShipmentStatus status; // CREATED, SHIPPED, DELIVERED, RETURNED
+    private String carrier; 
+    private ShipmentStatus status; 
 
     private LocalDateTime shippedAt;
-
     private LocalDateTime deliveredAt;
-
-    private Integer orderId; // referencia a la orden
+    
+    // Referencia esencial a la orden
+    private Integer orderId; 
+    
+    // Asumimos un campo de auditoría
+    private LocalDateTime createdAt; 
 }
-

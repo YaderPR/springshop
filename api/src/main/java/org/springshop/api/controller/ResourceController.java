@@ -1,5 +1,6 @@
 package org.springshop.api.controller;
 
+/*
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -29,3 +30,4 @@ public class ResourceController {
         return "Este es un recurso público, no se requiere autenticación.";
     }
 }
+*/

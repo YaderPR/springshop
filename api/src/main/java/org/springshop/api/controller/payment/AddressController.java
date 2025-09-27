@@ -1,50 +1,90 @@
 package org.springshop.api.controller.payment;
 
-import java.net.URI;
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springshop.api.dto.payment.AddressRequestDto;
 import org.springshop.api.dto.payment.AddressResponseDto;
 import org.springshop.api.service.payment.AddressService;
 
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+import jakarta.validation.Valid; // Importante para la validación
 
 @RestController
 @RequestMapping("/api/addresses")
 public class AddressController {
+    
     private final AddressService addressService;
     private final static String BASE_URL = "/api/addresses";
+    
     public AddressController(AddressService addressService) {
         this.addressService = addressService;
     }
+
+    // -------------------- CRUD BÁSICO --------------------
+    
+    /**
+     * Crea una nueva dirección.
+     */
     @PostMapping
-    public ResponseEntity<AddressResponseDto> createAddress(@RequestBody AddressRequestDto requestDto) {
+    public ResponseEntity<AddressResponseDto> createAddress(@Valid @RequestBody AddressRequestDto requestDto) { // Añadimos @Valid
         AddressResponseDto responseDto = addressService.createAddress(requestDto);
-        return ResponseEntity.created(URI.create(BASE_URL + responseDto.getId())).body(responseDto);
+        // NOTA: La URI debe incluir una barra de separación antes del ID
+        URI location = URI.create(BASE_URL + "/" + responseDto.getId()); 
+        return ResponseEntity.created(location).body(responseDto);
     }
+    
+    /**
+     * Obtiene todas las direcciones (generalmente solo para admins).
+     * NOTA: Este endpoint no soporta filtrado por userId, ese se manejará en el UserController.
+     */
     @GetMapping
-    public List<AddressResponseDto> getAllAddresses() {
-        return addressService.getAllAddresses();
+    public ResponseEntity<List<AddressResponseDto>> getAllAddresses() {
+        // CORRECCIÓN: Devolvemos ResponseEntity.ok
+        return ResponseEntity.ok(addressService.getAllAddresses()); 
     }
-    @GetMapping("{id}")
-    public AddressResponseDto getAddressById(@PathVariable Integer id) {
-        return addressService.getAddressById(id);
+
+    /**
+     * Obtiene una dirección por ID.
+     */
+    @GetMapping("/{id:\\d+}") // Añadimos validación de ruta numérica
+    public ResponseEntity<AddressResponseDto> getAddressById(@PathVariable Integer id) {
+        // CORRECCIÓN: Usamos el método de servicio que devuelve Optional
+        return wrapOrNotFound(addressService.getAddressById(id)); 
     }
-    @PutMapping("/{id}")
-    public AddressResponseDto updateAddressById(@PathVariable Integer id, AddressRequestDto requestDto) {
-        return addressService.updateAddressById(id, requestDto);
+    
+    /**
+     * Actualiza una dirección por ID.
+     */
+    @PutMapping("/{id:\\d+}") // Añadimos validación de ruta numérica
+    public ResponseEntity<AddressResponseDto> updateAddress(
+            @PathVariable Integer id, 
+            @Valid @RequestBody AddressRequestDto requestDto) { // Añadimos @Valid y @RequestBody
+        
+        // CORRECCIÓN: Confiamos en que el servicio lance 404
+        AddressResponseDto updatedDto = addressService.updateAddress(id, requestDto); 
+        return ResponseEntity.ok(updatedDto);
     }
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteAddressById(@PathVariable Integer id) {
-        addressService.deleteAddressById(id);
+    
+    /**
+     * Elimina una dirección por ID.
+     */
+    @DeleteMapping("/{id:\\d+}") // Añadimos validación de ruta numérica
+    public ResponseEntity<Void> deleteAddress(@PathVariable Integer id) { // CONSISTENCIA: Renombramos
+        // CORRECCIÓN: Usamos el nombre de método corregido en el servicio
+        addressService.deleteAddress(id); 
         return ResponseEntity.noContent().build(); 
+    }
+    
+    // -------------------- HELPER --------------------
+    
+    /**
+     * Convierte un Optional<T> en ResponseEntity<T> o 404 Not Found.
+     */
+    private <T> ResponseEntity<T> wrapOrNotFound(Optional<T> maybeResponse) {
+        return maybeResponse.map(ResponseEntity::ok)
+                            .orElse(ResponseEntity.notFound().build());
     }
 }

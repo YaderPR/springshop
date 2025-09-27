@@ -2,20 +2,13 @@ package org.springshop.api.controller.product;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springshop.api.repository.product.ApparelCategoryRepository;
-
-import jakarta.persistence.EntityNotFoundException;
-
+import org.springshop.api.service.product.ApparelCategoryService;
 import org.springshop.api.dto.product.apparel.ApparelCategoryRequestDTO;
 import org.springshop.api.dto.product.apparel.ApparelCategoryResponseDTO;
-import org.springshop.api.dto.product.apparel.ApparelResponseDTO;
-import org.springshop.api.mapper.product.ApparelCategoryMapper;
-import org.springshop.api.mapper.product.ApparelMapper;
-import org.springshop.api.model.product.ApparelCategory;
 
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional; // Importación necesaria para el helper
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,63 +17,70 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import jakarta.validation.Valid; // Importación necesaria para la validación
 
 @RestController
-@RequestMapping("/api/products/apparel/categories")
+@RequestMapping("/api/products/apparels/categories")
 public class ApparelCategoryController {
-    private final static String BASE_URL = "/api/products/apparel/categories";
-    ApparelCategoryRepository acr;
-
-    ApparelCategoryController(ApparelCategoryRepository acr) {
-        this.acr = acr;
+    
+    private final static String BASE_URL = "/api/products/apparels/categories";
+    private final ApparelCategoryService apparelCategoryService;
+    
+    ApparelCategoryController(ApparelCategoryService apparelCategoryService) {
+        this.apparelCategoryService = apparelCategoryService;
     }
 
+    // -------------------- CRUD de ApparelCategory --------------------
+    
+    // ✅ 1. Crear Categoría (POST)
     @PostMapping
     public ResponseEntity<ApparelCategoryResponseDTO> createApparelCategory(
-            @RequestBody ApparelCategoryRequestDTO requestDto) {
+            @Valid @RequestBody ApparelCategoryRequestDTO requestDto) { // Añadimos @Valid
 
-        ApparelCategory entity = ApparelCategoryMapper.toEntity(requestDto);
-        ApparelCategory savedEntity = acr.save(entity);
-        ApparelCategoryResponseDTO responseDto = ApparelCategoryMapper.toResponseDTO(savedEntity);
-
+        ApparelCategoryResponseDTO responseDto = apparelCategoryService.createApparelCategory(requestDto);
         return ResponseEntity
                 .created(URI.create(BASE_URL + "/" + responseDto.getId()))
                 .body(responseDto);
     }
 
+    // ✅ 2. Obtener Todas (GET)
     @GetMapping
     public ResponseEntity<List<ApparelCategoryResponseDTO>> getAllApparelCategories() {
-        return ResponseEntity.ok(acr.findAll().stream()
-                .map(ApparelCategoryMapper::toResponseDTO)
-                .collect(Collectors.toList()));
+        return ResponseEntity.ok(apparelCategoryService.getAllApparelCategories());
     }
 
-    @GetMapping("/{id:\\d+}/apparels")
-    public ResponseEntity<List<ApparelResponseDTO>> getApparelsByCategoryId(
-            @PathVariable Integer id) {
-        ApparelCategory category = acr.findById(id).orElse(null);
-        if (category == null) {
-            return ResponseEntity.notFound().build();
-        }
-        List<ApparelResponseDTO> apparels = category.getApparels().stream()
-                .map(apparel -> ApparelMapper.toDTO(apparel)).collect(Collectors.toList());
-        return ResponseEntity.ok(apparels);
+    // ✅ 3. Obtener por ID (GET)
+    @GetMapping("/{id:\\d+}") // Añadimos validación numérica
+    public ResponseEntity<ApparelCategoryResponseDTO> getApparelCategoryById(@PathVariable Integer id) {
+        // Usamos el helper para manejar el Optional
+        return wrapOrNotFound(apparelCategoryService.getApparelCategoryById(id));
     }
-    @PutMapping("/{id}")
-    public ResponseEntity<ApparelCategoryResponseDTO> updateApparelCategoryById(@PathVariable Integer id, @RequestBody ApparelCategoryRequestDTO dto) {
-        ApparelCategory apparelCategory = acr.findById(id).orElseThrow(() -> new EntityNotFoundException("Apparel category not found with id " + id));
-        ApparelCategoryMapper.updateEntity(apparelCategory, dto);
-        ApparelCategory updatedApparelCategory = acr.save(apparelCategory);
-        ApparelCategoryResponseDTO responseDto = ApparelCategoryMapper.toResponseDTO(updatedApparelCategory);
+
+    // ✅ 4. Actualizar Categoría (PUT)
+    @PutMapping("/{id:\\d+}") // Añadimos validación numérica
+    public ResponseEntity<ApparelCategoryResponseDTO> updateApparelCategory(
+            @PathVariable Integer id, 
+            @Valid @RequestBody ApparelCategoryRequestDTO dto) { // Añadimos @Valid
+
+        // ERROR CRÍTICO CORREGIDO: Llamar al método de ACTUALIZACIÓN, no al de OBTENCIÓN.
+        // Confiamos en que el servicio lance 404 si no existe.
+        ApparelCategoryResponseDTO responseDto = apparelCategoryService.updateApparelCategory(id, dto);
         return ResponseEntity.ok(responseDto);
     }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteApparelCategoryById(@PathVariable Integer id) {
-        if (!acr.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        acr.deleteById(id);
+    
+    // ✅ 5. Eliminar Categoría (DELETE)
+    @DeleteMapping("/{id:\\d+}") // Añadimos validación numérica
+    public ResponseEntity<Void> deleteApparelCategory(@PathVariable Integer id) {
+        // CORREGIDO: Llamar al método refactorizado. El servicio maneja el 404.
+        apparelCategoryService.deleteApparelCategory(id);
         return ResponseEntity.noContent().build();
     }
-
+    
+    // -------------------- HELPER --------------------
+    
+    // Añadimos el helper para el manejo de Optional/404
+    private <T> ResponseEntity<T> wrapOrNotFound(Optional<T> maybeResponse) {
+        return maybeResponse.map(ResponseEntity::ok)
+                            .orElse(ResponseEntity.notFound().build());
+    }
 }

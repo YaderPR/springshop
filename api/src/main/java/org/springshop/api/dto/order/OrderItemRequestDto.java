@@ -5,18 +5,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// OrderItemRequestDto (CORREGIDO)
 @Setter
 @Getter
 @NoArgsConstructor
 public class OrderItemRequestDto {
-
     @NotNull
     private Integer productId;
-
+    
     @NotNull
     private Integer quantity;
-
-    @NotNull
-    private Double price; // precio unitario o subtotal según tu lógica
+    
+    // ELIMINADO: price (viene del Servidor/Product)
+    // ELIMINADO: orderId (viene de la URL)
 }
 

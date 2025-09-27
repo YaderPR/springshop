@@ -1,4 +1,4 @@
-// ProductResponseDTO.java
+// ProductResponseDTO.java (AJUSTADO)
 package org.springshop.api.dto.product;
 
 import lombok.Data;
@@ -11,6 +11,9 @@ public class ProductResponseDTO {
     private Double price;
     private Integer stock;
     private String imageUrl;
-    private String categoryName; // devolvemos el nombre de la categoría
+    
+    // Campo añadido para completar la referencia de categoría
+    private Integer categoryId; 
+    
+    private String categoryName; 
 }
-

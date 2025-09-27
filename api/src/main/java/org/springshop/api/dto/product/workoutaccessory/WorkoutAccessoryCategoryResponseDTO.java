@@ -1,3 +1,4 @@
+// WorkoutAccessoryCategoryResponseDTO.java (CORRECTO)
 package org.springshop.api.dto.product.workoutaccessory;
 
 import lombok.Data;
@@ -9,4 +10,3 @@ public class WorkoutAccessoryCategoryResponseDTO {
     private Integer id;
     private String name;
 }
-

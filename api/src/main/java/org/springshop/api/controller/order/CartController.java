@@ -1,3 +1,5 @@
+// Archivo: org.springshop.api.controller.order.CartController.java
+
 package org.springshop.api.controller.order;
 
 import java.net.URI;
@@ -12,54 +14,65 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springshop.api.dto.order.CartItemRequestDto;
-import org.springshop.api.dto.order.CartItemResponseDto;
 import org.springshop.api.dto.order.CartRequestDto;
 import org.springshop.api.dto.order.CartResponseDto;
 import org.springshop.api.service.order.CartService;
 
+import jakarta.persistence.EntityNotFoundException; // Usaremos esta excepción para el 404
+
 @RestController
 @RequestMapping("/api/carts")
 public class CartController {
-    private final static String BASE_URL = "/api/carts";
-    private CartService cartService;
+    
+    private final CartService cartService;
+    
+    // NOTA: BASE_URL ya no es necesario si usamos el método created
+    
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
+
+    // -------------------- Carts (Recurso Principal) --------------------
+    
+    // ✅ 1. Obtener todos los carritos (GET /api/carts)
     @GetMapping
-    public List<CartResponseDto> getAllCarts() {
-        return cartService.getAllCarts();
+    public ResponseEntity<List<CartResponseDto>> getAllCarts() {
+        return ResponseEntity.ok(cartService.getAllCarts());
     }
-    @GetMapping("/{id}")
-    public CartResponseDto getCartById(@RequestBody Integer id) {
-        return cartService.getCartById(id);
+
+    // ✅ 2. Obtener un carrito por su ID (GET /api/carts/{id})
+    @GetMapping("/{id:\\d+}") // Aseguramos que el ID sea numérico
+    public ResponseEntity<CartResponseDto> getCartById(@PathVariable Integer id) {
+        // Mejor práctica: Devolver 404 si no se encuentra. 
+        // Ya que el servicio devuelve Optional<CartResponseDto>, lo manejamos aquí.
+        // Opcional: Si usamos @ControllerAdvice, el servicio lanzaría EntityNotFoundException y Spring lo manejaría.
+        return cartService.getCartById(id)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + id));
     }
+
+    // ✅ 3. Crear un carrito (POST /api/carts)
     @PostMapping
-    public CartResponseDto createCart(@RequestBody CartRequestDto dto) {
-        return cartService.createCart(dto);
+    public ResponseEntity<CartResponseDto> createCart(@RequestBody CartRequestDto dto) {
+        CartResponseDto responseDto = cartService.createCart(dto);
+        
+        // Principio REST: Devolver 201 Created con el URI del nuevo recurso
+        URI location = URI.create("/api/carts/" + responseDto.getId());
+        return ResponseEntity.created(location).body(responseDto);
     }
-    @PostMapping("/{id}")
-    public ResponseEntity<CartItemResponseDto> createCartItem(@PathVariable Integer id, @RequestBody CartItemRequestDto requestDto) {
-        CartItemResponseDto responseDto = cartService.createCartItem(requestDto);
-        return ResponseEntity.created(URI.create(BASE_URL + "/" + id + "/" + responseDto.getId())).body(responseDto);
-    }
+
+    // ✅ 4. Actualizar un carrito (PUT /api/carts/{id})
     @PutMapping("/{id:\\d+}")
-    public CartResponseDto updateCart(@PathVariable Integer id, @RequestBody CartRequestDto items) {
-        return cartService.updateCart(id, items);
+    public ResponseEntity<CartResponseDto> updateCart(@PathVariable Integer id, @RequestBody CartRequestDto requestDto) {
+        // 200 OK con el recurso actualizado
+        return ResponseEntity.ok(cartService.updateCart(id, requestDto));
     }
-    @PutMapping("/{id:\\d+}/items/{itemId:\\d+}")
-    public CartResponseDto updateCartItem(@PathVariable Integer id, @PathVariable Integer itemId, @RequestBody CartItemRequestDto item) {
-        return cartService.updateCartItem(id, itemId, item);
-    }
-    @DeleteMapping("/{id}")
-    public void deleteCart(@PathVariable Integer id) {
+
+    // ✅ 5. Eliminar un carrito (DELETE /api/carts/{id})
+    @DeleteMapping("/{id:\\d+}")
+    public ResponseEntity<Void> deleteCart(@PathVariable Integer id) {
         cartService.deleteCart(id);
-    }
-    @DeleteMapping("/{id:\\d+}/items/{itemId:\\d+}")
-    public ResponseEntity<Void> deleteCartItem(@PathVariable Integer id, @PathVariable Integer itemId) {
-        cartService.deleteCartItem(id, itemId);
+        // Principio REST: Devolver 204 No Content para una eliminación exitosa
         return ResponseEntity.noContent().build();
     }
-
-
 }

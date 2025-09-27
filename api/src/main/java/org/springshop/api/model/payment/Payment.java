@@ -1,3 +1,4 @@
+// Payment.java (AJUSTADO)
 package org.springshop.api.model.payment;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+// ... otros imports ...
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,14 +32,18 @@ public class Payment {
     private String method; // CARD, PAYPAL, CASH_ON_DELIVERY, etc.
 
     private Double amount;
+    
+    // ✅ CAMBIO CRÍTICO: Añadir la divisa
+    private String currency; 
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status; // PENDING, SUCCESS, FAILED, REFUNDED
     private String transactionId; // referencia de pasarela (Stripe, PayPal, etc.)
+    
     @CreationTimestamp
     private LocalDateTime createdAt;
+    
     @OneToOne
     @JoinColumn(name = "order_id")
     private Order order;
 }
-

@@ -1,4 +1,4 @@
-// WorkoutAccessoryResponseDTO.java
+// WorkoutAccessoryResponseDTO.java (AJUSTADO)
 package org.springshop.api.dto.product.workoutaccessory;
 
 import org.springshop.api.dto.product.ProductResponseDTO;
@@ -13,6 +13,9 @@ public class WorkoutAccessoryResponseDTO extends ProductResponseDTO {
     private String dimensions;
     private Double weight;
     private String color;
-    private String workoutAccessoryCategoryName; // devolvemos nombre de la categoría
+    
+    // Campo añadido: El ID es esencial para la integridad de la API
+    private Integer workoutAccessoryCategoryId; 
+    
+    private String workoutAccessoryCategoryName; 
 }
-

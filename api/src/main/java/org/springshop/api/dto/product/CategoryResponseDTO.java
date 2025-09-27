@@ -1,4 +1,4 @@
-// Response DTO
+// CategoryResponseDTO.java (CORRECTO)
 package org.springshop.api.dto.product;
 
 import lombok.Data;
@@ -12,4 +12,3 @@ public class CategoryResponseDTO {
     private String name;
     private List<Integer> productIds; // Solo IDs para simplificar
 }
-

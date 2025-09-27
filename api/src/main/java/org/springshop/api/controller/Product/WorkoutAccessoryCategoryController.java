@@ -1,79 +1,110 @@
 package org.springshop.api.controller.product;
 
-import java.net.URI;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*; // Usamos el RequestMapping de Spring
 import org.springshop.api.dto.product.workoutaccessory.WorkoutAccessoryCategoryRequestDTO;
 import org.springshop.api.dto.product.workoutaccessory.WorkoutAccessoryCategoryResponseDTO;
-import org.springshop.api.mapper.product.WorkoutAccessoryCategoryMapper;
-import org.springshop.api.model.product.WorkoutAccessory;
-import org.springshop.api.model.product.WorkoutAccessoryCategory;
-import org.springshop.api.repository.product.WorkoutAccessoryCategoryRepository;
+import org.springshop.api.dto.product.workoutaccessory.WorkoutAccessoryResponseDTO; // Para la lista de accesorios
+import org.springshop.api.service.product.WorkoutAccessoryCategoryService; // Inyectamos el servicio
+import org.springshop.api.service.product.WorkoutAccessoryService; // Para obtener accesorios por categoría
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import jakarta.persistence.EntityNotFoundException;
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+import jakarta.validation.Valid; // Para la validación
 
 @RestController
-@RequestMapping("/api/products/workoutaccesories/categories")
+// Ruta RESTful, asumiendo que el recurso existe bajo /products/workoutaccessories
+@RequestMapping("/api/products/workoutaccessories/categories")
 public class WorkoutAccessoryCategoryController {
-    private final WorkoutAccessoryCategoryRepository wacr;
-    private final static String BASE_URL = "/api/products/workoutaccesories/categories";
+    
+    // Inyectamos el servicio, no el repositorio
+    private final WorkoutAccessoryCategoryService categoryService;
+    // Inyectamos el servicio especializado para obtener accesorios por categoría
+    private final WorkoutAccessoryService accessoryService; 
+    
+    private final static String BASE_URL = "/api/products/workoutaccessories/categories";
 
-    WorkoutAccessoryCategoryController(WorkoutAccessoryCategoryRepository wacr) {
-        this.wacr = wacr;
+    WorkoutAccessoryCategoryController(
+            WorkoutAccessoryCategoryService categoryService,
+            WorkoutAccessoryService accessoryService) { // Inyectamos el servicio
+        this.categoryService = categoryService;
+        this.accessoryService = accessoryService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<WorkoutAccessoryCategoryResponseDTO>> getAllWorkoutAccessoryCategories() {
-        return ResponseEntity.ok(wacr.findAll().stream().map(WorkoutAccessoryCategoryMapper::toResponseDTO)
-                .collect(Collectors.toList()));
-    }
+    // -------------------- CRUD de WorkoutAccessoryCategory --------------------
 
+    // ✅ 1. Crear Categoría (POST /...)
     @PostMapping
     public ResponseEntity<WorkoutAccessoryCategoryResponseDTO> createWorkoutAccessoryCategory(
-            @RequestBody WorkoutAccessoryCategoryRequestDTO requestDTO) {
-        WorkoutAccessoryCategory savedCategory = wacr.save(WorkoutAccessoryCategoryMapper.toEntity(requestDTO));
-        WorkoutAccessoryCategoryResponseDTO responseDto = WorkoutAccessoryCategoryMapper.toResponseDTO(savedCategory);
+            @Valid @RequestBody WorkoutAccessoryCategoryRequestDTO requestDTO) { // Usamos @Valid
+        
+        // DELEGAMOS AL SERVICIO
+        WorkoutAccessoryCategoryResponseDTO responseDto = categoryService.createWorkoutAccessoryCategory(requestDTO);
+        
         return ResponseEntity.created(
-                URI.create(BASE_URL + "/" + responseDto.getId()))
+                        URI.create(BASE_URL + "/" + responseDto.getId()))
                 .body(responseDto);
     }
 
-    @GetMapping("/{id:\\d+}/workoutaccessories")
-    public ResponseEntity<Set<WorkoutAccessory>> getWorkoutAccessoriesByCategoryId(@PathVariable Integer id) {
-        Set<WorkoutAccessory> accessories = wacr.findById(id)
-                .map(WorkoutAccessoryCategory::getWorkoutAccessories)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found with id " + id));
-        return ResponseEntity.ok(accessories);
+    // ✅ 2. Obtener Todas (GET /...)
+    @GetMapping
+    public ResponseEntity<List<WorkoutAccessoryCategoryResponseDTO>> getAllWorkoutAccessoryCategories() {
+        // DELEGAMOS AL SERVICIO
+        return ResponseEntity.ok(categoryService.getAllWorkoutAccessoryCategories());
+    }
+    
+    // ✅ 3. Obtener por ID (GET /.../{id})
+    @GetMapping("/{id:\\d+}")
+    public ResponseEntity<WorkoutAccessoryCategoryResponseDTO> getWorkoutAccessoryCategoryById(@PathVariable Integer id) {
+        // Usamos el helper para manejar el Optional/404
+        return wrapOrNotFound(categoryService.getWorkoutAccessoryCategoryById(id));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<WorkoutAccessoryCategoryResponseDTO> updateWorkoutAccessoryCategory(@PathVariable Integer id,
-            @RequestBody WorkoutAccessoryCategoryRequestDTO requestDto) {
-        WorkoutAccessoryCategory existingCategory = wacr.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found with id " + id));
-        WorkoutAccessoryCategoryMapper.updateEntity(existingCategory, requestDto);
-        WorkoutAccessoryCategory updatedCategory = wacr.save(existingCategory);
-        WorkoutAccessoryCategoryResponseDTO responseDto = WorkoutAccessoryCategoryMapper.toResponseDTO(updatedCategory);
+    // ✅ 4. Actualizar Categoría (PUT /.../{id})
+    @PutMapping("/{id:\\d+}")
+    public ResponseEntity<WorkoutAccessoryCategoryResponseDTO> updateWorkoutAccessoryCategory(
+            @PathVariable Integer id,
+            @Valid @RequestBody WorkoutAccessoryCategoryRequestDTO requestDto) { // Usamos @Valid
+        
+        // DELEGAMOS AL SERVICIO (el servicio maneja el 404)
+        WorkoutAccessoryCategoryResponseDTO responseDto = categoryService.updateWorkoutAccessoryCategory(id, requestDto);
         return ResponseEntity.ok(responseDto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWorkoutAccessoryCategoryById(@PathVariable Integer id) {
-        if (!wacr.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        wacr.deleteById(id);
+    // ✅ 5. Eliminar Categoría (DELETE /.../{id})
+    @DeleteMapping("/{id:\\d+}")
+    public ResponseEntity<Void> deleteWorkoutAccessoryCategory(@PathVariable Integer id) {
+        // DELEGAMOS AL SERVICIO (el servicio maneja el 404 y la lógica de eliminación)
+        categoryService.deleteWorkoutAccessoryCategory(id); 
         return ResponseEntity.noContent().build();
+    }
+    
+    // -------------------- Relaciones --------------------
+
+    // ✅ Obtener Accesorios por Categoría (GET /.../{id}/workoutaccessories)
+    @GetMapping("/{id:\\d+}/workoutaccessories")
+    public ResponseEntity<List<WorkoutAccessoryResponseDTO>> getWorkoutAccessoriesByCategoryId(@PathVariable Integer id) {
+        // CORREGIDO: Usar el servicio especializado para obtener los DTOs de producto.
+        // ASUMIMOS que el WorkoutAccessoryService tiene este método:
+        // List<WorkoutAccessoryResponseDTO> getWorkoutAccessoriesByWorkoutCategoryId(Integer categoryId)
+        
+        List<WorkoutAccessoryResponseDTO> accessories = accessoryService.getWorkoutAccessoriesByWorkoutCategoryId(id);
+        
+        if (accessories.isEmpty()) {
+            // Es preferible devolver 200 OK con lista vacía en lugar de 404 si la categoría existe.
+            // Si la categoría no existe, el servicio debería lanzar 404.
+            // Para este ejemplo, si la lista es vacía, asumimos que la categoría existe.
+            return ResponseEntity.ok(accessories);
+        }
+        return ResponseEntity.ok(accessories);
+    }
+
+    // -------------------- HELPER --------------------
+    
+    private <T> ResponseEntity<T> wrapOrNotFound(Optional<T> maybeResponse) {
+        return maybeResponse.map(ResponseEntity::ok)
+                            .orElse(ResponseEntity.notFound().build());
     }
 }

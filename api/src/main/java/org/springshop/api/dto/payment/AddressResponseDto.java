@@ -1,3 +1,4 @@
+// AddressResponseDto.java (AJUSTADO)
 package org.springshop.api.dto.payment;
 
 import lombok.Getter;
@@ -16,7 +17,9 @@ public class AddressResponseDto {
     private String zipCode;
     private String phoneNumber;
 
+    // AÑADIDO: ID del usuario para integridad de la API
+    private Integer userId;
+
     // Información mínima del usuario dueño de la dirección
     private String username;
 }
-

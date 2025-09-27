@@ -1,49 +1,88 @@
 package org.springshop.api.controller.payment;
 
-import java.net.URI;
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springshop.api.dto.payment.ShipmentRequestDto;
 import org.springshop.api.dto.payment.ShipmentResponseDto;
 import org.springshop.api.service.payment.ShipmentService;
 
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+import jakarta.validation.Valid; // Importante para la validación
+
 @RestController
 @RequestMapping("/api/shipments")
 public class ShipmentController {
+    
     private final static String BASE_URL = "/api/shipments";
-    ShipmentService shipmentService;
+    private final ShipmentService shipmentService;
+    
     public ShipmentController(ShipmentService shipmentService) {
         this.shipmentService = shipmentService;
     }
+
+    // -------------------- CRUD BÁSICO --------------------
+    
+    /**
+     * Crea un nuevo envío.
+     */
     @PostMapping
-    public ResponseEntity<ShipmentResponseDto> createShipment(@RequestBody ShipmentRequestDto requestDto) {
+    public ResponseEntity<ShipmentResponseDto> createShipment(@Valid @RequestBody ShipmentRequestDto requestDto) { // Añadimos @Valid
         ShipmentResponseDto responseDto = shipmentService.createShipment(requestDto);
-        return ResponseEntity.created(URI.create(BASE_URL + responseDto.getId())).body(responseDto);
+        // CORRECCIÓN: La URI debe incluir una barra de separación antes del ID
+        URI location = URI.create(BASE_URL + "/" + responseDto.getId()); 
+        return ResponseEntity.created(location).body(responseDto);
     }
+    
+    /**
+     * Obtiene todos los envíos.
+     */
     @GetMapping
     public ResponseEntity<List<ShipmentResponseDto>> getAllShipments() {
         return ResponseEntity.ok(shipmentService.getAllShipments());
     }
-    @GetMapping("/{id}")
+
+    /**
+     * Obtiene un envío por ID.
+     */
+    @GetMapping("/{id:\\d+}") // Añadimos validación de ruta numérica
     public ResponseEntity<ShipmentResponseDto> getShipmentById(@PathVariable Integer id) {
-        return ResponseEntity.ok(shipmentService.getShipmentById(id));
+        // Usamos wrapOrNotFound para manejar el 404 de forma limpia (el servicio devuelve Optional)
+        return wrapOrNotFound(shipmentService.getShipmentById(id));
     }
-    @PutMapping("/{id}")
-    public ResponseEntity<ShipmentResponseDto> updateShipmentById(@PathVariable Integer id, @RequestBody ShipmentRequestDto requestDto) {
-        return ResponseEntity.ok(shipmentService.updateShipmentById(id, requestDto));
+    
+    /**
+     * Actualiza un envío por ID.
+     */
+    @PutMapping("/{id:\\d+}") // Añadimos validación de ruta numérica
+    public ResponseEntity<ShipmentResponseDto> updateShipment( // CONSISTENCIA: Renombramos
+            @PathVariable Integer id, 
+            @Valid @RequestBody ShipmentRequestDto requestDto) { // Añadimos @Valid
+        
+        // Usamos el nombre de método corregido en el servicio
+        ShipmentResponseDto updatedDto = shipmentService.updateShipment(id, requestDto); 
+        return ResponseEntity.ok(updatedDto);
     }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteShipmentById(@PathVariable Integer id) {
-        shipmentService.deleteShipmentById(id);
+    
+    /**
+     * Elimina un envío por ID.
+     */
+    @DeleteMapping("/{id:\\d+}") // Añadimos validación de ruta numérica
+    public ResponseEntity<Void> deleteShipment(@PathVariable Integer id) { // CONSISTENCIA: Renombramos
+        // Usamos el nombre de método corregido en el servicio
+        shipmentService.deleteShipment(id); 
         return ResponseEntity.noContent().build();
-    } 
+    }
+    
+    // -------------------- HELPER --------------------
+    
+    /**
+     * Convierte un Optional<T> en ResponseEntity<T> (200 OK) o 404 Not Found.
+     */
+    private <T> ResponseEntity<T> wrapOrNotFound(Optional<T> maybeResponse) {
+        return maybeResponse.map(ResponseEntity::ok)
+                            .orElse(ResponseEntity.notFound().build());
+    }
 }
