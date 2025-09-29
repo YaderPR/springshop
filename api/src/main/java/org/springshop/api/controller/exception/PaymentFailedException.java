@@ -1,4 +1,3 @@
-// PaymentFailedException.java (Crea este archivo en org.springshop.api.service.payment)
 package org.springshop.api.controller.exception;
 
 // Usamos RuntimeException para que Spring lo maneje automáticamente

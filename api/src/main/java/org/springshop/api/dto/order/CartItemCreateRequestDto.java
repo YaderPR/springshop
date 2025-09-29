@@ -10,7 +10,5 @@ import lombok.Setter;
 public class CartItemCreateRequestDto {
     private Integer productId;
     private Integer quantity;
-    // ELIMINADO: cartId (viene de la URL)
-    // ELIMINADO: price (viene del Servidor/Product)
 }
 

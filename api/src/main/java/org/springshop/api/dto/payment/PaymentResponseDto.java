@@ -1,4 +1,3 @@
-// PaymentResponseDto.java (ASUMIDO y AJUSTADO)
 package org.springshop.api.dto.payment;
 
 import java.time.LocalDateTime;
@@ -13,13 +12,12 @@ import lombok.Setter;
 public class PaymentResponseDto {
 
     private Integer id;
-    private Integer orderId; // Referencia
-    
+    private Integer orderId;
     private String method;
     private Double amount;
-    private String currency; // ✅ CAMBIO: Añadir divisa
-    
+    private String currency;
     private PaymentStatus status; 
     private String transactionId; 
     private LocalDateTime createdAt;
+
 }

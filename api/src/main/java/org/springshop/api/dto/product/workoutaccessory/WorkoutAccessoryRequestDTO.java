@@ -1,27 +1,26 @@
-// WorkoutAccessoryRequestDTO.java (AJUSTADO)
 package org.springshop.api.dto.product.workoutaccessory;
 import org.springshop.api.dto.product.ProductRequestDTO;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull; // Necesario para asegurar que el peso se envíe
+import jakarta.validation.constraints.NotNull; 
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class WorkoutAccessoryRequestDTO extends ProductRequestDTO {
     
-    @NotBlank // El material es un campo de texto clave
+    @NotBlank 
     private String material;
     
-    @NotBlank // Las dimensiones son importantes
+    @NotBlank 
     private String dimensions;
     
-    @NotNull // El peso es un campo numérico clave
+    @NotNull 
     private Double weight;
     
-    @NotBlank // El color es un campo de texto clave
+    @NotBlank 
     private String color;
     
-    private Integer workoutAccessoryCategoryId; // ID de la categoría de accesorio
+    private Integer workoutAccessoryCategoryId; 
 }

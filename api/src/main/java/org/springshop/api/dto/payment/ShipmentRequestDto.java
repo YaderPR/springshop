@@ -1,4 +1,3 @@
-// ShipmentRequestDto.java (AJUSTADO)
 package org.springshop.api.dto.payment;
 
 import java.time.LocalDateTime;
@@ -18,15 +17,13 @@ public class ShipmentRequestDto {
     private String trackingNumber;
 
     @NotBlank
-    private String carrier; // DHL, FedEx, UPS...
+    private String carrier;
 
-    @NotNull // Clave foránea esencial
+    @NotNull
     private Integer orderId; 
 
-    // Opcional en el request. El servicio debería inicializarlo o validarlo.
     private ShipmentStatus status; 
-
-    // Las fechas son opcionales al crear. Se manejan por lógica de negocio.
     private LocalDateTime shippedAt; 
     private LocalDateTime deliveredAt;
+    
 }

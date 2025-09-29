@@ -1,4 +1,3 @@
-// PaymentRequestDto.java (AJUSTADO)
 package org.springshop.api.dto.payment;
 
 import jakarta.validation.constraints.NotBlank;
@@ -13,14 +12,14 @@ public class PaymentRequestDto {
     @NotNull
     private Integer orderId;
     
-    @NotBlank // ✅ CAMBIO: El frontend envía el token de la tarjeta
+    @NotBlank
     private String paymentToken; 
     
-    @NotBlank // ✅ CAMBIO: La divisa es requerida (ej. "usd")
+    @NotBlank
     private String currency; 
 
     @NotBlank
-    private String method; // CARD, PAYPAL, etc.
+    private String method;
 
     @NotNull
     private Double amount;

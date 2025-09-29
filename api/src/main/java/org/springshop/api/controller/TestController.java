@@ -1,6 +1,5 @@
 package org.springshop.api.controller;
 
-/*
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
-public class ResourceController {
+public class TestController {
 
     @GetMapping("/protegida")
     public String protectedResource(@AuthenticationPrincipal Jwt jwt) {
@@ -30,4 +29,3 @@ public class ResourceController {
         return "Este es un recurso público, no se requiere autenticación.";
     }
 }
-*/

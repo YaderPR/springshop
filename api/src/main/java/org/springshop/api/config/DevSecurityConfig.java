@@ -9,7 +9,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@Profile("dev") // ✅ Se activa SOLO cuando el perfil 'dev' está activo
+@Profile("dev")
 public class DevSecurityConfig {
 
     @Bean

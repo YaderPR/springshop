@@ -1,5 +1,3 @@
-// Archivo: org.springshop.api.service.order.CartItemService.java
-
 package org.springshop.api.service.order;
 
 import java.util.List;
@@ -8,9 +6,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springshop.api.controller.exception.StockException;
 import org.springshop.api.dto.order.CartItemCreateRequestDto;
 import org.springshop.api.dto.order.CartItemResponseDto;
 import org.springshop.api.dto.order.CartItemUpdateRequestDto;
+
 import org.springshop.api.mapper.order.CartMapper;
 import org.springshop.api.model.order.Cart;
 import org.springshop.api.model.order.CartItem;
@@ -27,31 +27,22 @@ public class CartItemService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final CartService cartService;
-    
-    // Asumimos que has agregado este método en CartItemRepository:
-    // Optional<CartItem> findByCartIdAndProductId(Integer cartId, Integer productId);
 
-    public CartItemService(CartItemRepository cartItemRepository, ProductRepository productRepository, CartService cartService) {
+    
+    public CartItemService(CartItemRepository cartItemRepository, ProductRepository productRepository, 
+                           CartService cartService) {
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
         this.cartService = cartService;
     }
     
-    // -------------------- CREACIÓN/ACTUALIZACIÓN INTELIGENTE (UPSERT) --------------------
-    
-    /**
-     * Agrega un nuevo ítem o actualiza la cantidad si el producto ya existe en el carrito.
-     * @param cartId El ID del carrito.
-     * @param itemDto DTO con la cantidad a agregar y el ID del producto.
-     * @return El ítem del carrito (CartItem) actualizado/creado.
-     */
     public CartItemResponseDto addItemOrUpdateQuantity(Integer cartId, CartItemCreateRequestDto itemDto) {
         
-        // 1. Validar existencias
         Cart cart = cartService.findCartOrThrow(cartId); 
         Product product = findProductOrThrow(itemDto.getProductId());
+        final int quantityToAdd = itemDto.getQuantity();
         
-        // 2. Lógica de UPSERT: Buscar ítem existente
+        // 1. Lógica de UPSERT: Buscar ítem existente
         Optional<CartItem> existingItemOptional = cartItemRepository.findByCartIdAndProductId(
             cartId, 
             itemDto.getProductId()
@@ -62,57 +53,72 @@ public class CartItemService {
         if (existingItemOptional.isPresent()) {
             // Caso A: UPDATE (El ítem ya existe)
             itemToSave = existingItemOptional.get();
-            // Sumar la cantidad solicitada a la cantidad existente
-            int newQuantity = itemToSave.getQuantity() + itemDto.getQuantity();
+            int newQuantity = itemToSave.getQuantity() + quantityToAdd;
+            
+            // VALIDACIÓN 1: Stock máximo (si el carrito supera el stock actual)
+            if (newQuantity > product.getStock()) {
+                 throw new StockException(
+                    String.format("La cantidad solicitada (%d) supera el stock disponible (%d) para el producto %s.", 
+                    newQuantity, product.getStock(), product.getName())
+                );
+            }
             itemToSave.setQuantity(newQuantity); 
             
         } else {
             // Caso B: INSERT (Crear nuevo ítem)
-            // Usa el Mapper modificado que toma el precio del objeto Product
+            // VALIDACIÓN 2: Stock máximo para la cantidad inicial
+            if (quantityToAdd > product.getStock()) {
+                throw new StockException(
+                    String.format("La cantidad solicitada (%d) supera el stock disponible (%d) para el producto %s.", 
+                    quantityToAdd, product.getStock(), product.getName())
+                );
+            }
             itemToSave = CartMapper.toEntity(itemDto, product, cart);
         }
         
-        // 3. Guardar y mapear
-        return CartMapper.toResponseDto(cartItemRepository.save(itemToSave));
+        // 2. Guardar y Recalcular
+        itemToSave = cartItemRepository.save(itemToSave);
+        RecalculateCartTotal(cart); 
+        
+        return CartMapper.toResponseDto(itemToSave);
     }
 
     // -------------------- OBTENCIÓN --------------------
 
     public List<CartItemResponseDto> getCartItemsByCartId(Integer cartId) {
-        // Aseguramos que el carrito existe (doble check), luego consultamos los ítems.
         cartService.findCartOrThrow(cartId); 
-        
-        // Asume que tienes: List<CartItem> findAllByCartId(Integer cartId);
         List<CartItem> cartItems = cartItemRepository.findAllByCartId(cartId);
-        
         return cartItems.stream().map(CartMapper::toResponseDto).collect(Collectors.toList());
     }
 
     // -------------------- ACTUALIZACIÓN (Reemplazo Total de Cantidad) --------------------
 
-    /**
-     * Actualiza un ítem existente en el carrito con una nueva cantidad.
-     * @param cartId ID del carrito (para validación de pertenencia).
-     * @param itemId ID del ítem a modificar.
-     * @param itemDto DTO de actualización (contiene la nueva cantidad).
-     * @return El CartItem actualizado.
-     */
     public CartItemResponseDto updateCartItem(Integer cartId, Integer itemId, CartItemUpdateRequestDto itemDto) {
         CartItem item = findCartItemOrThrow(itemId);
+        Cart cart = cartService.findCartOrThrow(cartId);
         
-        // 1. Validar Pertenencia (CRÍTICO)
         if (!item.getCart().getId().equals(cartId)) {
             throw new IllegalArgumentException("Item with id " + itemId + " does not belong to cart with id " + cartId);
         }
         
-        // 2. Obtener el Producto (Se hace aunque no cambie, para mantener la firma del mapper)
-        // NOTA: Si el DTO no incluye productId, este paso debería usar item.getProduct().getId()
         Product product = findProductOrThrow(itemDto.getProductId()); 
-
-        // 3. Mapear y Guardar (Usando el nombre de método corregido: updateCartItem)
+        
+        // 1. VALIDACIÓN DE STOCK para la nueva cantidad total
+        if (itemDto.getQuantity() > product.getStock()) {
+             throw new StockException(
+                String.format("La cantidad solicitada (%d) supera el stock disponible (%d) para el producto %s.", 
+                itemDto.getQuantity(), product.getStock(), product.getName())
+            );
+        }
+        
+        // 2. Mapear y Guardar
         CartMapper.updateCartItem(item, itemDto, product);
         
-        CartItem updatedItem = cartItemRepository.save(item); 
+        CartItem updatedItem = cartItemRepository.save(item);
+        
+        // 3. Recalcular Total
+        RecalculateCartTotal(cart);
+        
         return CartMapper.toResponseDto(updatedItem);
     }
     
@@ -120,13 +126,16 @@ public class CartItemService {
 
     public void deleteCartItem(Integer cartId, Integer itemId) {
         CartItem item = findCartItemOrThrow(itemId);
+        Cart cart = cartService.findCartOrThrow(cartId);
 
-        // 1. Validar Pertenencia (CRÍTICO)
         if (!item.getCart().getId().equals(cartId)) {
             throw new IllegalArgumentException("Item with id " + itemId + " does not belong to cart with id " + cartId);
         }
 
         cartItemRepository.delete(item);
+        
+        // Recalcular Total después de eliminar
+        RecalculateCartTotal(cart);
     }
 
     // -------------------- MÉTODOS AUXILIARES --------------------
@@ -139,5 +148,15 @@ public class CartItemService {
     private CartItem findCartItemOrThrow(Integer itemId) {
         return cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("CartItem not found with id: " + itemId));
+    }
+    
+    /**
+     * Calcula el total del carrito y actualiza el campo totalAmount de la entidad Cart.
+     */
+    private void RecalculateCartTotal(Cart cart) {
+        // Asumimos que tienes un método para calcular el total en CartService
+        double newTotal = cartService.calculateCartTotals(cart.getId());
+        cart.setTotalAmount(newTotal);
+        // El @Transactional asegura que se persista.
     }
 }

@@ -1,4 +1,3 @@
-// CategoryResponseDTO.java (CORRECTO)
 package org.springshop.api.dto.product;
 
 import lombok.Data;
@@ -8,7 +7,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class CategoryResponseDTO {
+
     private Integer id;
     private String name;
-    private List<Integer> productIds; // Solo IDs para simplificar
+    private List<Integer> productIds;
+    
 }

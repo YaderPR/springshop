@@ -3,6 +3,8 @@
 package org.springshop.api.service.product;
 
 import jakarta.persistence.EntityNotFoundException;
+
+import org.springshop.api.controller.exception.StockException;
 import org.springshop.api.dto.product.ProductRequestDTO;
 import org.springshop.api.dto.product.ProductResponseDTO;
 import org.springshop.api.mapper.product.ProductMapper;
@@ -113,5 +115,34 @@ public class ProductService {
         }
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryId));
+    }
+    public ProductResponseDTO updateStock(Integer productId, Integer quantityChange) {
+        if (quantityChange == 0) {
+            return getProductById(productId)
+                    .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
+        }
+        
+        // 1. Obtener y bloquear la entidad (gracias a @Transactional)
+        Product product = findProductOrThrow(productId);
+        
+        int currentStock = product.getStock();
+        int newStock = currentStock + quantityChange;
+
+        // 2. VALIDACIÓN DEL RANGO (Stock no puede ser negativo)
+        if (newStock < 0) {
+            throw new StockException(
+                String.format("No se puede reducir el stock de %s. Stock actual: %d, Reducción solicitada: %d.",
+                    product.getName(), currentStock, Math.abs(quantityChange))
+            );
+        }
+        
+        // 3. Aplicar el cambio
+        product.setStock(newStock);
+        
+        // No es estrictamente necesario llamar a save() dentro de @Transactional si se usa findProductOrThrow,
+        // pero lo hacemos para ser explícitos.
+        Product updated = productRepository.save(product);
+        
+        return ProductMapper.toResponseDto(updated);
     }
 }

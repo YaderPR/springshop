@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CartResponseDto {
     private Integer id;
-    private Integer userId; // solo el id del usuario para no exponer todo el objeto User
+    private Integer userId;
     private Set<CartItemResponseDto> items;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;

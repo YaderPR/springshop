@@ -32,8 +32,6 @@ public class Payment {
     private String method; // CARD, PAYPAL, CASH_ON_DELIVERY, etc.
 
     private Double amount;
-    
-    // ✅ CAMBIO CRÍTICO: Añadir la divisa
     private String currency; 
 
     @Enumerated(EnumType.STRING)

@@ -1,4 +1,3 @@
-// AddressRequestDto.java (CORRECTO)
 package org.springshop.api.dto.payment;
 
 import jakarta.validation.constraints.NotBlank;
@@ -25,8 +24,8 @@ public class AddressRequestDto {
     @NotBlank
     private String zipCode;
 
-    private String phoneNumber; // opcional (si es requerido, debería ser @NotBlank)
+    private String phoneNumber;
 
-    @NotNull // Es correcto que el ID del usuario sea obligatorio
+    @NotNull
     private Integer userId; 
 }
