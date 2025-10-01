@@ -1,9 +1,9 @@
-package org.transportracker.api.api;
+package org.springshop.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = ApiApplication.class)
 class ApiApplicationTests {
 
 	@Test
