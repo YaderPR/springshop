@@ -35,6 +35,7 @@ public class Shipment {
     private ShipmentStatus status; // CREATED, SHIPPED, DELIVERED, RETURNED
     @CreationTimestamp
     private LocalDateTime shippedAt;
+    
     private LocalDateTime deliveredAt;
 
     @OneToOne

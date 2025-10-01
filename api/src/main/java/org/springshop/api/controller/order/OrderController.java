@@ -1,12 +1,10 @@
 package org.springshop.api.controller.order;
 
-import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.http.HttpStatus; // Nuevo import para 201 Created
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt; // Nuevo import para seguridad
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,101 +13,116 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springshop.api.controller.exception.StockException;
+import org.springshop.api.dto.checkout.CheckoutRequestDto;
 import org.springshop.api.dto.order.OrderRequestDto;
 import org.springshop.api.dto.order.OrderResponseDto;
-import org.springshop.api.dto.payment.PaymentRequestDto; // Nuevo import
-import org.springshop.api.dto.payment.PaymentResponseDto; // Nuevo import
+import org.springshop.api.dto.payment.PaymentResponseDto;
+import org.springshop.api.model.order.Order;
+import org.springshop.api.service.checkout.CheckoutService;
 import org.springshop.api.service.order.OrderService;
-import org.springshop.api.service.payment.PaymentService; // ✅ Nuevo import del servicio de pago
+import org.springshop.api.service.payment.PaymentService;
 
+import com.stripe.exception.StripeException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid; // Nuevo import para validar DTOs
 
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
-    
+
     private final OrderService orderService;
-    private final PaymentService paymentService; // ✅ Inyección del servicio de pago
-    
-    // Constructor actualizado para inyección
-    public OrderController(OrderService orderService, PaymentService paymentService) {
+    private final PaymentService paymentService;
+    private final CheckoutService checkoutService;
+
+    public OrderController(OrderService orderService, PaymentService paymentService, CheckoutService checkoutService) {
         this.orderService = orderService;
         this.paymentService = paymentService;
+        this.checkoutService = checkoutService;
     }
 
-    // -------------------- ÓRDENES (Recurso Principal) --------------------
-    
+    @PostMapping("/checkout")
+    public ResponseEntity<Map<String, String>> createOrderAndStartCheckout(
+            @RequestBody CheckoutRequestDto requestDto) {
+
+        Integer cartId = requestDto.getCartId();
+        Integer userId = requestDto.getUserId();
+        Integer addressId = requestDto.getAddressId();
+
+        try {
+            if (cartId == null || userId == null || addressId == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Faltan IDs de carrito, usuario o dirección."));
+            }
+            Order newOrder = orderService.createOrderFromCart(cartId, userId, addressId);
+            String checkoutUrl = checkoutService.createCheckoutSession(newOrder.getId());
+
+            // URL de redirección
+            return ResponseEntity.ok(Map.of(
+                    "checkoutUrl", checkoutUrl,
+                    "orderId", newOrder.getId().toString()));
+
+        } catch (StockException e) {
+            // Stock agotado (409 Conflict)
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", e.getMessage(), "code", "INSUFFICIENT_STOCK"));
+        } catch (EntityNotFoundException e) {
+            // Entidad no encontrada (404 Not Found)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (StripeException e) {
+            // Error de pasarela de pago (502 Bad Gateway)
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(Map.of("error", "Error al iniciar la sesión de Stripe: " + e.getMessage()));
+        } catch (Exception e) {
+            // Manejo de errores genéricos (500 Internal Server Error)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error interno al procesar la orden: " + e.getMessage()));
+        }
+    }
+
     @GetMapping
     public ResponseEntity<List<OrderResponseDto>> getAllOrders() {
-        // NOTA: Se recomienda añadir seguridad y paginación aquí.
         return ResponseEntity.ok(orderService.getAllOrders());
     }
-    
+
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable Integer id) {
-        // En un sistema seguro, se debe verificar que el usuario autenticado sea el dueño de la orden.
+
         return orderService.getOrderById(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + id));
     }
-    
-    @PostMapping
-    public ResponseEntity<OrderResponseDto> createOrder(@RequestBody OrderRequestDto requestDto) {
-        OrderResponseDto responseDto = orderService.createOrder(requestDto);
-        URI location = URI.create("/api/orders/" + responseDto.getId());
-        return ResponseEntity.created(location).body(responseDto);
-    }
-    
+
     @PutMapping("/{id:\\d+}")
-    public ResponseEntity<OrderResponseDto> updateOrder(@PathVariable Integer id, @RequestBody OrderRequestDto requestDto) {
-        OrderResponseDto responseDto = orderService.updateOrder(id, requestDto); 
+    public ResponseEntity<OrderResponseDto> updateOrder(@PathVariable Integer id,
+            @RequestBody OrderRequestDto requestDto) {
+
+        OrderResponseDto responseDto = orderService.updateOrder(id, requestDto);
+
         return ResponseEntity.ok(responseDto);
     }
-    
+
     @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Integer id) {
-        orderService.deleteOrder(id); 
+
+        orderService.deleteOrder(id);
+
         return ResponseEntity.noContent().build();
     }
-    
+
     @GetMapping("/{id:\\d+}/total")
     public ResponseEntity<Double> getOrderTotal(@PathVariable Integer id) {
+
         double total = orderService.calculateOrderTotals(id);
+
         return ResponseEntity.ok(total);
     }
 
-    // -------------------- PAGOS (Recurso Anidado) --------------------
-    
-    /**
-     * ✅ NUEVO ENDPOINT: Procesa un pago para una Orden específica.
-     * Mapea a: POST /api/orders/{orderId}/payments
-     * Activa el flujo del Payment Gateway (Stripe Sandbox).
-     */
-    @PostMapping("/{orderId:\\d+}/payments")
-    public ResponseEntity<PaymentResponseDto> processOrderPayment(
-        @PathVariable Integer orderId,
-        @Valid @RequestBody PaymentRequestDto requestDto,
-        // Usamos el token JWT para garantizar que solo el dueño pague la orden
-        @AuthenticationPrincipal Jwt jwt) { 
-        
-        // 1. Asignar el orderId de la ruta al DTO
-        requestDto.setOrderId(orderId);
-        
-        // 2. Aquí debería ir la lógica para asegurar que el ID de la ORDEN
-        //    pertenece al 'sub' (ID de usuario) del token JWT.
-        
-        // 3. Procesar el pago (activa Stripe Sandbox)
-        PaymentResponseDto responseDto = paymentService.createPayment(requestDto);
-
-        // 4. Retornar 201 Created para indicar que el recurso de Pago se ha creado
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-    }
-    
-    // ✅ Endpoint para ver los pagos de una orden
     @GetMapping("/{orderId:\\d+}/payments")
     public ResponseEntity<List<PaymentResponseDto>> getPaymentsByOrder(@PathVariable Integer orderId) {
+
         List<PaymentResponseDto> payments = paymentService.getPaymentsByOrderId(orderId);
+        
         return ResponseEntity.ok(payments);
     }
 }

@@ -28,10 +28,10 @@ public class Address {
     private String country;
     private String zipCode;
 
-    private String phoneNumber; // opcional, para contacto de envío
+    private String phoneNumber;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user; // dueño de la dirección
+    private User user;
 }
 

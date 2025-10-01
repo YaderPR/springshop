@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
-@Profile("!dev") // ✅ Se activa en TODOS los perfiles EXCEPTO 'dev'
+@Profile("!dev")
 public class SecurityConfig {
 
     @Bean
@@ -59,7 +59,6 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        // [CÓDIGO DE CONVERSIÓN DE ROLES EXISTENTE AQUÍ...]
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             @SuppressWarnings("unchecked")

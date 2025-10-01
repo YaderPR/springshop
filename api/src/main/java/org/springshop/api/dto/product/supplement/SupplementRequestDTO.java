@@ -1,5 +1,4 @@
-// Archivo: SupplementRequestDTO.java (CORREGIDO)
-package org.springshop.api.dto.product.supplement; // Ortografía corregida
+package org.springshop.api.dto.product.supplement;
 
 import org.springshop.api.dto.product.ProductRequestDTO;
 
@@ -10,24 +9,23 @@ import jakarta.validation.constraints.Size;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-// Ortografía corregida
 public class SupplementRequestDTO extends ProductRequestDTO { 
     
-    @NotBlank // Marca es esencial
+    @NotBlank
     private String brand;
     
-    @NotBlank // Sabor o tipo es esencial
+    @NotBlank
     private String flavor;
     
-    @NotBlank // Tamaño o formato de venta
+    @NotBlank
     private String size;
     
     @NotBlank
-    @Size(max = 2000) // Un límite para la lista de ingredientes
+    @Size(max = 2000)
     private String ingredients;
     
     @NotBlank
     private String usageInstructions;
     
-    private String warnings; // Puede ser nulo, pero es útil incluirlo
+    private String warnings;
 }

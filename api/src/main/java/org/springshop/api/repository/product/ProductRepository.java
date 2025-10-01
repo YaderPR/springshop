@@ -9,4 +9,5 @@ import org.springshop.api.model.product.Product;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
     public List<Product> findAllByCategoryId(Integer categoryId);
+    
 }

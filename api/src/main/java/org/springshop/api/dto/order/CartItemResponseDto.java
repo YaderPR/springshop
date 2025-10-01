@@ -12,5 +12,5 @@ public class CartItemResponseDto {
     private Integer productId;
     private Integer cartId;
     private Integer quantity;
-    private Double price; // si tu CartItem lo tiene
+    private Double price; 
 }

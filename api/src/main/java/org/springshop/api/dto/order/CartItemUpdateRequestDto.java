@@ -8,8 +8,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 public class CartItemUpdateRequestDto {
-    private Integer productId; // Si permites cambiar el producto en un ítem existente
+    private Integer productId;
     private Integer quantity;
-    // ELIMINADO: price (viene del Servidor/Product)
 }
 

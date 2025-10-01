@@ -1,4 +1,3 @@
-// ProductRequestDTO.java (CORRECTO)
 package org.springshop.api.dto.product;
 
 import jakarta.validation.constraints.NotBlank;
@@ -7,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class ProductRequestDTO {
+    
     @NotBlank
     private String name;
 

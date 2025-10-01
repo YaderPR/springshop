@@ -9,12 +9,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrderItemResponseDto {
 
-    private Integer id; // id del item
-
-    private Integer productId; // referencia al producto
-
+    private Integer id;
+    private Integer productId;
     private Integer quantity;
+    private Double price;
 
-    private Double price; // precio unitario
 }
-

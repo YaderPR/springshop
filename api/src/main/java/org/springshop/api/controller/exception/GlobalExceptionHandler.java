@@ -19,9 +19,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("status", HttpStatus.NOT_FOUND.value());
         errorDetails.put("error", "Not Found");
-        errorDetails.put("message", ex.getMessage()); // Muestra el mensaje de tu findOrderOrThrow
-
-        // Devolver el código de estado 404
+        errorDetails.put("message", ex.getMessage());
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
@@ -34,10 +32,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleDataIntegrityViolationException(
             DataIntegrityViolationException ex) {
 
-        Throwable rootCause = ex.getRootCause(); // Obtener la causa raíz
-
-        // **VERIFICACIÓN CRÍTICA:** Si la causa raíz es un "no encontrado", forzamos el
-        // 404.
+        Throwable rootCause = ex.getRootCause();
         if (rootCause instanceof EntityNotFoundException
                 || (rootCause != null && rootCause.getMessage().toLowerCase().contains("not found"))) {
             return handleEntityNotFoundException(new EntityNotFoundException(rootCause.getMessage()));
@@ -48,9 +43,6 @@ public class GlobalExceptionHandler {
         errorDetails.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         errorDetails.put("error", "Database Error");
         errorDetails.put("message", "A data integrity error occurred. Contact support with the transaction ID.");
-
-        // (Opcional: Loggear el error completo aquí)
-
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
