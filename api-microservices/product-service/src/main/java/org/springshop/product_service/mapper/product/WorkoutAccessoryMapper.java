@@ -1,0 +1,67 @@
+package org.springshop.product_service.mapper.product;
+
+import org.springshop.product_service.model.product.WorkoutAccessory;
+import org.springshop.product_service.dto.product.workoutaccessory.WorkoutAccessoryRequest;
+import org.springshop.product_service.dto.product.workoutaccessory.WorkoutAccessoryResponse;
+import org.springshop.product_service.model.product.Category;
+import org.springshop.product_service.model.product.WorkoutAccessoryCategory;
+
+public class WorkoutAccessoryMapper {
+    public static WorkoutAccessoryResponse toResponseDTO(WorkoutAccessory accessory) {
+        if (accessory == null) return null;
+        
+        WorkoutAccessoryResponse dto = new WorkoutAccessoryResponse();
+        dto.setId(accessory.getId());
+        dto.setName(accessory.getName());
+        dto.setDescription(accessory.getDescription());
+        dto.setPrice(accessory.getPrice());
+        dto.setStock(accessory.getStock());
+        dto.setImageUrl(accessory.getImageUrl());
+        if (accessory.getCategory() != null) {
+            dto.setCategoryId(accessory.getCategory().getId()); 
+            dto.setCategoryName(accessory.getCategory().getName());
+        }
+
+        dto.setMaterial(accessory.getMaterial());
+        dto.setDimensions(accessory.getDimensions());
+        dto.setWeight(accessory.getWeight());
+        dto.setColor(accessory.getColor());
+        if (accessory.getWorkoutAccessoryCategory() != null) {
+            dto.setWorkoutAccessoryCategoryId(accessory.getWorkoutAccessoryCategory().getId()); 
+            dto.setWorkoutAccessoryCategoryName(accessory.getWorkoutAccessoryCategory().getName());
+        }
+        
+        return dto;
+    }
+
+    public static WorkoutAccessory toEntity(WorkoutAccessoryRequest dto, Category category, WorkoutAccessoryCategory categoryWorkoutAccessory) {
+        if (dto == null) return null;
+        
+        WorkoutAccessory accessory = new WorkoutAccessory();
+
+        accessory.setName(dto.getName());
+        accessory.setDescription(dto.getDescription());
+        accessory.setPrice(dto.getPrice());
+        accessory.setStock(dto.getStock());
+        accessory.setImageUrl(dto.getImageUrl());
+        accessory.setCategory(category);
+        accessory.setMaterial(dto.getMaterial());
+        accessory.setDimensions(dto.getDimensions());
+        accessory.setWeight(dto.getWeight());
+        accessory.setColor(dto.getColor());
+        accessory.setWorkoutAccessoryCategory(categoryWorkoutAccessory);
+        
+        return accessory;
+    }
+    
+    public static void updateWorkoutAccessory(WorkoutAccessory existing, WorkoutAccessoryRequest dto, Category category, WorkoutAccessoryCategory categoryWorkoutAccessory) {
+        if (existing == null || dto == null) return;
+        
+        ProductMapper.updateProduct(existing, dto, category); 
+        existing.setMaterial(dto.getMaterial());
+        existing.setDimensions(dto.getDimensions());
+        existing.setWeight(dto.getWeight());
+        existing.setColor(dto.getColor());
+        existing.setWorkoutAccessoryCategory(categoryWorkoutAccessory);
+    }
+}
