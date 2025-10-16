@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Configuration
+@Profile({"!dev & !docker"})
 @EnableWebSecurity
-@Profile("!dev")
 public class SecurityConfig {
 
     @Bean
