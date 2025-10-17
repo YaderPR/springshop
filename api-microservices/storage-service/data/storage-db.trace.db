@@ -1,0 +1,3 @@
+2025-10-16 21:06:13.691048-06:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "FILES" not found; SQL statement:
+select * from files [42102-232]
