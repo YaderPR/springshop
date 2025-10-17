@@ -1,0 +1,4 @@
+/frontend-web/.vite
+/frontend-web/node_modules
+/target
+*.log
