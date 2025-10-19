@@ -1,5 +1,8 @@
 package org.springshop.cart_service.mapper.cart;
 
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
 import org.springshop.cart_service.dto.cart.CartItemCreateRequestDto;
 import org.springshop.cart_service.dto.cart.CartItemResponseDto;
 import org.springshop.cart_service.dto.cart.CartItemUpdateRequestDto;
@@ -29,6 +32,11 @@ public class CartMapper {
         CartResponseDto dto = new CartResponseDto();
         dto.setId(cart.getId());
         dto.setUserId(cart.getUserId());
+        dto.setItems(cart.getItems() != null
+                ? cart.getItems().stream()
+                        .map(CartMapper::toResponseDto)
+                        .collect(Collectors.toSet())
+                : new HashSet<>());
         dto.setCreateAt(cart.getCreateAt());
         dto.setUpdateAt(cart.getUpdateAt());
         return dto;
