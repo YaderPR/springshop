@@ -23,7 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Archivos locales que no deben subirse nunca
-api/pom.xml
-api/src/main/resources/application.properties
+#Archivo generado
+package-lock.json
 
