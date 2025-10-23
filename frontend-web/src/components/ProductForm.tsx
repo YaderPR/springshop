@@ -37,7 +37,7 @@ export default function ProductForm() {
 
   // URLs base de los microservicios
   const STORAGE_URL = "http://localhost:8083/files/upload";
-  const PRODUCT_URL = "http://localhost:8081/api/products/apparel"; // endpoint de productos
+  const PRODUCT_URL = "http://localhost:8081/api/products/apparels"; // endpoint de productos
   const CATEGORY_URL = "http://localhost:8081/api/products/categories"; // ajusta según tu backend
 
   // ?? Obtener categorías desde la API
