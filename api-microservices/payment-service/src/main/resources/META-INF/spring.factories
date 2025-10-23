@@ -1,0 +1,3 @@
+org.springframework.context.ApplicationContextInitializer=org.springshop.payment_service.config.initializer.DotenvInitializer
+
+
