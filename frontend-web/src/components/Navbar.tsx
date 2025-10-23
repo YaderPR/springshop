@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ShoppingCart, Menu, X, Search, User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,15 +18,26 @@ export default function Navbar() {
 
           {/* Desktop menu */}
           <div className="hidden md:flex space-x-8 text-gray-100 font-medium">
-            <a href="#" className="hover:text-secondary transition-colors">
+            {/* INICIO */}
+            <Link to="/" className="hover:text-secondary transition-colors">
               Inicio
-            </a>
+            </Link>
+            {/* PRODUCTOS (Aquí puedes usar Link o <a> si es una URL externa) */}
             <a href="#" className="hover:text-secondary transition-colors">
               Productos
             </a>
+            {/* CATEGORÍAS */}
             <a href="#" className="hover:text-secondary transition-colors">
               Categorías
             </a>
+            {/* NUEVA RUTA: AÑADIR PRODUCTO */}
+            <Link 
+              to="/products/new" 
+              className="hover:text-secondary transition-colors"
+            >
+              Añadir Producto
+            </Link>
+            {/* CONTACTO */}
             <a href="#" className="hover:text-secondary transition-colors">
               Contacto
             </a>
@@ -86,6 +98,9 @@ export default function Navbar() {
             </a>
             <a href="#" className="hover:text-secondary transition-colors">
               Productos
+            </a>
+            <a href= "#" classNamve="hover:text-secondary transtion-colors">
+              Add products
             </a>
             <a href="#" className="hover:text-secondary transition-colors">
               Categorías
