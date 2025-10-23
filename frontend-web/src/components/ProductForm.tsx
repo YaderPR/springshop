@@ -123,7 +123,7 @@ export default function ProductForm() {
         color: formData.color,
         brand: formData.brand,
         size: formData.size,
-        imageUrl,
+        imageUrl: imageUrl,
         category: formData.categoryId ? { id: formData.categoryId } : undefined,
       };
 
