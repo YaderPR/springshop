@@ -1,5 +1,6 @@
 package org.springshop.webhook_service.client;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -8,11 +9,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springshop.webhook_service.dto.order.OrderResponse;
 import org.springshop.webhook_service.dto.order.OrderUpdateStatus;
 import org.springshop.webhook_service.model.order.Order;
 
@@ -32,7 +35,7 @@ public class OrderClient {
     public Optional<Order> findById(Integer orderId) {
 
         // 1. Construir la URL completa para el endpoint: /orders/{orderId}
-        String url = orderServiceBaseUrl + "/orders/{orderId}";
+        String url = orderServiceBaseUrl + "/api/v2/orders/{orderId}";
 
         try {
             // 2. Realizar la llamada GET. El segundo argumento es la clase esperada
@@ -62,18 +65,17 @@ public class OrderClient {
         }
     }
 
-    public void updateOrderStatus(Integer orderId, OrderUpdateStatus orderUpdateStatus) {
+    public OrderResponse updateOrderStatus(Integer orderId, OrderUpdateStatus orderUpdateStatus) {
         // 1. Definir la URL del endpoint a consumir.
         // Suponiendo que el servicio de órdenes está en "http://order-service/orders"
         // y que orderUpdateStatus tiene el ID de la orden.
-        String baseUrl = "http://order-service/orders/";
-        String endpointUrl = baseUrl + orderId;
+        String url = orderServiceBaseUrl + "/orders/{orderId}";
 
         // 2. Definir los Headers: Es CRÍTICO especificar el tipo de contenido como JSON
         // y aceptar JSON en la respuesta.
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
         // 3. Crear el HttpEntity con el cuerpo (payload) y los headers.
         // El cuerpo es el objeto OrderUpdateStatus, que será serializado a JSON
@@ -84,15 +86,14 @@ public class OrderClient {
             // 4. Ejecutar la petición usando el método exchange() con HttpMethod.PATCH.
             // El tipo de respuesta se establece como void, ya que la respuesta PATCH
             // a menudo es un 204 No Content o simplemente no se necesita el cuerpo.
-            restTemplate.exchange(
-                    endpointUrl,
+            ResponseEntity<OrderResponse> response = restTemplate.exchange(
+                    url,
                     HttpMethod.PATCH,
                     entity,
-                    Void.class // O OrderResponseDto.class si el servicio devuelve el objeto actualizado
+                    OrderResponse.class // O OrderResponseDto.class si el servicio devuelve el objeto actualizado
             );
-
             System.out.println("Estado de la orden " + orderId + " actualizado correctamente.");
-
+            return response.getBody();
         } catch (HttpClientErrorException e) {
             // Manejo de errores del cliente (4xx): 404 Not Found, 400 Bad Request, 403
             // Forbidden, etc.

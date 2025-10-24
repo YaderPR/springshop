@@ -1,4 +1,4 @@
-package org.springshop.webhook_service.model.payment;
+package org.springshop.webhook_service.dto.payment;
 
 public enum PaymentStatus {
     PENDING,

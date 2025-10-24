@@ -10,7 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springshop.webhook_service.model.payment.Payment;
+import org.springshop.webhook_service.dto.payment.PaymentRequest;
+import org.springshop.webhook_service.dto.payment.PaymentResponse;
 
 @Component
 public class PaymentClient {
@@ -26,17 +27,17 @@ public class PaymentClient {
         this.paymentServiceBaseUrl = paymentServiceBaseUrl;
     }
 
-    public Optional<Payment> createPayment(Payment payment) {
+    public Optional<PaymentResponse> createPayment(PaymentRequest request) {
         // Definimos la URL sin Query Params, solo el path base para la creación (POST)
         String url = UriComponentsBuilder.fromUriString(paymentServiceBaseUrl)
-                .path("/api/payments") // El endpoint base en el servicio de Pagos
+                .path("/api/v2/payments") // El endpoint base en el servicio de Pagos
                 .toUriString();
 
         // 1. Crear el HttpEntity con el cuerpo de la petición (el objeto 'payment')
         // Los headers por defecto de RestTemplate ya suelen ser suficientes
         // (Content-Type: application/json)
         // para un POST simple, pero podemos especificarlos si es necesario.
-        HttpEntity<Payment> requestEntity = new HttpEntity<>(payment);
+        HttpEntity<PaymentRequest> requestEntity = new HttpEntity<>(request);
 
         try {
             // 2. Ejecutar la llamada POST con RestTemplate.exchange()
@@ -45,11 +46,11 @@ public class PaymentClient {
             // - El tipo de retorno es Payment.class o ParameterizedTypeReference si fuera
             // una lista,
             // pero para un objeto único, la clase es suficiente.
-            ResponseEntity<Payment> response = restTemplate.exchange(
+            ResponseEntity<PaymentResponse> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     requestEntity, // <--- Aquí se envía el cuerpo 'payment'
-                    Payment.class);
+                    PaymentResponse.class);
 
             // 3. Devolver el cuerpo de la respuesta envuelto en Optional
             // El estado 201 Created o 200 OK generalmente devolverá el objeto Payment
@@ -60,7 +61,7 @@ public class PaymentClient {
             // 4. Manejar errores (conexión, 4xx, 5xx).
             // Es mejor capturar errores específicos como HttpClientErrorException o
             // HttpServerErrorException.
-            System.err.println("Error creando pago para la orden/ID " + payment.getId() + ": " + e.getMessage());
+            System.err.println("Error creando pago para la orden/ID " + request.getOrderId() + ": " + e.getMessage());
 
             // Dependiendo de tu lógica de negocio, aquí puedes:
             // A) Relanzar una excepción de servicio.

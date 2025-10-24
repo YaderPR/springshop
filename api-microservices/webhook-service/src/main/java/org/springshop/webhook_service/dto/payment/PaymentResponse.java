@@ -1,11 +1,11 @@
-package org.springshop.webhook_service.model.payment;
+package org.springshop.webhook_service.dto.payment;
 
 import java.time.LocalDateTime;
 
 import lombok.Data;
 
 @Data
-public class Payment {
+public class PaymentResponse {
 
     private Integer id;
     private Integer orderId;

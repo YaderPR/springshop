@@ -5,10 +5,10 @@ import com.stripe.model.StripeObject;
 import com.stripe.model.checkout.Session;
 import org.springshop.webhook_service.model.order.Order;
 import org.springshop.webhook_service.model.order.OrderStatus;
-import org.springshop.webhook_service.model.payment.Payment;
-import org.springshop.webhook_service.model.payment.PaymentStatus;
 import org.springshop.webhook_service.client.PaymentClient;
 import org.springshop.webhook_service.dto.order.OrderUpdateStatus;
+import org.springshop.webhook_service.dto.payment.PaymentRequest;
+import org.springshop.webhook_service.dto.payment.PaymentStatus;
 import org.springshop.webhook_service.client.OrderClient;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -66,14 +66,15 @@ public class WebhookService {
         }
 
         // 3. Crear y Persistir la entidad Payment
-        Payment payment = new Payment();
+        PaymentRequest payment = new PaymentRequest();
         // El PaymentIntent.id o el Charge.id es el transactionId más fiable.
         // Session.getPaymentIntent() devuelve el ID del PaymentIntent.
         payment.setTransactionId(session.getPaymentIntent()); 
         payment.setAmount(session.getAmountTotal() / 100.0); // Convertir centavos a decimal
         payment.setCurrency(session.getCurrency());
         payment.setStatus(PaymentStatus.SUCCESS);
-        payment.setOrderId(order.getId()); 
+        payment.setOrderId(order.getId());
+        payment.setMethod("stripe checkout"); 
         // Otros campos como 'method', 'createdAt', etc.
 
         paymentClient.createPayment(payment);
