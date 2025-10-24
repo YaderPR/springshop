@@ -39,8 +39,6 @@ public class Order {
     private Integer userId;
     @Column(name = "address_id", nullable = false)
     private Integer addressId;
-    @Column(name = "shipment_id", nullable = false)
-    private Integer shipmentId;
     @CreationTimestamp
     private LocalDateTime createAt;
     @UpdateTimestamp

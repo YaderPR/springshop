@@ -19,7 +19,7 @@ import org.springshop.order_service.service.order.OrderItemService;
 import org.springshop.order_service.service.order.OrderService;
 
 @RestController
-@RequestMapping("/api/orders/{orderId:\\d+}/items")
+@RequestMapping("/api/v2/orders/{orderId:\\d+}/items")
 public class OrderItemController {
 
     private final OrderItemService orderItemService;
@@ -49,7 +49,7 @@ public class OrderItemController {
         Order order = orderService.findOrderOrThrow(orderId);
         OrderItemResponseDto responseDto = orderItemService.createOrderItem(order, requestDto);
         orderService.updateOrderTotal(orderId);
-        URI location = URI.create("/api/orders/" + orderId + "/items/" + responseDto.getId());
+        URI location = URI.create("/api/v2/orders/" + orderId + "/items/" + responseDto.getId());
 
         return ResponseEntity.created(location).body(responseDto);
     }

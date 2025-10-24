@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springshop.order_service.model.user.User; // Importación de tu entidad/modelo User
@@ -17,9 +18,9 @@ public class UserClient {
     // URL base del microservicio de usuarios (Se obtiene de application.properties)
     private final String userServiceBaseUrl;
 
-    public UserClient(RestTemplate restTemplate, 
-                      @Value("http://localhost:8084") String userServiceBaseUrl) {
-        this.restTemplate = restTemplate;
+    public UserClient(RestTemplateBuilder builder, 
+                      @Value("http://localhost:8090") String userServiceBaseUrl) {
+        this.restTemplate = builder.build();
         //${clients.user-service.url} cuando ya este configurado como arquitectura de microservicios
         this.userServiceBaseUrl = userServiceBaseUrl;
     }
@@ -27,7 +28,7 @@ public class UserClient {
     public Optional<User> findById(Integer userId) {
         
         // 1. Construir la URL completa para el endpoint: /users/{userId}
-        String url = userServiceBaseUrl + "/users/{userId}";
+        String url = userServiceBaseUrl + "/api/v2/users/{userId}";
         
         try {
             // 2. Realizar la llamada GET. El segundo argumento es la clase esperada (User.class).

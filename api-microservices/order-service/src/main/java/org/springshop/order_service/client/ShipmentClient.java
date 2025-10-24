@@ -8,33 +8,34 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springshop.order_service.model.address.Address;
+import org.springshop.order_service.model.shipment.Shipment;
 
 @Component
-public class AddressClient {
+public class ShipmentClient {
         // Inyecta el RestTemplate
     private final RestTemplate restTemplate;
     
     // URL base del microservicio de usuarios (Se obtiene de application.properties)
-    private final String addressServiceBaseUrl;
+    private final String shipmentServiceBaseUrl;
 
-    public AddressClient(RestTemplateBuilder builder, 
-                      @Value("http://localhost:8087") String addressServiceBaseUrl) {
+    public ShipmentClient(RestTemplateBuilder builder, 
+                      @Value("http://localhost:8087") String shipmentServiceBaseUrl) {
         this.restTemplate = builder.build();
         //${clients.user-service.url} cuando ya este configurado como arquitectura de microservicios
-        this.addressServiceBaseUrl = addressServiceBaseUrl;
+        this.shipmentServiceBaseUrl = shipmentServiceBaseUrl;
     }
-    public Optional<Address> findById(Integer addressId) {
+    public Optional<Shipment> findById(Integer shipmentId) {
         
         // 1. Construir la URL completa para el endpoint: /addresses/{addressId}
-        String url = addressServiceBaseUrl + "/api/v2/addresses/{addressId}";
+        String url = shipmentServiceBaseUrl + "/api/v2/shipments/{shipmentId}";
         
         try {
             // 2. Realizar la llamada GET. El segundo argumento es la clase esperada (User.class).
             // El tercer argumento son las variables de la URI (userId).
-            Address address = restTemplate.getForObject(url, Address.class, addressId);
+            Shipment shipment = restTemplate.getForObject(url, Shipment.class, shipmentId);
             
             // 3. Si la respuesta es 200 OK y devuelve un cuerpo, devuelve Optional.of(user).
-            return Optional.ofNullable(address);
+            return Optional.ofNullable(shipment);
             
         } catch (HttpClientErrorException.NotFound ex) {
             // 4. Capturar el error 404 (Not Found), que indica que el usuario no existe.

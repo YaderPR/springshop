@@ -19,7 +19,7 @@ public class PaymentClient {
 
     public PaymentClient(
         RestTemplateBuilder builder,
-        @Value("${client.payment-service.base-url}") String paymentServiceBaseUrl) {
+        @Value("http://localhost:8084") String paymentServiceBaseUrl) {
         
         this.restTemplate = builder.build();
         this.paymentServiceBaseUrl = paymentServiceBaseUrl;
@@ -29,7 +29,7 @@ public class PaymentClient {
         
         // 1. Construir la URL completa con el Query Parameter
         String url = UriComponentsBuilder.fromUriString(paymentServiceBaseUrl)
-                                         .path("/api/payments") // El endpoint base en el servicio de Pagos
+                                         .path("/api/v2/payments") // El endpoint base en el servicio de Pagos
                                          .queryParam("orderId", orderId) // Añadir el parámetro de consulta
                                          .toUriString();
 

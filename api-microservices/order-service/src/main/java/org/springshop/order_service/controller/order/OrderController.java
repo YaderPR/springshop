@@ -29,7 +29,7 @@ import com.stripe.exception.StripeException;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/v2/orders")
 public class OrderController {
 
     private final OrderService orderService;
@@ -49,21 +49,23 @@ public class OrderController {
         Integer cartId = requestDto.getCartId();
         Integer userId = requestDto.getUserId();
         Integer addressId = requestDto.getAddressId();
-
+        Integer tempOrderId = null;
         try {
             if (cartId == null || userId == null || addressId == null) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Faltan IDs de carrito, usuario o dirección."));
             }
             Order newOrder = orderService.createOrderFromCart(cartId, userId, addressId);
-            String checkoutUrl = checkoutService.createCheckoutSession(newOrder.getId());
-
+            String checkoutUrl = checkoutService.createCheckoutSession(newOrder.getId(), cartId);
+            tempOrderId = newOrder.getId();
             // URL de redirección
             return ResponseEntity.ok(Map.of(
                     "checkoutUrl", checkoutUrl,
                     "orderId", newOrder.getId().toString()));
 
         } catch (StockException e) {
+            //revertir los cambios
+
             // Stock agotado (409 Conflict)
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("error", e.getMessage(), "code", "INSUFFICIENT_STOCK"));
@@ -72,10 +74,14 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));
         } catch (StripeException e) {
+            //Revertir los cambios
+            orderService.rollbackFailedOrder(tempOrderId);
             // Error de pasarela de pago (502 Bad Gateway)
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body(Map.of("error", "Error al iniciar la sesión de Stripe: " + e.getMessage()));
         } catch (Exception e) {
+            //Revertir los cambios
+            orderService.rollbackFailedOrder(tempOrderId);
             // Manejo de errores genéricos (500 Internal Server Error)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error interno al procesar la orden: " + e.getMessage()));
