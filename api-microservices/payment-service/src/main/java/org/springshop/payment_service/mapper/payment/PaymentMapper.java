@@ -3,10 +3,10 @@ package org.springshop.payment_service.mapper.payment;
 import org.springshop.payment_service.dto.payment.PaymentRequestDto;
 import org.springshop.payment_service.dto.payment.PaymentResponseDto;
 import org.springshop.payment_service.model.payment.Payment;
-import org.springshop.payment_service.model.payment.PaymentStatus;
+
 
 public class PaymentMapper {
-    public static Payment toEntity(PaymentRequestDto dto, Integer orderId, PaymentStatus status) {
+    public static Payment toEntity(PaymentRequestDto dto) {
         if (dto == null) return null;
         
         Payment payment = new Payment();
@@ -14,9 +14,11 @@ public class PaymentMapper {
         payment.setMethod(dto.getMethod());
         payment.setCurrency(dto.getCurrency());
         
-        payment.setStatus(status); 
-        payment.setOrderId(orderId);
-        
+        payment.setStatus(dto.getStatus());
+    
+        payment.setOrderId(dto.getOrderId());
+        payment.setTransactionId(dto.getTransactionId());
+
         return payment;
     }
 

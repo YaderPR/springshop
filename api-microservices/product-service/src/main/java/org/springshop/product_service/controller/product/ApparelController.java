@@ -13,11 +13,11 @@ import java.util.Optional;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/products/apparels")
+@RequestMapping("/api/v2/products/apparels")
 public class ApparelController {
 
     private final ApparelService apparelService;
-    private static final String BASE_URL = "/api/products/apparels";
+    private static final String BASE_URL = "/api/v2/products/apparels";
 
     public ApparelController(ApparelService apparelService) {
         this.apparelService = apparelService;

@@ -31,7 +31,7 @@ public class ProductClient {
     public Optional<Product> findById(Integer productId) {
         
         // 1. Construir la URL completa para el endpoint: /api/products/{id}
-        String url = productServiceBaseUrl + "/api/products/{id}";
+        String url = productServiceBaseUrl + "/api/v2/products/{id}";
         
         try {
             // 2. Realizar la llamada GET. El segundo argumento es la clase esperada (Product.class).

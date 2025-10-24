@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +18,7 @@ import org.springshop.order_service.controller.exception.StockException;
 import org.springshop.order_service.dto.checkout.CheckoutRequestDto;
 import org.springshop.order_service.dto.order.OrderRequestDto;
 import org.springshop.order_service.dto.order.OrderResponseDto;
+import org.springshop.order_service.dto.order.OrderUpdateStatus;
 import org.springshop.order_service.dto.payment.PaymentResponseDto;
 import org.springshop.order_service.model.order.Order;
 import org.springshop.order_service.service.checkout.CheckoutService;
@@ -27,7 +29,7 @@ import com.stripe.exception.StripeException;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/v2/orders")
 public class OrderController {
 
     private final OrderService orderService;
@@ -47,21 +49,23 @@ public class OrderController {
         Integer cartId = requestDto.getCartId();
         Integer userId = requestDto.getUserId();
         Integer addressId = requestDto.getAddressId();
-
+        Integer tempOrderId = null;
         try {
             if (cartId == null || userId == null || addressId == null) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Faltan IDs de carrito, usuario o dirección."));
             }
             Order newOrder = orderService.createOrderFromCart(cartId, userId, addressId);
-            String checkoutUrl = checkoutService.createCheckoutSession(newOrder.getId());
-
+            String checkoutUrl = checkoutService.createCheckoutSession(newOrder.getId(), cartId);
+            tempOrderId = newOrder.getId();
             // URL de redirección
             return ResponseEntity.ok(Map.of(
                     "checkoutUrl", checkoutUrl,
                     "orderId", newOrder.getId().toString()));
 
         } catch (StockException e) {
+            //revertir los cambios
+
             // Stock agotado (409 Conflict)
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("error", e.getMessage(), "code", "INSUFFICIENT_STOCK"));
@@ -70,10 +74,14 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));
         } catch (StripeException e) {
+            //Revertir los cambios
+            orderService.rollbackFailedOrder(tempOrderId);
             // Error de pasarela de pago (502 Bad Gateway)
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body(Map.of("error", "Error al iniciar la sesión de Stripe: " + e.getMessage()));
         } catch (Exception e) {
+            //Revertir los cambios
+            orderService.rollbackFailedOrder(tempOrderId);
             // Manejo de errores genéricos (500 Internal Server Error)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error interno al procesar la orden: " + e.getMessage()));
@@ -124,5 +132,10 @@ public class OrderController {
         List<PaymentResponseDto> payments = paymentClient.getPaymentsByOrderId(orderId);
         
         return ResponseEntity.ok(payments);
+    }
+    @PatchMapping("/{orderId:\\d+}")
+    public ResponseEntity<OrderResponseDto> updateStatus(@PathVariable Integer orderId, @RequestBody OrderUpdateStatus updatedStatus) {
+
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, updatedStatus));
     }
 }

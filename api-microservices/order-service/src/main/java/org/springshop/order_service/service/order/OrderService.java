@@ -8,23 +8,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springshop.order_service.dto.order.OrderRequestDto;
 import org.springshop.order_service.dto.order.OrderResponseDto;
+import org.springshop.order_service.dto.order.OrderUpdateStatus;
 import org.springshop.order_service.client.AddressClient;
 import org.springshop.order_service.client.CartClient;
 import org.springshop.order_service.client.ProductClient;
+import org.springshop.order_service.client.ShipmentClient;
 import org.springshop.order_service.client.UserClient;
 import org.springshop.order_service.controller.exception.StockException;
 import org.springshop.order_service.dto.order.OrderItemRequestDto;
+import org.springshop.order_service.dto.order.OrderItemResponseDto;
 import org.springshop.order_service.mapper.order.OrderMapper;
 import org.springshop.order_service.model.cart.Cart;
 import org.springshop.order_service.model.cart.CartItem;
 import org.springshop.order_service.model.order.Order;
+import org.springshop.order_service.model.order.OrderItem;
 import org.springshop.order_service.model.order.OrderStatus;
 import org.springshop.order_service.model.address.Address;
 import org.springshop.order_service.model.product.Product;
+import org.springshop.order_service.model.shipment.Shipment;
 import org.springshop.order_service.model.user.User;
 import org.springshop.order_service.repository.order.OrderRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.RollbackException;
 
 @Service
 @Transactional
@@ -36,25 +42,25 @@ public class OrderService {
     private final UserClient userClient;
     private final AddressClient addressClient;
     private final ProductClient productClient;
+    private final ShipmentClient shipmentClient;
 
-    public OrderService(OrderRepository orderRepository,  CartClient  cartClient,
+    public OrderService(OrderRepository orderRepository, CartClient cartClient,
             OrderItemService orderItemService, UserClient userClient,
-            AddressClient addressClient, ProductClient productClient) {
+            AddressClient addressClient, ProductClient productClient, ShipmentClient shipmentClient) {
         this.orderRepository = orderRepository;
-        this.cartClient =  cartClient;
+        this.cartClient = cartClient;
         this.orderItemService = orderItemService;
         this.userClient = userClient;
         this.addressClient = addressClient;
         this.productClient = productClient;
+        this.shipmentClient = shipmentClient;
     }
 
     public Order createOrderFromCart(Integer cartId, Integer userId, Integer addressId) {
 
         // 1. OBTENER ENTIDADES NECESARIAS
-        Cart cart =  findCartOrThrow(cartId);
+        Cart cart = findCartOrThrow(cartId);
         User user = findUserOrThrow(userId);
-        Address shippingAddress = findAddressOrThrow(addressId);
-
         if (cart.getItems().isEmpty()) {
             throw new IllegalArgumentException("Cannot create an order from an empty cart.");
         }
@@ -92,10 +98,47 @@ public class OrderService {
         }
 
         savedOrder.setTotalAmount(calculatedTotal);
-        cartClient.clearCart(cartId);
 
         return savedOrder;
     }
+
+    @Transactional
+    public void rollbackFailedOrder(Integer orderId) {
+
+        // 1. OBTENER Y VALIDAR LA ORDEN PROVISIONAL
+        Order order = findOrderOrThrow(orderId);
+
+        if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.FAILED) {
+            throw new RollbackException(
+                    "No se puede revertir la orden " + orderId + ". Estado actual: " + order.getStatus());
+        }
+
+        // 2. REVERTIR EL STOCK RESERVADO (La acción crítica)
+        List<OrderItemResponseDto> orderItems = orderItemService.getOrderItemsByOrderId(orderId);
+
+        for (OrderItemResponseDto item : orderItems) {
+            try {
+                // Revertir el stock añadiendo la cantidad (PATCH con cantidad positiva)
+                productClient.updateStock(item.getProductId(), item.getQuantity());
+
+            } catch (Exception e) {
+                // Manejo de CRÍTICO: Fallo en la reversión de stock.
+                System.err.println("CRÍTICO: Fallo al revertir stock para producto " + item.getProductId() + ".");
+                // Loguear el error y continuar.
+            }
+        }
+
+        // 3. ELIMINAR ITEMS DE ORDEN ASOCIADOS
+        orderItemService.deleteItemsByOrderId(orderId);
+
+        // 4. ELIMINAR EL REGISTRO DE LA ORDEN
+        orderRepository.delete(order);
+
+        // *ELIMINADO*: Ya no se necesita restaurar el carrito, porque nunca se limpió.
+
+        System.out.println("Rollback completado para la orden: " + orderId);
+    }
+
     public OrderResponseDto createOrder(OrderRequestDto requestDto) {
         User user = findUserOrThrow(requestDto.getUserId());
         Address address = findAddressOrThrow(requestDto.getAddressId());
@@ -124,6 +167,14 @@ public class OrderService {
         OrderMapper.updateOrder(order, requestDto, address.getId(), user.getId());
         return OrderMapper.toResponseDto(orderRepository.save(order));
     }
+
+    @Transactional
+    public OrderResponseDto updateOrderStatus(Integer id, OrderUpdateStatus updatedStatus) {
+        Order order = findOrderOrThrow(id);
+        order.setStatus(updatedStatus.getStatus());
+        return OrderMapper.toResponseDto(order);
+    }
+
     public void deleteOrder(Integer id) {
         Order order = findOrderOrThrow(id);
         if (order.getStatus() != OrderStatus.PENDING) {
@@ -134,6 +185,7 @@ public class OrderService {
 
         orderRepository.delete(order);
     }
+
     public double calculateOrderTotals(Integer orderId) {
         Order order = findOrderOrThrow(orderId);
         return order.getItems().stream()
@@ -151,23 +203,34 @@ public class OrderService {
             orderRepository.save(order);
         }
     }
+
     private User findUserOrThrow(Integer userId) {
         return userClient.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
     }
 
     private Address findAddressOrThrow(Integer addressId) {
-        return addressClient.findById(addressId).orElseThrow(() -> new EntityNotFoundException("address not found with id: " + addressId));
+        return addressClient.findById(addressId)
+                .orElseThrow(() -> new EntityNotFoundException("address not found with id: " + addressId));
     }
 
     public Order findOrderOrThrow(Integer orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
     }
+
     public Cart findCartOrThrow(Integer cartId) {
-        return cartClient.findById(cartId).orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
+        return cartClient.findById(cartId)
+                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
     }
+
     public Product findProductOrThrow(Integer productId) {
-        return productClient.findById(productId).orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
+        return productClient.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
+    }
+
+    public Shipment findShipmentOrThrow(Integer shipmentId) {
+        return shipmentClient.findById(shipmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Shipment not found with id: " + shipmentId));
     }
 }

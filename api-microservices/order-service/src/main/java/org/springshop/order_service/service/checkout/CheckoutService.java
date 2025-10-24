@@ -1,5 +1,6 @@
 package org.springshop.order_service.service.checkout;
 import org.springframework.stereotype.Service;
+import org.springshop.order_service.client.CartClient;
 import org.springshop.order_service.model.order.Order;
 import org.springshop.order_service.service.order.OrderService;
 
@@ -13,10 +14,12 @@ import jakarta.transaction.Transactional;
 @Transactional 
 public class CheckoutService {
     private final OrderService orderService;
-    public CheckoutService(OrderService orderService) {
+    private final CartClient cartClient;
+    public CheckoutService(OrderService orderService, CartClient cartClient) {
         this.orderService = orderService;
+        this.cartClient = cartClient;
     }
-    public String createCheckoutSession(Integer orderId) throws StripeException {
+    public String createCheckoutSession(Integer orderId, Integer cartId) throws StripeException {
         
         // 1. OBTENER DATOS DE LA ORDEN
         Order order = orderService.findOrderOrThrow(orderId);
@@ -51,7 +54,7 @@ public class CheckoutService {
                 .build();
 
         Session session = Session.create(params);
-        
+        cartClient.clearCart(cartId);
         // El backend devuelve la URL de Stripe
         return session.getUrl(); 
     }

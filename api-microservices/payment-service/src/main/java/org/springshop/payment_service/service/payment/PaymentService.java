@@ -51,9 +51,9 @@ public class PaymentService {
     }
     @Transactional(readOnly = true)
     public PaymentResponseDto createPayment(PaymentRequestDto requestDto) {
-        Order order = orderClient.findById(requestDto.getOrderId()).orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + requestDto.getOrderId()));
-
-        Payment newPayment = PaymentMapper.toEntity(requestDto, order.getId(), PaymentStatus.PENDING);
+        orderClient.findById(requestDto.getOrderId()).orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + requestDto.getOrderId()));
+        
+        Payment newPayment = PaymentMapper.toEntity(requestDto);
         Payment savedPayment = paymentRepository.save(newPayment);
 
         return PaymentMapper.toResponseDto(savedPayment);

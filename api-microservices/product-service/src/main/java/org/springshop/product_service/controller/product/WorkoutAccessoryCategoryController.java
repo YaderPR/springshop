@@ -15,13 +15,13 @@ import java.util.Optional;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/products/workoutaccessories/categories")
+@RequestMapping("/api/v2/products/workoutaccessories/categories")
 public class WorkoutAccessoryCategoryController {
 
     private final WorkoutAccessoryCategoryService categoryService;
     private final WorkoutAccessoryService accessoryService;
 
-    private final static String BASE_URL = "/api/products/workoutaccessories/categories";
+    private final static String BASE_URL = "/api/v2/products/workoutaccessories/categories";
 
     WorkoutAccessoryCategoryController(
             WorkoutAccessoryCategoryService categoryService,

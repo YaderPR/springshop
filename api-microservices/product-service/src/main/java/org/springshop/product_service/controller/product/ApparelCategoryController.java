@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import jakarta.validation.Valid; 
 
 @RestController
-@RequestMapping("/api/products/apparels/categories")
+@RequestMapping("/api/v2/products/apparels/categories")
 public class ApparelCategoryController {
     
-    private final static String BASE_URL = "/api/products/apparels/categories";
+    private final static String BASE_URL = "/api/v2/products/apparels/categories";
     private final ApparelCategoryService apparelCategoryService;
     
     ApparelCategoryController(ApparelCategoryService apparelCategoryService) {
