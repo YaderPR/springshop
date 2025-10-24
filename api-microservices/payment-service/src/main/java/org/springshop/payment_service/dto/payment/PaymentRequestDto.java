@@ -1,5 +1,7 @@
 package org.springshop.payment_service.dto.payment;
 
+import org.springshop.payment_service.model.payment.PaymentStatus;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -13,9 +15,6 @@ public class PaymentRequestDto {
     private Integer orderId;
     
     @NotBlank
-    private String paymentToken; 
-    
-    @NotBlank
     private String currency; 
 
     @NotBlank
@@ -24,5 +23,9 @@ public class PaymentRequestDto {
     @NotNull
     private Double amount;
 
-    private String description;
+    @NotNull
+    private PaymentStatus status; // PENDING, SUCCESS, FAILED, REFUNDED
+
+    @NotNull
+    private String transactionId; // referencia de pasarela (Stripe, PayPal, etc.)
 }

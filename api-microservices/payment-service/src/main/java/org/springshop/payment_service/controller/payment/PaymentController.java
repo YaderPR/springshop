@@ -14,10 +14,10 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("/api/payments")
+@RequestMapping("/api/v2/payments")
 public class PaymentController {
 
-    private final static String BASE_URL = "/api/payments";
+    private final static String BASE_URL = "/api/v2/payments";
     private final PaymentService paymentService;
 
     public PaymentController(PaymentService paymentService) {

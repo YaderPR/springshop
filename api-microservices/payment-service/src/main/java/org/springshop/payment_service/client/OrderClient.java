@@ -17,7 +17,7 @@ public class OrderClient {
     // 1. Constructor para inyectar RestTemplate y la URL base
     public OrderClient(
         RestTemplateBuilder builder,
-        @Value("${client.order-service.base-url}") String orderServiceBaseUrl) {
+        @Value("http://localhost:8086") String orderServiceBaseUrl) {
         
         // Crear la instancia de RestTemplate (mejor práctica usar RestTemplateBuilder)
         this.restTemplate = builder.build();
@@ -28,7 +28,7 @@ public class OrderClient {
     public Optional<Order> findById(Integer orderId) {
         // Construir la URL completa del endpoint del servicio de Órdenes
         // Asumimos que el endpoint para una orden singular es GET /api/orders/{id}
-        String url = orderServiceBaseUrl + "/api/orders/{id}";
+        String url = orderServiceBaseUrl + "/api/v2/orders/{id}";
 
         try {
             // Realizar la llamada HTTP GET. Spring automáticamente mapea el JSON a la clase Order.
