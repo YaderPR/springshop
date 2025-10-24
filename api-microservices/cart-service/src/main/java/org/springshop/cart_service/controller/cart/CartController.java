@@ -19,7 +19,7 @@ import org.springshop.cart_service.service.cart.CartService;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
-@RequestMapping("/api/carts")
+@RequestMapping("/api/v2/carts")
 public class CartController {
 
     private final CartService cartService;
@@ -63,6 +63,11 @@ public class CartController {
 
         cartService.deleteCart(id);
         
+        return ResponseEntity.noContent().build();
+    }
+    @DeleteMapping("{cartId:\\d+}/items")
+    public ResponseEntity<Void> clearCart(@PathVariable Integer cartId) {
+        cartService.clearCart(cartId);
         return ResponseEntity.noContent().build();
     }
 }

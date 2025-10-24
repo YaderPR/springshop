@@ -18,7 +18,7 @@ public class UserClient {
     private final String userServiceBaseUrl;
 
     public UserClient(RestTemplate restTemplate, 
-                      @Value("http://localhost:8084") String userServiceBaseUrl) {
+                      @Value("http://localhost:8090") String userServiceBaseUrl) {
         this.restTemplate = restTemplate;
         //${clients.user-service.url} cuando ya este configurado como arquitectura de microservicios
         this.userServiceBaseUrl = userServiceBaseUrl;
@@ -27,7 +27,7 @@ public class UserClient {
     public Optional<User> findById(Integer userId) {
         
         // 1. Construir la URL completa para el endpoint: /users/{userId}
-        String url = userServiceBaseUrl + "/users/{userId}";
+        String url = userServiceBaseUrl + "/api/v2/users/{userId}";
         
         try {
             // 2. Realizar la llamada GET. El segundo argumento es la clase esperada (User.class).

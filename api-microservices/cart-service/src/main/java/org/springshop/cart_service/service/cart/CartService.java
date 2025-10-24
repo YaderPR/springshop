@@ -26,7 +26,8 @@ public class CartService {
         private final CartItemRepository cartItemRepository;
         private final UserClient userClient;
 
-        public CartService(CartRepository cartRepository, UserClient userClient, CartItemRepository cartItemRepository) {
+        public CartService(CartRepository cartRepository, UserClient userClient,
+                        CartItemRepository cartItemRepository) {
                 this.cartRepository = cartRepository;
                 this.userClient = userClient;
                 this.cartItemRepository = cartItemRepository;
@@ -65,18 +66,19 @@ public class CartService {
                 Cart cart = findCartOrThrow(id);
                 cartRepository.delete(cart);
         }
-    public void clearCart(Integer cartId) {
-        Cart cart = findCartOrThrow(cartId);
-        cartItemRepository.deleteAllByCartId(cartId);
-        cart.getItems().clear();
-        cart.setTotalAmount(0.0);
 
-        cartRepository.save(cart); 
-    }
+        public void clearCart(Integer cartId) {
+                Cart cart = findCartOrThrow(cartId);
+                cartItemRepository.deleteAllByCartId(cartId);
+                cart.getItems().clear();
+                cart.setTotalAmount(0.0);
+
+                cartRepository.save(cart);
+        }
 
         public List<CartItemResponseDto> getItemsInCart(Integer cartId) {
 
-                Cart cart = findCartOrThrow(cartId); 
+                Cart cart = findCartOrThrow(cartId);
 
                 return cart.getItems().stream()
                                 .map(CartMapper::toResponseDto)
@@ -87,7 +89,7 @@ public class CartService {
         public double calculateCartTotals(Integer cartId) {
                 Cart cart = findCartOrThrow(cartId);
                 return cart.getItems().stream()
-                        
+
                                 .filter(item -> item.getProductId() != null)
                                 .mapToDouble(item -> {
                                         double price = item.getPrice();
