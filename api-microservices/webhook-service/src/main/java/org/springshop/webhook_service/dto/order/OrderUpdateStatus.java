@@ -8,6 +8,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class OrderUpdateStatus {
-    private Integer id;
     private OrderStatus status;
 }

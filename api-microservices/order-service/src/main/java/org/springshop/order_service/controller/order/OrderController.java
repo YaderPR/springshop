@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +18,7 @@ import org.springshop.order_service.controller.exception.StockException;
 import org.springshop.order_service.dto.checkout.CheckoutRequestDto;
 import org.springshop.order_service.dto.order.OrderRequestDto;
 import org.springshop.order_service.dto.order.OrderResponseDto;
+import org.springshop.order_service.dto.order.OrderUpdateStatus;
 import org.springshop.order_service.dto.payment.PaymentResponseDto;
 import org.springshop.order_service.model.order.Order;
 import org.springshop.order_service.service.checkout.CheckoutService;
@@ -124,5 +126,10 @@ public class OrderController {
         List<PaymentResponseDto> payments = paymentClient.getPaymentsByOrderId(orderId);
         
         return ResponseEntity.ok(payments);
+    }
+    @PatchMapping("/{orderId:\\d+}")
+    public ResponseEntity<OrderResponseDto> updateStatus(@PathVariable Integer orderId, @RequestBody OrderUpdateStatus updatedStatus) {
+
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, updatedStatus));
     }
 }

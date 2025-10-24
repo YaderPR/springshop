@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springshop.order_service.dto.order.OrderRequestDto;
 import org.springshop.order_service.dto.order.OrderResponseDto;
+import org.springshop.order_service.dto.order.OrderUpdateStatus;
 import org.springshop.order_service.client.AddressClient;
 import org.springshop.order_service.client.CartClient;
 import org.springshop.order_service.client.ProductClient;
@@ -53,7 +54,6 @@ public class OrderService {
         // 1. OBTENER ENTIDADES NECESARIAS
         Cart cart =  findCartOrThrow(cartId);
         User user = findUserOrThrow(userId);
-        Address shippingAddress = findAddressOrThrow(addressId);
 
         if (cart.getItems().isEmpty()) {
             throw new IllegalArgumentException("Cannot create an order from an empty cart.");
@@ -123,6 +123,12 @@ public class OrderService {
         Address address = findAddressOrThrow(requestDto.getAddressId());
         OrderMapper.updateOrder(order, requestDto, address.getId(), user.getId());
         return OrderMapper.toResponseDto(orderRepository.save(order));
+    }
+    @Transactional
+    public OrderResponseDto updateOrderStatus(Integer id, OrderUpdateStatus updatedStatus) {
+        Order order = findOrderOrThrow(id);
+        order.setStatus(updatedStatus.getStatus());
+        return OrderMapper.toResponseDto(order);
     }
     public void deleteOrder(Integer id) {
         Order order = findOrderOrThrow(id);

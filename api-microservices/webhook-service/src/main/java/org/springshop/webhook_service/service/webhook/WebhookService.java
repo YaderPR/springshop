@@ -79,9 +79,8 @@ public class WebhookService {
         paymentClient.createPayment(payment);
         
         // 4. Actualizar el estado de la Orden
-        order.setStatus(OrderStatus.PAID);
-        orderClient.updateOrder(new OrderUpdateStatus(order.getId(), order.getStatus())); // OrderService.findOrderOrThrow ya da un objeto persistido que se guardará con @Transactional.
-
+        //order.setStatus(OrderStatus.PAID);
+        orderClient.updateOrderStatus(orderId, new OrderUpdateStatus(OrderStatus.PAID));
         System.out.println("Pago exitoso registrado para la orden: " + orderId);
     }
     public Order findOrderOrThrow(Integer orderId) {
