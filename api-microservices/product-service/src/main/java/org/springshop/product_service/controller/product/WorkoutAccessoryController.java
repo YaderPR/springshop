@@ -13,11 +13,11 @@ import java.util.Optional;
 import jakarta.validation.Valid; 
 
 @RestController
-@RequestMapping("/api/products/workout-accessories")
+@RequestMapping("/api/v2/products/workout-accessories")
 public class WorkoutAccessoryController {
 
     private final WorkoutAccessoryService accessoryService;
-    private static final String BASE_URL = "/api/products/workout-accessories";
+    private static final String BASE_URL = "/api/v2/products/workout-accessories";
 
     public WorkoutAccessoryController(WorkoutAccessoryService accessoryService) {
         this.accessoryService = accessoryService;

@@ -13,11 +13,11 @@ import java.util.Optional;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/products/supplements")
+@RequestMapping("/api/v2/products/supplements")
 public class SupplementController {
 
     private final SupplementService supplementService;
-    private static final String BASE_URL = "/api/products/supplements";
+    private static final String BASE_URL = "/api/v2/products/supplements";
 
     public SupplementController(SupplementService supplementService) {
         this.supplementService = supplementService;

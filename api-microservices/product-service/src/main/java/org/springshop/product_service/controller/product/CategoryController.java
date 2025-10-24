@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/products/categories")
+@RequestMapping("/api/v2/products/categories")
 public class CategoryController {
 
     private final CategoryService categoryService;
 
-    private static final String BASE_URL = "/api/products/categories";
+    private static final String BASE_URL = "/api/v2/products/categories";
 
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
