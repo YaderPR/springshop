@@ -17,7 +17,7 @@ import org.springshop.user_service.service.user.UserService;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("users")
+@RequestMapping("/api/v2/users")
 public class UserController {
 
     private final UserService userService;
