@@ -1,0 +1,1 @@
+org.springframework.context.ApplicationContextInitializer=org.springshop.webhook_service.config.initializer.DotenvInitializer

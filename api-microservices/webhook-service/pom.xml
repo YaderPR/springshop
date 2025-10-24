@@ -46,6 +46,18 @@
 			<version>2.8.13</version>
 			<scope>compile</scope>
 		</dependency>
+		<!-- Carga de archivos de variables de entorno -->
+		<dependency>
+			<groupId>io.github.cdimascio</groupId>
+			<artifactId>java-dotenv</artifactId>
+			<version>5.2.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.stripe/stripe-java -->
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>29.5.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
