@@ -24,7 +24,7 @@ public class OrderClient {
     public Optional<Order> findById(Integer orderId) {
         
         // 1. Construir la URL completa para el endpoint: /users/{userId}
-        String url = orderServiceBaseUrl + "/orders/{userId}";
+        String url = orderServiceBaseUrl + "/api/v2/orders/{userId}";
         
         try {
             // 2. Realizar la llamada GET. El segundo argumento es la clase esperada (User.class).

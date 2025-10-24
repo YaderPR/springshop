@@ -13,10 +13,10 @@ import java.util.Optional;
 import jakarta.validation.Valid; // Importante para la validación
 
 @RestController
-@RequestMapping("/api/shipments")
+@RequestMapping("/api/v2/shipments")
 public class ShipmentController {
 
-    private final static String BASE_URL = "/api/shipments";
+    private final static String BASE_URL = "/api/v2/shipments";
     private final ShipmentService shipmentService;
 
     public ShipmentController(ShipmentService shipmentService) {

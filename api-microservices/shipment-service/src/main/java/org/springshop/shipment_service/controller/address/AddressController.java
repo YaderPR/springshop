@@ -13,11 +13,11 @@ import java.util.Optional;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/addresses")
+@RequestMapping("/api/v2/addresses")
 public class AddressController {
 
     private final AddressService addressService;
-    private final static String BASE_URL = "/api/addresses";
+    private final static String BASE_URL = "/api/v2/addresses";
 
     public AddressController(AddressService addressService) {
         this.addressService = addressService;
