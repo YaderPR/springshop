@@ -1,9 +1,11 @@
 package org.springshop.shipment_service.service.shipment;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springshop.shipment_service.dto.shipment.ShipmentRequestDto;
@@ -11,6 +13,7 @@ import org.springshop.shipment_service.dto.shipment.ShipmentResponseDto;
 import org.springshop.shipment_service.mapper.shipment.ShipmentMapper;
 import org.springshop.shipment_service.model.order.Order;
 import org.springshop.shipment_service.model.shipment.Shipment;
+import org.springshop.shipment_service.model.shipment.ShipmentStatus;
 import org.springshop.shipment_service.client.OrderClient;
 import org.springshop.shipment_service.repository.shipment.ShipmentRepository;
 
@@ -75,7 +78,51 @@ public class ShipmentService {
         Shipment shipment = findShipmentOrThrow(id);
         shipmentRepository.delete(shipment);
     }
+    @Async
+    @Transactional 
+    public void simulateShipment(Integer shipmentId) {
+        System.out.println("Hilo: " + Thread.currentThread().getName() + " - Iniciando envío para Shipment ID: " + shipmentId);
 
+        try {
+            // SIMULACIÓN DE PROCESO DE LARGA DURACIÓN (60 segundos)
+            Thread.sleep(60000); 
+
+            // 1. Obtener la entidad Shipment
+            Shipment shipment = findShipmentOrThrow(shipmentId);
+
+            // 2. Aplicar el cambio de estado interno
+            shipment.setStatus(ShipmentStatus.SHIPPED);
+            shipment.setTrackingNumber(generateRandomTrackingId()); // Simular asignación de tracking
+            shipment.setDeliveredAt(LocalDateTime.now());
+            shipment.setCarrier("UPS");
+            // 3. Persistir el cambio de estado (guardado por el Dirty Checking de @Transactional)
+            shipmentRepository.save(shipment);
+            
+            System.out.println("✅ Hilo: " + Thread.currentThread().getName() + " - Shipment ID: " + shipmentId + " CAMBIADO a SHIPPED.");
+
+        } catch (InterruptedException e) {
+            // Manejo de interrupciones del hilo (puede ser un rollback a FAILED)
+            Thread.currentThread().interrupt();
+            System.err.println("❌ Proceso de envío interrumpido para Shipment ID: " + shipmentId);
+            updateShipmentStatus(shipmentId, ShipmentStatus.RETURNED);
+        } catch (Exception e) {
+            System.err.println("❌ Error en el proceso asíncrono para Shipment ID: " + shipmentId + ". Error: " + e.getMessage());
+            updateShipmentStatus(shipmentId, ShipmentStatus.RETURNED);
+        }
+    }
+    
+    // Método auxiliar para actualizar estado a FAILED
+    private void updateShipmentStatus(Integer shipmentId, ShipmentStatus status) {
+        shipmentRepository.findById(shipmentId).ifPresent(shipment -> {
+            shipment.setStatus(status);
+            shipmentRepository.save(shipment);
+        });
+    }
+    
+    private String generateRandomTrackingId() {
+        return "TRK-" + (int) (Math.random() * 1000000);
+    }
+    //Helpers
     public Shipment findShipmentOrThrow(Integer shipmentId) {
         return shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Shipment not found with id: " + shipmentId));
