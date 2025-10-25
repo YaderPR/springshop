@@ -23,20 +23,14 @@ export default function Navbar() {
               Inicio
             </Link>
             {/* PRODUCTOS (Aquí puedes usar Link o <a> si es una URL externa) */}
-            <a href="#" className="hover:text-secondary transition-colors">
+            <Link to="/admin/products" className="hover:text-secondary transition-colors">
               Productos
-            </a>
+            </Link>
             {/* CATEGORÍAS */}
             <a href="#" className="hover:text-secondary transition-colors">
               Categorías
             </a>
-            {/* NUEVA RUTA: AÑADIR PRODUCTO */}
-            <Link 
-              to="/products/new" 
-              className="hover:text-secondary transition-colors"
-            >
-              Añadir Producto
-            </Link>
+            
             {/* CONTACTO */}
             <a href="#" className="hover:text-secondary transition-colors">
               Contacto
