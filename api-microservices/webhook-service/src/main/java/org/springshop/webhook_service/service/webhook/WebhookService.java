@@ -6,10 +6,17 @@ import com.stripe.model.checkout.Session;
 import org.springshop.webhook_service.model.order.Order;
 import org.springshop.webhook_service.model.order.OrderStatus;
 import org.springshop.webhook_service.client.PaymentClient;
+import org.springshop.webhook_service.client.ShipmentClient;
 import org.springshop.webhook_service.dto.order.OrderUpdateStatus;
 import org.springshop.webhook_service.dto.payment.PaymentRequest;
 import org.springshop.webhook_service.dto.payment.PaymentStatus;
+import org.springshop.webhook_service.dto.shipment.ShipmentRequest;
+import org.springshop.webhook_service.dto.shipment.ShipmentStatus;
 import org.springshop.webhook_service.client.OrderClient;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -19,10 +26,12 @@ public class WebhookService {
 
     private final OrderClient orderClient;
     private final PaymentClient paymentClient;
+    private final ShipmentClient shipmentClient;
 
-    public WebhookService(OrderClient orderClient, PaymentClient paymentClient) {
+    public WebhookService(OrderClient orderClient, PaymentClient paymentClient, ShipmentClient shipmentClient) {
         this.orderClient = orderClient;
         this.paymentClient = paymentClient;
+        this.shipmentClient = shipmentClient;
     }
 
     public void processEvent(Event event) {
@@ -78,10 +87,10 @@ public class WebhookService {
         // Otros campos como 'method', 'createdAt', etc.
 
         paymentClient.createPayment(payment);
-        
         // 4. Actualizar el estado de la Orden
         //order.setStatus(OrderStatus.PAID);
         orderClient.updateOrderStatus(orderId, new OrderUpdateStatus(OrderStatus.PAID));
+        shipmentClient.createShipment(new ShipmentRequest("No assign", "No assign", order.getId(), ShipmentStatus.CREATED, LocalDateTime.now(), LocalDateTime.now()));
         System.out.println("Pago exitoso registrado para la orden: " + orderId);
     }
     public Order findOrderOrThrow(Integer orderId) {
