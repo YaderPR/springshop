@@ -10,7 +10,7 @@ const HomePage: React.FC = () => {
         <main>
             <Hero />
             <ProductsSection />
-            <RecommendedSection />
+            <RecommendedSection  className="no-scrollbar"/>
             <CtaSection />
         </main>
     );

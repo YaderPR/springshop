@@ -14,24 +14,24 @@ export default function RecommendedSection() {
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -3522 : 352; 
+      const scrollAmount = direction === 'left' ? -352 : 350; 
       scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
   return (
-    <section className="bg-primary py-16">
+    <section className="bg-primary px-4 py-10 relative">
      
-      <div className="container mx-auto px-6 sm:px-12 lg:px-20 relative">
+      <div className="container mx-auto px-2 sm:px-12 lg:px-20 relative">
         <h2 className="text-3xl font-bold text-white mb-8">Recomendado para ti</h2>
         
         {/* Contenedor con scroll horizontal */}
         <div
           ref={scrollContainerRef} 
-          className="flex space-x-8 overflow-x-auto pb-4 scrollbar-hide" 
+          className="flex overflow-x-auto pb-4 no-scrollbar" 
         >
           {recommendedProducts.map((product) => (
-            <div key={product.id} className="flex-none w-80">
+            <div key={product.id} className="flex-none w-80 -mr-6 ">
               <ProductCard
                 name={product.name}
                 price={product.price}
