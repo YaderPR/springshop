@@ -34,13 +34,13 @@ export default function ProductsSection() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
         
         
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 ">
           <CategorySidebar />
         </div>
 
         
         <div className="lg:col-span-3">
-          <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
             {products.map((product) => (
              <div
             key={product.id}
@@ -50,9 +50,10 @@ export default function ProductsSection() {
               border border-gray-700 
               rounded-2xl 
               shadow-lg 
-              p-4 
-              space-y-4
+              p-3
+              space-y-3
               ring-2 ring-lime-400/20 hover:ring-secondary transition-all duration-300
+              hover:filter hover:shadow-[0_0_25px_rgba(137,254,0,0.7)]
             "
           >
                 
@@ -61,7 +62,7 @@ export default function ProductsSection() {
             </div>
 
             
-            <h3 className="text-xl font-bold text-lime-400 truncate">{product.name}</h3>
+            <h3 className="text-lg font-bold text-secondary truncate">{product.name}</h3>
             
             {/* Sección de Rating y Precio */}
             <div className="flex justify-between items-center text-gray-200">
@@ -69,13 +70,13 @@ export default function ProductsSection() {
                 <svg className="w-5 h-5 text-secondary" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.445a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.367-2.445a1 1 0 00-1.175 0l-3.367 2.445c-.784.57-1.838-.197-1.54-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.07 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"></path>
                 </svg>
-                <span className="font-semibold">{product.rating.toFixed(1)}</span>
+                <span className="font-semibold text-lg">{product.rating.toFixed(1)}</span>
               </div>
-              <span className="text-xl font-bold">${product.price.toFixed(2)}</span>
+              <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
             </div>
 
             {/* Botones de Acción */}
-            <div className="flex gap-3 text-sm font-bold">
+            <div className="flex gap-2 text-xs font-bold">
               <button className="w-full bg-gray-200 text-gray-900 py-3 rounded-full hover:bg-white transition-colors">
                 Add to cart
               </button>

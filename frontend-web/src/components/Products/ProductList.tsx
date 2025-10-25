@@ -109,13 +109,13 @@ export default function ProductList({ refreshSignal, onEdit }: Props) {
               <td className="p-2 flex flex-col gap-2">
                 <button
                   onClick={() => handleDelete(p.id!)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  className=" ring-2 ring-red-400 text-red-400 px-3 py-1 rounded hover:text-gray-100"
                 >
                   Eliminar
                 </button>
                 <button
-                  onClick={() => onEdit(p)} // ?? aquí llamamos la función
-                  className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600"
+                  onClick={() => onEdit(p)} 
+                  className="bg-primary ring-2 ring-secondary text-secondary px-3 py-1 rounded hover:text-gray-100"
                 >
                   Editar
                 </button>
