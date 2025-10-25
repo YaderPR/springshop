@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#000201", // Almost black
-        secondary: "#89FE00", // Bright green
+        primary: "#000201", //  0 2 1 1 (rgba)
+        secondary: "#89FE00", // 137 254 0 1 (rgba)
         tertiary: "#1E1E1E", // Dark gray
         highlight: "#FFD700",
         accent: "#F1F1F1", // Very light gray
