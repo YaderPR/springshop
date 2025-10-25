@@ -105,11 +105,11 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
         await updateApparel(formData.id!, payload).catch(async () => {
           await updateProduct(formData.id!, payload);
         });
-        setMessage("Producto actualizado correctamente ?");
+        setMessage("Producto actualizado correctamente ");
       } else {
         // Modo creación
         await createApparel(payload);
-        setMessage("Producto creado correctamente ?");
+        setMessage("Producto creado correctamente ");
       }
 
       onCreated();

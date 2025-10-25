@@ -4,7 +4,6 @@ import {
   deleteProduct,
   getCategories,
   getApparels,
-  getApparelCategories,
   deleteApparel,
 } from "../../services/productService";
 import type { Product, Category } from "../../types/Product";
@@ -21,35 +20,30 @@ export default function ProductList({ refreshSignal, onEdit }: Props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [
-          productsData,
-          apparelsData,
-          categoriesData,
-          apparelCategoriesData,
-        ] = await Promise.all([
-          getProducts(),
-          getApparels(),
-          getCategories(),
-          getApparelCategories(),
-        ]);
+       const [
+        productsData,
+        apparelsData,
+        categoriesData, 
+      ] = await Promise.all([
+        getProducts(),
+        getApparels(),
+        getCategories(), 
+      ]);
 
-        const apparelIds = new Set(apparelsData.map((a) => a.id));
-        const genericProductsData = productsData.filter(product => !apparelIds.has(product.id));
-        const allProducts = [...genericProductsData, ...apparelsData];
+      const apparelIds = new Set(apparelsData.map((a) => a.id));
+      const genericProductsData = productsData.filter(product => !apparelIds.has(product.id));
+      const allProducts = [...genericProductsData, ...apparelsData];
 
-        const categoryMap = new Map<number, Category>();
-        categoriesData.forEach((cat) => categoryMap.set(cat.id, cat));
-        apparelCategoriesData.forEach((cat) => categoryMap.set(cat.id, cat));
+      setProducts(allProducts);
+      setCategories(categoriesData);
 
-        setProducts(allProducts);
-        setCategories(Array.from(categoryMap.values()));
-      } catch (error) {
-        console.error("Error al cargar datos:", error);
-      }
-    };
+    } catch (error) {
+      console.error("Error al cargar datos:", error);
+    }
+  };
 
-    fetchData();
-  }, [refreshSignal]);
+  fetchData();
+}, [refreshSignal]);
 
   const handleDelete = async (id: number) => {
     if (!confirm("¿Seguro que quieres eliminar este producto?")) return;
