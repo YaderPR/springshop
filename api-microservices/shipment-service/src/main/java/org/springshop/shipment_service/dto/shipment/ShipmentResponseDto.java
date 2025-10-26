@@ -18,6 +18,5 @@ public class ShipmentResponseDto {
     private LocalDateTime shippedAt;
     private LocalDateTime deliveredAt;
     private Integer orderId; 
-    private LocalDateTime createdAt;
 
 }
