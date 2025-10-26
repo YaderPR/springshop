@@ -43,13 +43,13 @@ public class PaymentService {
             .map(PaymentMapper::toResponseDto); 
     }
     
-    @Transactional(readOnly = true)
+    @Transactional
     public List<PaymentResponseDto> getPaymentsByOrderId(Integer orderId) {
         return paymentRepository.findAllByOrderId(orderId).stream()
             .map(PaymentMapper::toResponseDto)
             .collect(Collectors.toList());
     }
-    @Transactional(readOnly = true)
+    @Transactional
     public PaymentResponseDto createPayment(PaymentRequestDto requestDto) {
         orderClient.findById(requestDto.getOrderId()).orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + requestDto.getOrderId()));
         
