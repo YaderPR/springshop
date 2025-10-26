@@ -69,7 +69,7 @@ public class OrderClient {
         // 1. Definir la URL del endpoint a consumir.
         // Suponiendo que el servicio de órdenes está en "http://order-service/orders"
         // y que orderUpdateStatus tiene el ID de la orden.
-        String url = orderServiceBaseUrl + "/orders/{orderId}";
+        String url = orderServiceBaseUrl + "/api/v2/orders/{orderId}";
 
         // 2. Definir los Headers: Es CRÍTICO especificar el tipo de contenido como JSON
         // y aceptar JSON en la respuesta.
@@ -90,7 +90,8 @@ public class OrderClient {
                     url,
                     HttpMethod.PATCH,
                     entity,
-                    OrderResponse.class // O OrderResponseDto.class si el servicio devuelve el objeto actualizado
+                    OrderResponse.class, // Tipo de respuesta
+                    orderId
             );
             System.out.println("Estado de la orden " + orderId + " actualizado correctamente.");
             return response.getBody();

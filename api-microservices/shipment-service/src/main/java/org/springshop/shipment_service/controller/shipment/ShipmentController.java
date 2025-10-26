@@ -10,7 +10,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.validation.Valid; // Importante para la validación
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v2/shipments")
@@ -28,7 +28,7 @@ public class ShipmentController {
 
         ShipmentResponseDto responseDto = shipmentService.createShipment(requestDto);
         URI location = URI.create(BASE_URL + "/" + responseDto.getId());
-
+        shipmentService.simulateShipment(responseDto.getId());
         return ResponseEntity.created(location).body(responseDto);
     }
 

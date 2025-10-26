@@ -1,15 +1,14 @@
-package org.springshop.shipment_service.dto.shipment;
+package org.springshop.webhook_service.dto.shipment;
 
 import java.time.LocalDateTime;
 
-import org.springshop.shipment_service.model.shipment.ShipmentStatus;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ShipmentResponseDto {
+public class ShipmentResponse {
 
     private Integer id;
     private String trackingNumber;
