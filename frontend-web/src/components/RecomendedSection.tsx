@@ -1,48 +1,68 @@
-import React, { useRef } from 'react'; 
+import React, { useRef, useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
-
-const recommendedProducts = [
-  { id: 5, name: 'Mancuernas Hexagonales 5KG', price: 35.50, rating: 4.9, image: 'https://placehold.co/400x400/FFFFFF/000000?text=Mancuernas' },
-  { id: 6, name: 'Banda de Resistencia Alta', price: 9.99, rating: 4.7, image: 'https://placehold.co/400x400/FFFFFF/000000?text=Banda' },
-  { id: 7, name: 'Rueda Abdominal Pro', price: 18.00, rating: 4.8, image: 'https://placehold.co/400x400/FFFFFF/000000?text=Rueda' },
-  { id: 8, name: 'Cuerda para Saltar de Velocidad', price: 14.90, rating: 5.0, image: 'https://placehold.co/400x400/FFFFFF/000000?text=Cuerda' },
-  { id: 9, name: 'Foam Roller para Masaje', price: 22.00, rating: 4.6, image: 'https://placehold.co/400x400/FFFFFF/000000?text=Roller' },
-];
+import type { Product } from "../types/Product";
+import { getProducts, getApparels } from '../services/productService';
 
 export default function RecommendedSection() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [productsData, apparelsData] = await Promise.all([
+          getProducts(),
+          getApparels(),
+        ]);
+
+        const apparelIds = new Set(apparelsData.map((a) => a.id));
+        const genericProductsData = productsData.filter(product => !apparelIds.has(product.id));
+        const allProducts = [...genericProductsData, ...apparelsData];
+
+        setProducts(allProducts.slice(0, 5)); 
+
+      } catch (error) {
+        console.error("Error al cargar productos recomendados:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); 
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -352 : 350; 
+      const scrollAmount = direction === 'left' ? -300 : 300; 
       scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
   return (
-    <section className="bg-primary px-4 py-10 relative">
-     
+    <section className="py-20 ">
       <div className="container mx-auto px-2 sm:px-12 lg:px-20 relative">
         <h2 className="text-3xl font-bold text-white mb-8">Recomendado para ti</h2>
         
-        {/* Contenedor con scroll horizontal */}
         <div
           ref={scrollContainerRef} 
-          className="flex overflow-x-auto pb-4 no-scrollbar" 
+          className="flex overflow-x-auto pb-6 pt-6 pl-6 no-scrollbar gap-6" 
         >
-          {recommendedProducts.map((product) => (
-            <div key={product.id} className="flex-none w-80 -mr-6 ">
-              <ProductCard
-                name={product.name}
-                price={product.price}
-                rating={product.rating}
-                imageUrl={product.image}
-              />
-            </div>
-          ))}
+          {isLoading ? (
+            <p className="text-white">Cargando productos...</p>
+          ) : (
+            products.map((product) => (
+              <div key={product.id} className="flex-none w-72"> 
+                
+                <ProductCard product={product} /> 
+
+              </div>
+            ))
+          )}
         </div>
 
-        {/* Botones de Navegación */}
         <button 
           onClick={() => scroll('left')}
           className="absolute top-1/2 left-0 sm:left-4 lg:left-12 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white p-3 rounded-full z-10 transition-colors"
