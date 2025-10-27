@@ -1,0 +1,142 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin1234
+      - POSTGRES_DB=init_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - microservices-network
+  product-service:
+    container_name: product-service
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    volumes:
+      - ./product-service/target/product-service-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+  cart-service:
+    container_name: cart-service
+    build:
+      context: ./cart-service
+      dockerfile: Dockerfile
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./cart-service/target/cart-service-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+  order-service:
+    container_name: order-service
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "8087:8087"
+    volumes:
+      - ./order-service/target/order-service-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+  payment-service:
+    container_name: payment-service
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./payment-service/target/payment-service-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+  webhook-service:
+    container_name: webhook-service
+    build:
+      context: ./webhook-service
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./webhook-service/target/webhook-service-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+  shipment-service:
+    container_name: shipment-service
+    build:
+      context: ./shipment-service
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./shipment-service/target/shipment-service-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+  user-service:
+    container_name: user-service
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8091:8091"
+    volumes:
+      - ./user-service/target/user-service-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+  storage-service:
+    container_name: storage-service
+    build:
+      context: ./storage-service
+      dockerfile: Dockerfile
+    ports:
+      - "8092:8092"
+    volumes:
+      - ./storage-service/target/storage-service-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+volumes:
+  postgres-data:
+networks:
+  microservices-network:
+
+
