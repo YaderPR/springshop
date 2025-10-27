@@ -20,7 +20,7 @@ public class ShipmentClient {
     private final String shipmentServiceBaseUrl;
 
     public ShipmentClient(RestTemplateBuilder builder, 
-                      @Value("http://localhost:8087") String shipmentServiceBaseUrl) {
+                      @Value("${shipment.service.url}") String shipmentServiceBaseUrl) {
         this.restTemplate = builder.build();
         //${clients.user-service.url} cuando ya este configurado como arquitectura de microservicios
         this.shipmentServiceBaseUrl = shipmentServiceBaseUrl;

@@ -17,7 +17,7 @@ public class OrderClient {
     // 1. Constructor para inyectar RestTemplate y la URL base
     public OrderClient(
         RestTemplateBuilder builder,
-        @Value("http://localhost:8086") String orderServiceBaseUrl) {
+        @Value("${order.service.url}") String orderServiceBaseUrl) {
         
         // Crear la instancia de RestTemplate (mejor práctica usar RestTemplateBuilder)
         this.restTemplate = builder.build();

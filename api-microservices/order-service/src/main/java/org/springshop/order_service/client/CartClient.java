@@ -21,7 +21,7 @@ public class CartClient {
     private final String cartServiceBaseUrl;
 
     public CartClient(RestTemplateBuilder builder, 
-                      @Value("http://localhost:8085") String cartServiceBaseUrl) {
+                      @Value("${cart.service.url}") String cartServiceBaseUrl) {
         this.restTemplate = builder.build();
         //${clients.user-service.url} cuando ya este configurado como arquitectura de microservicios
         this.cartServiceBaseUrl = cartServiceBaseUrl;

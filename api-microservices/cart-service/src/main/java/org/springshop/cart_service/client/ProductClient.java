@@ -17,7 +17,7 @@ public class ProductClient {
     private final String productServiceBaseUrl;
 
     public ProductClient(RestTemplate restTemplate, 
-                         @Value("http://localhost:8081") String productServiceBaseUrl) {
+                         @Value("${product.service.url}") String productServiceBaseUrl) {
         this.restTemplate = restTemplate;
         this.productServiceBaseUrl = productServiceBaseUrl;
     }
