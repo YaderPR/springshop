@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/files")
+@RequestMapping("/api/v2/files")
 public class FileController {
 
     private final FileStorageService storageService;
