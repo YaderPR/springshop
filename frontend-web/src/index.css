@@ -6,3 +6,23 @@
 .container-max {
   @apply mx-auto px-4 sm:px-6 lg:px-8;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;  
+  scrollbar-width: none;  
+}
+
+.cart-item-exit {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.cart-item-exit.cart-item-exit-active {
+  opacity: 0;
+  transform: translateX(-20px);
+}
