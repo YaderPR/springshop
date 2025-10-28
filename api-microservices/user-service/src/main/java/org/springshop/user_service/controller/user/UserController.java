@@ -13,6 +13,7 @@ import org.springshop.user_service.dto.user.UserResponse;
 import org.springshop.user_service.dto.user.UserSync;
 import org.springshop.user_service.service.user.UserProfileService;
 import org.springshop.user_service.service.user.UserService;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.Optional;
 
@@ -48,14 +49,19 @@ public class UserController {
     */
     //Endpoint temporal hasta integrar Keycloak
     @PostMapping("/me/sync")
-    public ResponseEntity<UserResponse> syncProfile(@RequestBody UserSync subject) {
-
-        String sub = subject.getSubject();//authentication.getToken().getSubject();
-        System.out.println(sub + ":" + subject.toString());
-        UserResponse dto = userService.syncUser(sub);
-
-        return ResponseEntity.ok(dto);
+public ResponseEntity<UserResponse> syncProfile(
+    // 🚨 Usar required = false 🚨
+    @RequestHeader(value = "X-Auth-Subject", required = false) String sub 
+) {
+    if (sub == null || sub.isEmpty()) {
+        // Loggear o devolver un 401/403 si la identidad es nula
+        // Esto confirmará que el encabezado no llegó.
+        return ResponseEntity.status(401).build();
     }
+    
+    UserResponse dto = userService.syncUser(sub);
+    return ResponseEntity.ok(dto);
+}
     @GetMapping("/{userId:\\d+}")
     public ResponseEntity<UserResponse> findUserById(@PathVariable Integer userId) {
         return ResponseEntity.ok(userService.getUserById(userId));

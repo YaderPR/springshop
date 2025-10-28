@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -44,5 +45,28 @@ public class GlobalExceptionHandler {
         errorDetails.put("error", "Database Error");
         errorDetails.put("message", "A data integrity error occurred. Contact support with the transaction ID.");
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingRequestBody(HttpMessageNotReadableException ex) {
+        
+        // El mensaje de error interno puede ser muy técnico.
+        String detail = ex.getMessage();
+        
+        String errorClientMessage;
+        
+        if (detail != null && detail.contains("Required request body is missing")) {
+            errorClientMessage = "El cuerpo de la solicitud (JSON) está ausente o vacío. Es requerido para esta operación.";
+        } else {
+            errorClientMessage = "El formato de la solicitud es inválido. Verifique que el JSON esté bien formado.";
+        }
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("status", HttpStatus.BAD_REQUEST.value());
+        responseBody.put("error", "Bad Request");
+        responseBody.put("message", errorClientMessage);
+        // Opcional: Puedes añadir el mensaje original para debug, pero NO en producción
+        // responseBody.put("technical_detail", detail); 
+
+        return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
     }
 }
