@@ -11,7 +11,7 @@ public class TokenSubjectRelayFilter extends AbstractGatewayFilterFactory<Object
 
     @Override
     public GatewayFilter apply(Object config) {
-        return (exchange, chain) -> 
+        return (exchange, chain) ->
             exchange.getPrincipal()
                 .flatMap(principal -> {
                     if (principal instanceof JwtAuthenticationToken jwtAuth) {

@@ -68,7 +68,7 @@ public class SecurityConfig {
                 // Prepend "ROLE_" si es necesario, Keycloak normalmente no lo necesita
                 return Flux.fromIterable(
                         AuthorityUtils.commaSeparatedStringToAuthorityList(
-                                String.join(",", ((Iterable<String>) roles))));
+                                String.join(",", (Iterable<String>) roles)));
             }
             return Flux.empty();
         });

@@ -128,6 +128,7 @@ services:
       - "8092:8092"
     volumes:
       - ./storage-service/target/storage-service-0.0.1-SNAPSHOT.jar:/app.jar
+      - storage-data:/data
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -137,7 +138,7 @@ services:
   api-gateway:
     container_name: api-gateway
     build:
-      context: ./api-service
+      context: ./api-gateway
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
@@ -168,7 +169,6 @@ services:
     image: keycloak/keycloak:latest
     restart: always
     environment:
-      - KC_HTTP_PORT=9090
       - KC_DB=postgres
       - KC_DB_USERNAME=admin
       - KC_DB_PASSWORD=admin1234
@@ -177,13 +177,14 @@ services:
       - KEYCLOAK_ADMIN_PASSWORD=admin1234
     ports:
       - "9090:9090"
-    command: start-dev
+    command: ["start-dev", "--http-port=9090"]
     depends_on:
       - postgres
     networks:
       - microservices-network
 volumes:
   postgres-data:
+  storage-data:
 networks:
   microservices-network:
 

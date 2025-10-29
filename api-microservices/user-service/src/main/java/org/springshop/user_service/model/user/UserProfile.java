@@ -16,11 +16,11 @@ import lombok.Setter;
 public class UserProfile {
     @Id
     private Integer id;
-    @Column(name = "firstname")
+    @Column(name = "firstname", nullable = true)
     private String firstName;
-    @Column(name = "lastname")
+    @Column(name = "lastname", nullable = true)
     private String lastName;
-    @Column(name = "profile_picture_url")
+    @Column(name = "profile_picture_url", nullable = true)
     private String profilePicUrl;
 
     @OneToOne
