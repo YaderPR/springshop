@@ -117,6 +117,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - postgres
+      - keycloak
     networks:
       - microservices-network
   storage-service:
@@ -128,14 +129,64 @@ services:
       - "8092:8092"
     volumes:
       - ./storage-service/target/storage-service-0.0.1-SNAPSHOT.jar:/app.jar
+      - storage-data:/data
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - postgres
     networks:
       - microservices-network
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api-gateway/target/gateway-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+      - keycloak
+    networks:
+      - microservices-network
+  discovery-server:
+    container_name: discovery-server
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    volumes:
+      - ./eureka-server/target/eureka-0.0.1-SNAPSHOT.jar:/app.jar
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+  keycloak:
+    image: keycloak/keycloak:latest
+    restart: always
+    environment:
+      - KC_DB=postgres
+      - KC_DB_USERNAME=admin
+      - KC_DB_PASSWORD=admin1234
+      - KC_DB_URL=jdbc:postgresql://postgres/springshop_keycloak
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin1234
+    ports:
+      - "9090:9090"
+    command: ["start-dev", "--http-port=9090"]
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
 volumes:
   postgres-data:
+  storage-data:
 networks:
   microservices-network:
 

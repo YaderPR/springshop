@@ -7,7 +7,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springshop.order_service.model.address.Address;
 import org.springshop.order_service.model.shipment.Shipment;
 
 @Component
@@ -19,7 +18,7 @@ public class ShipmentClient {
     private final String shipmentServiceBaseUrl;
 
     public ShipmentClient(RestTemplateBuilder builder, 
-                      @Value("http://localhost:8087") String shipmentServiceBaseUrl) {
+                      @Value("${shipment.service.url}") String shipmentServiceBaseUrl) {
         this.restTemplate = builder.build();
         //${clients.user-service.url} cuando ya este configurado como arquitectura de microservicios
         this.shipmentServiceBaseUrl = shipmentServiceBaseUrl;

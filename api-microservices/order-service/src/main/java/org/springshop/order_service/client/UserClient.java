@@ -19,7 +19,7 @@ public class UserClient {
     private final String userServiceBaseUrl;
 
     public UserClient(RestTemplateBuilder builder, 
-                      @Value("http://localhost:8090") String userServiceBaseUrl) {
+                      @Value("${user.service.url}") String userServiceBaseUrl) {
         this.restTemplate = builder.build();
         //${clients.user-service.url} cuando ya este configurado como arquitectura de microservicios
         this.userServiceBaseUrl = userServiceBaseUrl;

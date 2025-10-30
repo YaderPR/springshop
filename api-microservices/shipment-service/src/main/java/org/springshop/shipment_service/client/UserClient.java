@@ -20,7 +20,7 @@ public class UserClient {
 
     public UserClient(
         RestTemplateBuilder builder,
-        @Value("http://localhost:8090") String userServiceBaseUrl) {
+        @Value("${user.service.url}") String userServiceBaseUrl) {
         
         this.restTemplate = builder.build();
         this.userServiceBaseUrl = userServiceBaseUrl;

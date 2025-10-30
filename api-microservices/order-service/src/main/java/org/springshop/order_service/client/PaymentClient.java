@@ -19,7 +19,7 @@ public class PaymentClient {
 
     public PaymentClient(
         RestTemplateBuilder builder,
-        @Value("http://localhost:8084") String paymentServiceBaseUrl) {
+        @Value("${payment.service.url}") String paymentServiceBaseUrl) {
         
         this.restTemplate = builder.build();
         this.paymentServiceBaseUrl = paymentServiceBaseUrl;

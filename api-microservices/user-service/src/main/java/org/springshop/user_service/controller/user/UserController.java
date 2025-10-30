@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springshop.user_service.dto.user.UserProfilePictureURLResponse;
 import org.springshop.user_service.dto.user.UserResponse;
+import org.springshop.user_service.dto.user.UserProfileResponse;
+import org.springshop.user_service.dto.user.UserProfileRequest;
 import org.springshop.user_service.dto.user.UserSync;
 import org.springshop.user_service.service.user.UserProfileService;
 import org.springshop.user_service.service.user.UserService;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.Optional;
 
@@ -27,34 +30,29 @@ public class UserController {
         this.userService = userService;
         this.userProfileService = userProfileService;
     }
-    /*
-    @PostMapping("/me/sync")
-    public ResponseEntity<UserResponseDTO> syncProfile(JwtAuthenticationToken authentication) {
-
-        String sub = authentication.getToken().getSubject();
-        UserResponseDTO dto = userService.syncUser(sub);
-
-        return ResponseEntity.ok(dto);
-    }
-
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDTO> getProfile(JwtAuthenticationToken authentication) {
-
-        String sub = authentication.getToken().getSubject();
-        Optional<UserResponseDTO> maybeDto = userService.getUserBySub(sub);
-
-        return wrapOrNotFound(maybeDto);
+    public ResponseEntity<UserResponse> getProfile(@RequestHeader(name = "X-Auth-Subject", required = false) String subject) { 
+        Optional<UserResponse> response = null;
+        if(subject != null) {
+            response = Optional.of(userService.getUserBySub(subject));
+        }
+        return wrapOrNotFound(response);
     }
-    */
     //Endpoint temporal hasta integrar Keycloak
     @PostMapping("/me/sync")
-    public ResponseEntity<UserResponse> syncProfile(@RequestBody UserSync subject) {
-
-        String sub = subject.getSubject();//authentication.getToken().getSubject();
-        System.out.println(sub + ":" + subject.toString());
+    public ResponseEntity<UserResponse> syncProfile(@RequestHeader(value = "X-Auth-Subject", required = false) String sub) {
+        if (sub == null || sub.isEmpty()) {
+            // Devolver un 401/403 si la identidad es nula
+            return ResponseEntity.status(401).build();
+        }
+    
         UserResponse dto = userService.syncUser(sub);
-
         return ResponseEntity.ok(dto);
+    }
+    @PostMapping("/user-profile")
+    public ResponseEntity<UserProfileResponse> createProfile(@RequestBody UserProfileRequest request) {
+        UserProfileResponse response = userProfileService.saveProfile(request);
+        return ResponseEntity.ok(response);
     }
     @GetMapping("/{userId:\\d+}")
     public ResponseEntity<UserResponse> findUserById(@PathVariable Integer userId) {

@@ -18,7 +18,7 @@ public class AddressClient {
     private final String addressServiceBaseUrl;
 
     public AddressClient(RestTemplateBuilder builder, 
-                      @Value("http://localhost:8087") String addressServiceBaseUrl) {
+                      @Value("${shipment.service.url}") String addressServiceBaseUrl) {
         this.restTemplate = builder.build();
         //${clients.user-service.url} cuando ya este configurado como arquitectura de microservicios
         this.addressServiceBaseUrl = addressServiceBaseUrl;

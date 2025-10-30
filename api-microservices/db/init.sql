@@ -1,3 +1,4 @@
+CREATE DATABASE springshop_keycloak;
 CREATE DATABASE springshop_user;
 CREATE DATABASE springshop_product;
 CREATE DATABASE springshop_cart;
