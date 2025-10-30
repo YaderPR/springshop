@@ -19,7 +19,7 @@ import org.springshop.cart_service.service.cart.CartItemService;
 import org.springshop.cart_service.service.cart.CartService;
 
 @RestController
-@RequestMapping("/api/carts/{cartId:\\d+}/items")
+@RequestMapping("/api/v2/carts/{cartId:\\d+}/items")
 public class CartItemController {
 
     private final CartItemService cartItemService;
@@ -41,7 +41,7 @@ public class CartItemController {
             @RequestBody CartItemCreateRequestDto requestDto) {
 
         CartItemResponseDto responseDto = cartItemService.addItemOrUpdateQuantity(cartId, requestDto);
-        URI location = URI.create("/api/carts/" + cartId + "/items/" + responseDto.getId());
+        URI location = URI.create("/api/v2/carts/" + cartId + "/items/" + responseDto.getId());
 
         return ResponseEntity.created(location).body(responseDto);
     }

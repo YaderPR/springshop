@@ -7,16 +7,16 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.lang.NonNull;
 //configuración de cors
-@Profile("docker")
+@Profile("default")
 @Configuration
-public class WebConfig {
+public class DevWebConfig {
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
-                registry.addMapping("/**") // o "/api/**" si tus endpoints tienen ese prefijo
+                registry.addMapping("/api/**") // o "/api/**" si tus endpoints tienen ese prefijo
                         .allowedOrigins("http://localhost:5173")
                         .allowedOrigins("http://localhost:8080")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")

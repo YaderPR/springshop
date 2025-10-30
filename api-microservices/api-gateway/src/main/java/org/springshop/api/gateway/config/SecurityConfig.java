@@ -3,7 +3,7 @@ package org.springshop.api.gateway.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -16,9 +16,10 @@ import reactor.core.publisher.Flux;
 
 @Configuration
 @EnableWebFluxSecurity
+@Profile("docker")
 public class SecurityConfig {
 
-    @Value("${ISSUER_URI}")
+    @Value("${ISSUER_URI_DOCKER}")
     private String issuerUri;
 
     @Bean
@@ -54,7 +55,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public ReactiveJwtDecoder jwtDecoder(@Value("${ISSUER_URI}") String issuerUri) {
+    public ReactiveJwtDecoder jwtDecoder(@Value("${ISSUER_URI_DOCKER}") String issuerUri) {
         return ReactiveJwtDecoders.fromIssuerLocation(issuerUri);
     }
 

@@ -9,6 +9,7 @@ COPY mvnw .
 COPY .mvn .mvn
 # RUN ./mvnw dependency:go-offline
 RUN ./mvnw dependency:resolve
+COPY .env .
 COPY src src
 RUN ./mvnw clean package -DskipTests
 
@@ -18,6 +19,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 EXPOSE 8080
 
+COPY --from=builder /app/.env .
 COPY --from=builder /app/target/*.jar app.jar
 
 ENTRYPOINT [ "java", "-jar", "/app.jar" ]
