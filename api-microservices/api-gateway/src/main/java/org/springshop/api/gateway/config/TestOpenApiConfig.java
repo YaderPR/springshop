@@ -18,8 +18,8 @@ public class TestOpenApiConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         // URLs públicas de Keycloak (accesibles desde el navegador)
-        String authUrl = "http://localhost:9090/realms/master/protocol/openid-connect/auth";
-        String tokenUrl = "http://localhost:9090/realms/master/protocol/openid-connect/token";
+        String authUrl = "http://keycloak:9090/realms/master/protocol/openid-connect/auth";
+        String tokenUrl = "http://keycloak:9090/realms/master/protocol/openid-connect/token";
 
         SecurityScheme oAuthScheme = new SecurityScheme()
                 .type(SecurityScheme.Type.OAUTH2)

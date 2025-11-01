@@ -16,7 +16,7 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
-                registry.addMapping("/**") // o "/api/**" si tus endpoints tienen ese prefijo
+                registry.addMapping("/**")
                         .allowedOrigins("http://localhost:5173")
                         .allowedOrigins("http://localhost:8080")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
