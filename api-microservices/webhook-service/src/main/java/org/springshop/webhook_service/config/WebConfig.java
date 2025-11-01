@@ -1,4 +1,4 @@
-package org.springshop.order_service.config;
+package org.springshop.webhook_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

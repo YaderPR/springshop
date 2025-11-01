@@ -129,7 +129,7 @@ services:
       - "8092:8092"
     volumes:
       - ./storage-service/target/storage-service-0.0.1-SNAPSHOT.jar:/app.jar
-      - storage-data:/data
+      - storage-data:/app/data
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -172,6 +172,7 @@ services:
     restart: always
     environment:
       - KC_DB=postgres
+      - KC_HOSTNAME=keycloak
       - KC_DB_USERNAME=admin
       - KC_DB_PASSWORD=admin1234
       - KC_DB_URL=jdbc:postgresql://postgres/springshop_keycloak
