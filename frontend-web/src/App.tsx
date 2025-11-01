@@ -6,6 +6,7 @@ import HomePage from "./pages/HomePage";
 import AdminProducts from "./pages/AdminProducts";
 import { CartProvider } from "./context/CartContext";
 import CartDrawer from "./components/Cart/CartDrawer";
+import CheckoutPage from "./pages/CheckoutPage";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/Checkout" element={<CheckoutPage />} />
           </Routes>
 
           <Footer />

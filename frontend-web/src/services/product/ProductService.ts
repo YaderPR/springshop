@@ -1,10 +1,8 @@
-import type { Product, Category } from "../types/Product";
-
-
-const API_URL = "http://localhost:8081/api/v2/products";
-const API_URL_CATEGORIES = "http://localhost:8081/api/v2/products/categories";
-const API_URL_APPARELS = "http://localhost:8081/api/v2/products/apparels";
-const API_URL_APPARELS_CATEGORIES = "http://localhost:8081/api/v2/products/apparels/categories";
+import type { Product, Category } from "../../types/Product";
+const API_URL = "http://localhost:8085/api/v2/products";
+const API_URL_CATEGORIES = "http://localhost:8085/api/v2/products/categories";
+const API_URL_APPARELS = "http://localhost:8085/api/v2/products/apparels";
+const API_URL_APPARELS_CATEGORIES = "http://localhost:8085/api/v2/products/apparels/categories";
 
 
 //PRODUCTOS

@@ -1,4 +1,4 @@
-const API_URL_STORAGE = "http://localhost:8083/files/upload";
+const API_URL_STORAGE = "http://localhost:8092/api/v2/files/upload";
 
 export async function uploadImage(file: File): Promise<string> {
   const formData = new FormData();
@@ -19,5 +19,5 @@ export async function uploadImage(file: File): Promise<string> {
   const uploadedFile = await res.json();
   
 
-  return `http://localhost:8083/files/${uploadedFile.filename}`;
+  return `http://localhost:8092/api/v2/files/${uploadedFile.filename}`;
 }

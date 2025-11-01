@@ -8,7 +8,7 @@ export interface Product {
   brand?: string;
   size?: string;
   categoryId?: number;
-  imageFile?: string;
+  imageUrl?: string;
 }
 
 export interface Category {
