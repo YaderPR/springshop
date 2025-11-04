@@ -34,6 +34,16 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  provider: ^6.1.5+1
+  material: 1.0.1
+  flutter_svg: 2.2.1
+  flutter_web_auth_2: ^4.1.0
+  dio: ^5.9.0
+  crypto: ^3.0.6
+  convert: ^3.1.2
+  flutter_appauth: ^11.0.0  # Latest as of 2025; handles PKCE automatically
+  flutter_secure_storage: ^9.2.2  # For secure token storage on mobile
+  http: ^1.2.2  # For API requests (or use dio for more features)
 
 dev_dependencies:
   flutter_test:
@@ -56,7 +66,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  assets:
+    - assets/icons/springshop-logo-text.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
