@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:springshop/src/auth/auth_gate.dart';
 import 'package:springshop/src/core/di/inject_container.dart';
 import 'package:springshop/src/core/theme/theme_notifier.dart';
-import 'package:springshop/src/features/home/presentation/screens/home_screen.dart';
+
 
 void main() {
+  // Asegúrate de inicializar Flutter antes de usar el Provider (Buena práctica)
+  WidgetsFlutterBinding.ensureInitialized(); 
+  
   runApp(
     MultiProvider(
-      // Llama a la función de tu módulo de DI
       providers: buildAppProviders(),
       child: const MyApp(),
     ),
@@ -20,6 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeNotifier = context.watch<ThemeNotifier>();
+    
     return MaterialApp(
       title: 'SpringShop Demo',
       themeMode: themeNotifier.themeMode,
@@ -35,12 +39,13 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
-        scaffoldBackgroundColor: Colors.black, // Estética de eBay
+        scaffoldBackgroundColor: Colors.black, 
         appBarTheme: const AppBarTheme(backgroundColor: Colors.black, foregroundColor: Colors.white),
         useMaterial3: true,
       ),
-      // Usamos directamente la nueva pantalla como home
-      home: const HomeScreen(),
+      
+      // 🚀 ¡CLAVE! Usamos AuthGuard para manejar la redirección inicial y el estado.
+      home: const AuthGuard(), 
     );
   }
 }

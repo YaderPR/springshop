@@ -28,7 +28,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        manifestPlaceholders += mapOf("appAuthRedirectScheme" to "org.springshop")
+        //manifestPlaceholders += mapOf("appAuthRedirectScheme" to "org.springshop")
     }
 
     buildTypes {

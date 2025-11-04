@@ -1,52 +1,64 @@
-// lib/src/auth/auth_state_notifier.dart
-
 import 'package:flutter/foundation.dart';
-import 'keycloak_auth_service.dart'; 
+import 'auth_repository.dart'; // 💡 Usar la interfaz, no la clase concreta
 
 class AuthStateNotifier extends ChangeNotifier {
-  // 💡 El estado principal de la aplicación
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
+  
+  bool _isLoading = true; 
+  bool get isLoading => _isLoading;
 
-  final KeycloakAuthService _authService;
+  final AuthRepository _authService; 
 
-  // Constructor que recibe el servicio de Keycloak por inyección de dependencia
   AuthStateNotifier(this._authService);
 
   // 🚀 1. Verifica la sesión al inicio de la App
   Future<void> checkInitialAuthStatus() async {
-    _isLoggedIn = await _authService.isAuthenticated();
+    print('🔑 [Notifier.checkInitialAuthStatus] Iniciando verificación de tokens...');
+    _isLoading = true; // Empezar cargando
     notifyListeners();
+
+    try {
+      _isLoggedIn = await _authService.isAuthenticated();
+      print('🔑 [Notifier.checkInitialAuthStatus] Verificación completada. isLoggedIn: $_isLoggedIn');
+    } catch (e) {
+      print('❌ [Notifier.checkInitialAuthStatus] Error durante la verificación: $e');
+      _isLoggedIn = false;
+    } finally {
+      _isLoading = false; // Finalizar la carga
+      notifyListeners();
+    }
   }
   
   // 🔑 2. Manejo de Inicio de Sesión
   Future<void> login() async {
     try {
-      // Llama a la lógica de Keycloak
-      await _authService.signInWithKeycloak();
+      // Usar signIn del contrato
+      await _authService.signIn(); 
       
-      // Si llega aquí, KeycloakAuthService debería haber guardado los tokens.
+      // La verificación debe ser inmediata después del éxito
       _isLoggedIn = await _authService.isAuthenticated(); 
       
-      // Si el login fue exitoso, notifica a la UI (ej: AuthGate)
       notifyListeners();
       
     } catch (e) {
-      // Maneja errores (ej: el usuario cancela o el intercambio falla).
+      // Maneja errores y notifica
       _isLoggedIn = false;
       notifyListeners();
-      // Re-lanza la excepción para que la SignInScreen pueda mostrar un mensaje.
       rethrow; 
     }
   }
 
   // 🚪 3. Manejo de Cierre de Sesión
   Future<void> logout() async {
-    // Llama al servicio para invalidar y limpiar tokens.
-    await _authService.logout(); 
-    
-    // Actualiza el estado local y notifica.
-    _isLoggedIn = false;
-    notifyListeners();
+    try {
+      // Usar logout del contrato
+      await _authService.logout(); 
+    } catch (_) {
+      // Ignorar errores de logout para asegurar la limpieza local
+    } finally {
+      _isLoggedIn = false;
+      notifyListeners();
+    }
   }
 }

@@ -34,7 +34,7 @@ class SearchScreen extends StatelessWidget {
           ),
           
           // Línea divisoria bajo la pestaña (opcional, pero útil)
-          Divider(height: 1, thickness: 1, color: colorScheme.onBackground.withOpacity(0.1)),
+          Divider(height: 1, thickness: 1, color: colorScheme.onSurface.withOpacity(0.1)),
           
           // 3. Lista de Búsquedas Recientes
           const Expanded(

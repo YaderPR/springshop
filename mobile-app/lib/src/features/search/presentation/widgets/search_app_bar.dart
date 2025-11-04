@@ -16,12 +16,12 @@ class SearchScreenAppBar extends StatelessWidget implements PreferredSizeWidget 
     // El color de fondo y el color de los iconos/texto vienen del tema
     return AppBar(
       automaticallyImplyLeading: true, // Muestra la flecha de retroceso
-      backgroundColor: colorScheme.background, // Usa el fondo del tema
+      backgroundColor: colorScheme.surface, // Usa el fondo del tema
       
       title: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: colorScheme.surfaceVariant.withOpacity(0.5), // Color para el campo de texto
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.5), // Color para el campo de texto
           borderRadius: BorderRadius.circular(4.0),
         ),
         child: TextField(

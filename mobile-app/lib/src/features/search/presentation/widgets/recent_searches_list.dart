@@ -21,15 +21,15 @@ class RecentSearchesList extends StatelessWidget {
       children: [
         // Lista de ítems recientes
         ...recentSearches.map((term) => ListTile(
-          leading: Icon(Icons.history, color: colorScheme.onBackground.withOpacity(0.7)),
+          leading: Icon(Icons.history, color: colorScheme.onSurface.withOpacity(0.7)),
           title: Text(
             term,
-            style: TextStyle(color: colorScheme.onBackground, fontSize: 16),
+            style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
           ),
           onTap: () {
             // Lógica para ejecutar la búsqueda
           },
-        )).toList(),
+        )),
 
         const SizedBox(height: 20),
 
