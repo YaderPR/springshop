@@ -12,7 +12,9 @@ export default function Navbar() {
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
-  const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+  //const totalItems = getCartItemCount();
+  const totalItems = cartItems?.reduce((total, item) => total + item.quantity, 0) ?? 0;
+//  const totalItems = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) ?? 0;
 
   // const isLoggedIn = false;
 
@@ -30,7 +32,7 @@ export default function Navbar() {
             {/* Links de navegación */}
             <div className="hidden md:flex space-x-8 text-gray-100 font-medium">
               <Link to="/" className="hover:text-secondary transition-colors">
-                Inicio
+                Shop
               </Link>
 
               <Link to="/admin/products" className="hover:text-secondary transition-colors">
@@ -111,7 +113,7 @@ export default function Navbar() {
           <div className="md:hidden bg-primary text-gray-100 shadow-inner">
             <div className="flex flex-col px-4 py-3 space-y-2 font-medium">
               <Link to="/" className="hover:text-secondary transition-colors">
-                Inicio
+                Shop
               </Link>
               <Link to="/admin/products" className="hover:text-secondary transition-colors">
                 Productos

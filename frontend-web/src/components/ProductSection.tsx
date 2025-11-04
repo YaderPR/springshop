@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Search } from "lucide-react";
 import CategorySidebar from "./CategorySidebar";
 import type { Product } from "../types/Product";
-import { getProducts, getApparels } from '../services/productService'; 
-import ProductCard from './ProductCard'; 
+import { getProducts, getApparels } from '../services/product/ProductService'; 
+import ProductCard from '../components/Products/ProductCard'; 
 
 export default function ProductsSection() {
   const [products, setProducts] = useState<Product[]>([]);

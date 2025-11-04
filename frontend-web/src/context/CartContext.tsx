@@ -1,125 +1,118 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import type { Product } from "../types/Product";
-import {
-  getCartItems,
-  addItemToCart,
-  updateCartItemQuantity,
-  removeCartItem,
-} from "../services/CartService";
-
-
+// context/CartContext.tsx
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useCartManager } from '../hooks/useCartManager';
+// ?? Importa el hook Y el nuevo TIPO de item
+import { useCart as useCartHook } from '../hooks/useCart'; 
+import type { FullCartItem } from '../hooks/useCart';
+import type { Product } from '../types/Product';
 
 interface CartContextType {
-  cartItems: CartItem[];
-  addToCart: (product: Product, quantity?: number) => Promise<void>;
-  removeFromCart: (cartItemId: number) => Promise<void>;
-  updateQuantity: (cartItemId: number, productId: number, quantity: number) => Promise<void>;
-  clearCart: () => void;
-  totalItems: number;
-  totalPrice: number;
-  isLoading: boolean;
+  // ?? CAMBIA EL TIPO AQUÍ
+  cartItems: FullCartItem[]; // <-- CAMBIADO
+  total: number;
+  loading: boolean;
+  error: string | null;
+  
+  // ... (el resto de la interfaz no cambia)
+  addToCart: (product: Product) => Promise<void>;
+  removeFromCart: (itemId: number) => Promise<void>;
+  updateCartItem: (itemId: number, productId: number, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  cartId: number | null;
+  userId: number | null;
+  isUserCart: boolean;
+  getCartItemCount: () => number;
+  isProductInCart: (productId: number) => boolean;
+  getProductQuantity: (productId: number) => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+interface CartProviderProps {
+  children: ReactNode;
+}
 
+export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
+  const { cartId, userId, isUserCart, loading: cartManagerLoading } = useCartManager();
   
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getCartItems();
-        setCartItems(data);
-      } catch (error) {
-        console.error("Error cargando carrito:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchCart();
-  }, []);
+  // ?? 'cartItems' aquí AHORA es de tipo FullCartItem[]
+  const { 
+    cartItems, 
+    total, 
+    loading: cartLoading, 
+    error, 
+    addItem, 
+    removeItem, 
+    updateItem, 
+    clearCart 
+  } = useCartHook(cartId || undefined);
 
-  const addToCart = async (product: Product, quantity: number = 1) => {
-    try {
-      const existingItem = cartItems.find((item) => item.productId === product.id);
-      if (existingItem) {
-        const newQuantity = existingItem.quantity + quantity;
-        const updatedItem = await updateCartItemQuantity(existingItem.id, product.id, newQuantity);
+  const loading = cartManagerLoading || cartLoading;
 
-        setCartItems((prev) =>
-          prev.map((item) =>
-            item.id === updatedItem.id ? { ...item, quantity: updatedItem.quantity } : item
-          )
-        );
-      } else {
-
-        const newItem = await addItemToCart(product.id, quantity);
-        setCartItems((prev) => [...prev, { ...newItem, product }]);
-      }
-    } catch (error) {
-      console.error("Error al añadir producto al carrito:", error);
+  const addToCart = async (product: Product) => {
+    if (!cartId) {
+      throw new Error('Carrito no inicializado');
     }
+    // Asegúrate que el DTO sea correcto (productId y quantity)
+    await addItem({
+      productId: product.id,
+      quantity: 1
+    });
   };
 
-  // ?? Actualizar cantidad manualmente
-  const updateQuantity = async (cartItemId: number, productId: number, quantity: number) => {
-    try {
-      const updatedItem = await updateCartItemQuantity(cartItemId, productId, quantity);
-      setCartItems((prev) =>
-        prev.map((item) =>
-          item.id === updatedItem.id ? { ...item, quantity: updatedItem.quantity } : item
-        )
-      );
-    } catch (error) {
-      console.error("Error al actualizar cantidad:", error);
-    }
+  const removeFromCart = async (itemId: number) => {
+    if (!cartId) return;
+    await removeItem(itemId);
   };
 
-  // ?? Eliminar item del carrito
-  const removeFromCart = async (cartItemId: number) => {
-    try {
-      await removeCartItem(cartItemId);
-      setCartItems((prev) => prev.filter((item) => item.id !== cartItemId));
-    } catch (error) {
-      console.error("Error al eliminar item del carrito:", error);
-    }
+  const updateCartItem = async (itemId: number, productId: number, quantity: number) => {
+    if (!cartId) return;
+    await updateItem(itemId, { productId, quantity });
   };
 
-  // ?? Vaciar carrito (solo localmente)
-  const clearCart = () => {
-    setCartItems([]);
+  // ?? Esta lógica ahora funciona con FullCartItem[]
+  const getCartItemCount = (): number => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
 
-  // ?? Calcular totales
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const isProductInCart = (productId: number): boolean => {
+    return cartItems.some(item => item.productId === productId);
+  };
+
+  const getProductQuantity = (productId: number): number => {
+    const item = cartItems.find(item => item.productId === productId);
+    return item ? item.quantity : 0;
+  };
+
+  // El 'value' ahora pasa el tipo de item correcto
+  const value: CartContextType = {
+    cartItems, // <-- Este ahora es FullCartItem[]
+    total,
+    loading,
+    error,
+    addToCart,
+    removeFromCart,
+    updateCartItem,
+    clearCart,
+    cartId,
+    userId,
+    isUserCart,
+    getCartItemCount,
+    isProductInCart,
+    getProductQuantity
+  };
 
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        totalItems,
-        totalPrice,
-        isLoading,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
 };
 
-// Hook para usar el contexto fácilmente
 export const useCart = (): CartContextType => {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart debe usarse dentro de un CartProvider");
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
   }
   return context;
 };

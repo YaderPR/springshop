@@ -5,7 +5,7 @@ import {
   getCategories,
   getApparels,
   deleteApparel,
-} from "../../services/productService";
+} from "../../services/product/ProductService";
 import type { Product, Category } from "../../types/Product";
 
 interface Props {

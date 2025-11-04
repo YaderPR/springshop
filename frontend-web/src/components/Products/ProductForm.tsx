@@ -4,8 +4,8 @@ import {
   updateApparel,
   updateProduct,
   getCategories,
-} from "../../services/productService";
-import { uploadImage } from "../../services/StorageService";
+} from "../../services/product/ProductService";
+import { uploadImage } from "../../services/storage/StorageService";
 import type { Product, Category } from "../../types/Product";
 
 interface Props {
