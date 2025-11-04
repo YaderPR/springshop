@@ -14,7 +14,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         Server serverLocal = new Server()
-                .url("http://localhost:8085")
+                .url("http://localhost:8091")
                 .description("Servidor local");
 
         Server gatewayServer = new Server()
