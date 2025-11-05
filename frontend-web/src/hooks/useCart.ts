@@ -1,20 +1,19 @@
-// hooks/useCart.ts
 import { useState, useEffect } from 'react';
 import { cartService } from '../services/cart/cartService';
-// ?? 1. IMPORTA EL SERVICIO DE PRODUCTOS Y TIPOS
+
 import { getProductById } from '../services/product/ProductService'; 
 import type { Product } from '../types/Product';
 import type { CartItemResponseDto, CartItemCreateRequestDto, CartItemUpdateRequestDto } from '../types/cart.types';
 
-// ?? 2. DEFINE EL NUEVO TIPO DE ITEM FUSIONADO
+
 // (Esto es lo que tu CartDrawer espera)
 export interface FullCartItem extends CartItemResponseDto {
-  product: Product; // El objeto de producto anidado
+  product: Product; 
 }
 
 export const useCart = (cartId?: number) => {
   // ?? 3. CAMBIA EL TIPO DE ESTADO
-  const [cartItems, setCartItems] = useState<FullCartItem[]>([]); // <-- CAMBIADO
+  const [cartItems, setCartItems] = useState<FullCartItem[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

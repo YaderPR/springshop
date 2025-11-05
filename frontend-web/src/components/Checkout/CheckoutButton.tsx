@@ -9,9 +9,9 @@ const CheckoutButton: React.FC = () => {
     <button
       onClick={startCheckout}
       disabled={loading}
-      className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
+      className="bg-secondary ring-1 ring-secondary shadow-sm text-primary hover:text-secondary px-6 py-3 rounded-lg hover:bg-primary transition"
     >
-      {loading ? "Procesando..." : "Pagar con Stripe ??"}
+      {loading ? "Procesando..." : "Pagar con Stripe"}
     </button>
   );
 };
