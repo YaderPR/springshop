@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:springshop/src/auth/auth_gate.dart';
+
+// Asegúrate de usar la importación correcta para tu HomeScreen
+import 'package:springshop/src/features/home/presentation/screens/home_screen.dart'; // 💡 Nuevo Home
 import 'package:springshop/src/core/di/inject_container.dart';
 import 'package:springshop/src/core/theme/theme_notifier.dart';
 
+// NOTA: El import de AuthGate se mantiene, pero ya no se usa como 'home'
+// import 'package:springshop/src/core/widgets/auth_gate.dart'; 
+
 
 void main() {
-  // Asegúrate de inicializar Flutter antes de usar el Provider (Buena práctica)
   WidgetsFlutterBinding.ensureInitialized(); 
   
   runApp(
@@ -44,8 +48,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       
-      // 🚀 ¡CLAVE! Usamos AuthGuard para manejar la redirección inicial y el estado.
-      home: const AuthGuard(), 
+      // 🚀 CORRECCIÓN: El punto de entrada es ahora la pantalla pública.
+      // Las secciones protegidas serán envueltas por AuthGate dentro de HomeScreen.
+      home: const HomeScreen(), 
     );
   }
 }

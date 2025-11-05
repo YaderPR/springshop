@@ -19,7 +19,8 @@ class AppBarWidget extends StatelessWidget {
     final searchFieldColor = isDark ? const Color(0xFF222222) : Colors.grey[200];
     final hintColor = isDark ? Colors.white54 : Colors.grey;
 
-    // 💡 Aquí usamos context.read<T>() para acceder al estado actual sin re-renderizar
+    // 💡 Usamos context.read<T>() porque el AppBar no necesita re-renderizarse 
+    // cuando el login cambia, solo necesita leer el estado en el onTap.
     final authNotifier = context.read<AuthStateNotifier>();
 
     return Container(
@@ -36,6 +37,7 @@ class AppBarWidget extends StatelessWidget {
                 onPressed: () {
                   // 🚀 LÓGICA DE PROTECCIÓN DEL CARRITO
                   if (authNotifier.isLoggedIn) {
+                    print('🛒 [AppBar] Acceso al carrito: Usuario logueado. ✅');
                     // 🟢 El usuario está logueado: Navegar al carrito
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -43,6 +45,7 @@ class AppBarWidget extends StatelessWidget {
                       ),
                     );
                   } else {
+                    print('🛒 [AppBar] Acceso al carrito: Usuario NO logueado. Forzando login. 🚫');
                     // 🟠 El usuario NO está logueado: Forzar el login
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -57,6 +60,7 @@ class AppBarWidget extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           
+          // ... (Search Bar Widget)
           InkWell(
             onTap: () {
               Navigator.push(
