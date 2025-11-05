@@ -39,11 +39,8 @@ dependencies:
   flutter_svg: 2.2.1
   flutter_web_auth_2: ^4.1.0
   dio: ^5.9.0
-  crypto: ^3.0.6
-  convert: ^3.1.2
   flutter_appauth: ^11.0.0  # Latest as of 2025; handles PKCE automatically
   flutter_secure_storage: ^9.2.2  # For secure token storage on mobile
-  http: ^1.2.2  # For API requests (or use dio for more features)
 
 dev_dependencies:
   flutter_test:
