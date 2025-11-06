@@ -27,7 +27,8 @@ public class Category {
     private Integer id;
     @Column(name = "name", nullable = false, length = 100)
     private String name;
-
+    @Column(name = "image_url", nullable = true, length = 200)
+    private String imageUrl;
     @OneToMany(mappedBy = "category")
     private Set<Product> products;
 
