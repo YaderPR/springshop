@@ -5,7 +5,7 @@ import 'package:springshop/src/features/home/presentation/screens/home_screen.da
 // 💡 Ya no necesitamos importar el servicio directamente,
 //    usaremos el Notifier para llamar a la acción de login.
 // import 'package:springshop/src/auth/auth_service.dart';
-import '../../../../auth/auth_state_notifier.dart';
+import '../../../../core/auth/auth_state_notifier.dart';
 
 class SignInScreen extends StatelessWidget {
   final bool isModal;

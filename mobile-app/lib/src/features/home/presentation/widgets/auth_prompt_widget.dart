@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 // 🔑 Imports necesarios
-import 'package:springshop/src/auth/auth_state_notifier.dart'; 
+import 'package:springshop/src/core/auth/auth_state_notifier.dart'; 
 import 'package:springshop/src/features/auth/presentation/screens/sign_in_screen.dart'; 
 
 class AuthPromptWidget extends StatelessWidget {

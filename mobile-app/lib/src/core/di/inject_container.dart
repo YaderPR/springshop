@@ -1,20 +1,26 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:dio/dio.dart';
-import 'package:springshop/src/auth/app_auth_service.dart';
+import 'package:springshop/src/core/auth/app_auth_service.dart';
+import 'package:springshop/src/core/config/app_config.dart';
+import 'package:springshop/src/features/categories/data/repositories/category_api_repository.dart';
+import 'package:springshop/src/features/categories/domain/repositories/category_repository.dart';
 
 import '../../core/theme/theme_notifier.dart';
-import '../../auth/auth_repository.dart'; 
-import '../../auth/auth_state_notifier.dart'; 
+import '../auth/auth_repository.dart'; 
+import '../auth/auth_state_notifier.dart'; 
 
 import '../api/auth_interceptor.dart'; 
 
 // =======================================================
 final AppAuthService _appAuthService = AppAuthService(); 
+final AppConfig _appConfig = AppConfig(
+  apiBaseUrl: 'http://10.22.99.191:8085/api/v2',
+);
 
 final Dio _dioClient = Dio(
   BaseOptions(
-    baseUrl: 'http://localhost:8080/api/v2', 
+    baseUrl: _appConfig.apiBaseUrl, 
     connectTimeout: const Duration(seconds: 15),
   ),
 );
@@ -39,9 +45,16 @@ List<SingleChildWidget> buildAppProviders() {
     Provider<AuthRepository>(
       create: (_) => _appAuthService,
     ),
-
+    Provider<AppConfig>(
+      create: (_) => _appConfig,
+    ),
     Provider<Dio>(
       create: (_) => _dioClient, 
+    ),
+    Provider<CategoryRepository>(
+      create: (context) => CategoryApiRepository(
+        context.read<Dio>()
+      )
     ),
     ChangeNotifierProvider<AuthStateNotifier>(
       create: (context) => AuthStateNotifier(

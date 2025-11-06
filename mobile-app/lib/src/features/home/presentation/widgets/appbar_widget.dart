@@ -3,7 +3,7 @@ import 'package:provider/provider.dart'; // 💡 NECESARIO para acceder al AuthS
 import 'package:springshop/src/features/search/presentation/screens/search_screen.dart';
 import 'package:springshop/src/features/cart/presentation/screens/shopping_cart_screen.dart'; // Importar el Carrito
 import 'package:springshop/src/features/auth/presentation/screens/sign_in_screen.dart'; // Importar la pantalla de Login
-import 'package:springshop/src/auth/auth_state_notifier.dart'; // Importar el Notifier
+import 'package:springshop/src/core/auth/auth_state_notifier.dart'; // Importar el Notifier
 
 class AppBarWidget extends StatelessWidget {
   const AppBarWidget({super.key});
