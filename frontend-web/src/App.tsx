@@ -7,6 +7,7 @@ import AdminProducts from "./pages/AdminProducts";
 import { CartProvider } from "./context/CartContext";
 import CartDrawer from "./components/Cart/CartDrawer";
 import CheckoutPage from "./pages/CheckoutPage";
+import PagoExitoso from "./pages/PagoExitoso";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/Checkout" element={<CheckoutPage />} />
+            <Route path="/pago-exitoso" element={<PagoExitoso />} />
           </Routes>
 
           <Footer />
