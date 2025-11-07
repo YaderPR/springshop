@@ -26,3 +26,17 @@ export interface UserProfilePictureURLResponse {
 export interface UserSync {
   subject: string;
 }
+
+export interface UserProfileRequest {
+  userId: number; 
+  firstName: String;
+  lastName: String;
+  profilePicUrl: String;
+}
+
+export interface UserProfileResponse {
+  userId: number; 
+  firstName: String;
+  lastName: String;
+  profilePicUrl: String;
+}

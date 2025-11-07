@@ -13,6 +13,7 @@
     "@stripe/react-stripe-js": "^5.3.0",
     "@stripe/stripe-js": "^8.2.0",
     "axios": "^1.13.1",
+    "framer-motion": "^12.23.24",
     "keycloak-js": "^26.2.1",
     "lucide-react": "^0.545.0",
     "react": "^19.1.1",

@@ -1,94 +1,110 @@
-import type { Product, Category } from "../../types/Product";
-const API_URL = "http://localhost:8085/api/v2/products";
-const API_URL_CATEGORIES = "http://localhost:8085/api/v2/products/categories";
-const API_URL_APPARELS = "http://localhost:8085/api/v2/products/apparels";
-const API_URL_APPARELS_CATEGORIES = "http://localhost:8085/api/v2/products/apparels/categories";
+// src/services/product/ProductService.ts
+import axios from "axios";
+import type { 
+  Product, 
+  Category, 
+  Apparel, 
+  Supplement, 
+  WorkoutAccessory,
+  ApparelCategory,
+  WorkoutAccessoryCategory
+} from "../../types/Product";
 
+// --- INSTANCIA BASE DE AXIOS ---
+const api = axios.create({
+  baseURL: "http://localhost:8085/api/v2/products",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-//PRODUCTOS
+// --- PRODUCTOS GENÉRICOS ---
 export async function getProducts(): Promise<Product[]> {
-  const res = await fetch(API_URL);
-  if (!res.ok) throw new Error("Error al obtener productos");
-  return res.json();
+  const { data } = await api.get<Product[]>("");
+  return data;
 }
 
 export async function getProductById(id: number): Promise<Product> {
-  const res = await fetch(`${API_URL}/${id}`);
-  if (!res.ok) throw new Error("Error al obtener producto");
-  return res.json();
-}
-
-export async function createProduct(data: Product): Promise<Product> {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Error al crear producto");
-  return res.json();
-}
-
-export async function updateProduct(id: number, data: Product): Promise<Product> {
-  const res = await fetch(`${API_URL}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Error al actualizar producto");
-  return res.json();
+  const { data } = await api.get<Product>(`/${id}`);
+  return data;
 }
 
 export async function deleteProduct(id: number): Promise<void> {
-  const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Error al eliminar producto");
+  await api.delete(`/${id}`);
 }
-// CATEGORÍAS DE PRODUCTOS
+
+// --- CATEGORÍAS GENÉRICAS (para Suplementos) ---
 export async function getCategories(): Promise<Category[]> {
-  const res = await fetch(`${API_URL_CATEGORIES}`); // Ajusta esta URL si es necesario
-  if (!res.ok) throw new Error("Error al obtener categorías");
-  return res.json();
+  const { data } = await api.get<Category[]>("/categories");
+  return data;
 }
 
-// APPARELS
-export async function getApparels(): Promise<Product[]> {
-  const res = await fetch(API_URL_APPARELS);
-  if (!res.ok) throw new Error("Error al obtener apparels");
-  return res.json();
+// --- APPARELS ---
+export async function getApparels(): Promise<Apparel[]> {
+  const { data } = await api.get<Apparel[]>("/apparels");
+  return data;
 }
 
-export async function getApparelById(id: number): Promise<Product> {
-  const res = await fetch(`${API_URL_APPARELS}/${id}`);
-  if (!res.ok) throw new Error("Error al obtener apparel");
-  return res.json();
+export async function createApparel(data: any): Promise<Apparel> {
+  const res = await api.post<Apparel>("/apparels", data);
+  return res.data;
 }
 
-export async function createApparel(data: Product): Promise<Product> {
-  const res = await fetch(API_URL_APPARELS, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Error al crear apparel");
-  return res.json();
-}
-
-export async function updateApparel(id: number, data: Product): Promise<Product> {
-  const res = await fetch(`${API_URL_APPARELS}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Error al actualizar apparel");
-  return res.json();
+export async function updateApparel(id: number, data: any): Promise<Apparel> {
+  const res = await api.put<Apparel>(`/apparels/${id}`, data);
+  return res.data;
 }
 
 export async function deleteApparel(id: number): Promise<void> {
-  const res = await fetch(`${API_URL_APPARELS}/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Error al eliminar apparel");
+  await api.delete(`/apparels/${id}`);
 }
-// CATEGORÍAS DE APPARELS
-export async function getApparelCategories(): Promise<Category[]> {
-  const res = await fetch(`${API_URL_APPARELS_CATEGORIES}`); // Ajusta esta URL si es necesario
-  if (!res.ok) throw new Error("Error al obtener categorías de apparels");
-  return res.json();
+
+export async function getApparelCategories(): Promise<ApparelCategory[]> {
+  const { data } = await api.get<ApparelCategory[]>("/apparels/categories");
+  return data;
+}
+
+// --- SUPPLEMENTS ---
+export async function getSupplements(): Promise<Supplement[]> {
+  const { data } = await api.get<Supplement[]>("/supplements");
+  return data;
+}
+
+export async function createSupplement(data: any): Promise<Supplement> {
+  const res = await api.post<Supplement>("/supplements", data);
+  return res.data;
+}
+
+export async function updateSupplement(id: number, data: any): Promise<Supplement> {
+  const res = await api.put<Supplement>(`/supplements/${id}`, data);
+  return res.data;
+}
+
+export async function deleteSupplement(id: number): Promise<void> {
+  await api.delete(`/supplements/${id}`);
+}
+
+// --- WORKOUT ACCESSORIES ---
+export async function getWorkoutAccessories(): Promise<WorkoutAccessory[]> {
+  const { data } = await api.get<WorkoutAccessory[]>("/workout-accessories");
+  return data;
+}
+
+export async function createWorkoutAccessory(data: any): Promise<WorkoutAccessory> {
+  const res = await api.post<WorkoutAccessory>("/workout-accessories", data);
+  return res.data;
+}
+
+export async function updateWorkoutAccessory(id: number, data: any): Promise<WorkoutAccessory> {
+  const res = await api.put<WorkoutAccessory>(`/workout-accessories/${id}`, data);
+  return res.data;
+}
+
+export async function deleteWorkoutAccessory(id: number): Promise<void> {
+  await api.delete(`/workout-accessories/${id}`);
+}
+
+export async function getWorkoutAccessoryCategories(): Promise<WorkoutAccessoryCategory[]> {
+  const { data } = await api.get<WorkoutAccessoryCategory[]>("/workoutaccessories/categories");
+  return data;
 }

@@ -1,12 +1,53 @@
-// components/Product/ProductCard.tsx
 import React, { useState } from "react";
 import { useCart } from "../../context/CartContext";
-import type { Product } from "../../types/Product";
+import type { 
+  AnyProduct, 
+  Apparel, 
+  Supplement, 
+  WorkoutAccessory 
+} from "../../types/Product"; // Usamos los tipos correctos
 import { Loader2 } from "lucide-react";
 
 interface ProductCardProps {
-  product: Product;
+  product: AnyProduct; // Tipo actualizado
 }
+
+// --- ¡NUEVO HELPER MEJORADO! ---
+// Este componente decide qué detalle específico mostrar,
+// con fallbacks para mostrar 'brand' si es lo único que hay.
+const ProductSpecificDetail: React.FC<{ product: AnyProduct }> = ({ product }) => {
+  let label = "";
+  let value: string | undefined = "";
+
+  // 1. Comprobamos las propiedades ESPECÍFICAS primero
+  if ('flavor' in product && (product as Supplement).flavor) {
+    label = "Sabor";
+    value = (product as Supplement).flavor;
+  } else if ('material' in product && (product as WorkoutAccessory).material) {
+    label = "Material";
+    value = (product as WorkoutAccessory).material;
+  } 
+  // 2. FALLBACK: Si no se encontró nada, comprobamos 'brand'.
+  //    Esto funcionará para Apparel Y para productos genéricos
+  //    que solo tengan la propiedad 'brand' (como tu "Proteina").
+  else if ('brand' in product && (product as any).brand) {
+    label = "Marca";
+    value = (product as any).brand;
+  }
+
+  // Si no se encontró ningún detalle en absoluto, renderizamos un espacio
+  // para mantener la altura de la tarjeta.
+  if (!label || !value) {
+    return <span className="bg-transparent px-2 py-1 rounded">&nbsp;</span>;
+  }
+
+  return (
+    <span className="bg-gray-700 px-2 py-1 rounded">
+      {label}: {value}
+    </span>
+  );
+};
+
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   if (!product) {
@@ -20,31 +61,28 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const isInCart = isProductInCart(product.id);
 
   const handleAddToCart = async () => {
-  if (isInCart || isAdding) return;
+    // ... (Tu lógica de handleAddToCart está perfecta)
+    if (isInCart || isAdding) return;
+    if (!product.id) {
+      console.error("Producto sin ID válido");
+      return;
+    }
+    if (product.stock <= 0) {
+      console.error("No hay stock disponible");
+      return;
+    }
 
-  if (!product.id) {
-    console.error("Producto sin ID válido");
-    return;
-  }
-
-  if (product.stock <= 0) {
-    console.error("No hay stock disponible");
-    return;
-  }
-
-  setIsAdding(true);
-  try {
-    await addToCart(product);
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 1500);
-  } catch (error) {
-    console.error('Error adding to cart:', error);
-    // Mostrar feedback al usuario para error (toast, etc.)
-  } finally {
-    setIsAdding(false);
-  }
-};
-
+    setIsAdding(true);
+    try {
+      await addToCart(product); 
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 1500);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <div
@@ -63,6 +101,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       "
     >
       <div className="aspect-square bg-white/90 rounded-xl overflow-hidden">
+        {/* --- CAMBIO --- */}
+        {/* Volvemos a usar <img> normal, como pediste */}
         <img
           src={product.imageUrl}
           alt={product.name}
@@ -76,25 +116,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       <h3 className="text-base font-bold text-secondary truncate">{product.name}</h3>
 
-      {/* Información adicional del producto */}
-      <div className="space-y-1">
-        {/* <p className="text-sm text-gray-300 line-clamp-2">{product.description}</p> */}
-        
-        {(product.brand || product.color || product.size) && (
-          <div className="flex flex-wrap gap-1 text-xs text-gray-400">
-            {product.brand && (
-              <span className="bg-gray-700 px-2 py-1 rounded">Marca: {product.brand}</span>
-            )}
-            {/* {product.color && (
-              <span className="bg-gray-700 px-2 py-1 rounded"> {}</span>
-            )}
-            {product.size && (
-              <span className="bg-gray-700 px-2 py-1 rounded"> {}</span>
-            )} */}
-          </div>
-        )}
+      {/* --- CAMBIO --- */}
+      {/* Este div ahora usa el helper corregido */}
+      <div className="space-y-1 min-h-[26px]"> {/* Forzar la altura */}
+        <div className="flex flex-wrap gap-1 text-xs text-gray-400">
+          <ProductSpecificDetail product={product} />
+        </div>
       </div>
 
+      {/* ... (El resto de tu JSX de precio, stock y botón de carrito está perfecto) ... */}
       <div className="flex justify-between items-center text-gray-200">
         <div className="flex items-center gap-1">
           <svg 
@@ -122,7 +152,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           onClick={handleAddToCart}
           disabled={isAdded || isInCart || isAdding || loading || product.stock === 0}
           className={`
-            w-full py-1 px-2 rounded-lg transition-all duration-300 flex items-center justify-center
+            w-full py-2 px-2 rounded-lg transition-all duration-300 flex items-center justify-center
             ${
               product.stock === 0
                 ? "bg-gray-400 text-gray-800 cursor-not-allowed"
@@ -147,19 +177,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           ) : isInCart ? (
             "En el carrito"
           ) : (
-            "Add to cart"
+            "Agregar al carrito"
           )}
         </button>
-        <button
-          disabled={product.stock === 0}
-          className={`
-            w-full bg-black text-white hover:text-primary 
-            py-2 px-2 rounded-lg transition-colors
-            ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-secondary'}
-          `}
-        >
-          {product.stock === 0 ? "Agotado" : "Buy Now"}
-        </button>
+       
       </div>
     </div>
   );

@@ -1,23 +1,29 @@
-const API_URL_STORAGE = "http://localhost:8092/api/v2/files/upload";
+import axios from "axios";
+
+const fileApi = axios.create({
+  baseURL: "http://localhost:8092/api/v2/files"
+});
+
 
 export async function uploadImage(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(API_URL_STORAGE, {
-    method: "POST",
-    body: formData,
-  });
+  try {
+    const { data: uploadedFile } = await fileApi.post(
+      "/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
-  if (!res.ok) {
+    return `http://localhost:8092/api/v2/files/${uploadedFile.filename}`;
     
-    const errorBody = await res.text();
-    console.error("Respuesta de error del storage:", errorBody);
-    throw new Error(`Error al subir la imagen: ${res.statusText}`);
+  } catch (error: any) {
+    console.error("Error al subir la imagen:", error.response?.data || error.message);
+    throw new Error("Error al subir la imagen");
   }
-
-  const uploadedFile = await res.json();
-  
-
-  return `http://localhost:8092/api/v2/files/${uploadedFile.filename}`;
 }

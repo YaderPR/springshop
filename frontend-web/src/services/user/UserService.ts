@@ -1,5 +1,10 @@
 import axios from 'axios';
-import type { UserResponse, UserProfilePictureURLResponse, UserSync } from '../../types/User.types';
+import type { 
+  UserResponse, 
+  UserProfilePictureURLResponse, 
+  UserProfileRequest,  
+  UserProfileResponse  
+} from '../../types/User.types';
 
 const USER_API_BASE_URL = 'http://localhost:8091/api/v2/users';
 
@@ -20,25 +25,53 @@ class UserService {
     return data;
   }
 
-  // Sincronizar usuario (crear si no existe)
-  async syncUser(subject: string): Promise<UserResponse> {
-    const { data } = await axios.post<UserResponse>(`${USER_API_BASE_URL}/me/sync`, { subject });
-    return data;
+  /**
+   * Crea un nuevo usuario "invitado" llamando al endpoint público
+   * POST /api/v2/users/user-profile.
+   * Este es el endpoint que tu backend (UserController.java) expone
+   * sin seguridad de headers.
+   */
+  // async createGuestUser(profileData: UserProfileRequest): Promise<UserProfileResponse> {
+  //   try {
+  //     const { data } = await axios.post<UserProfileResponse>(
+  //       `${USER_API_BASE_URL}/user-profile`,
+  //       profileData
+  //     );
+      
+  //     // 'data' será el UserProfileResponse.
+  //     // Asumimos que este objeto de respuesta contiene el 'id' del usuario
+  //     // (o un 'userId') que necesitamos para el 'useCartManager'.
+  //     return data;
+
+  //   } catch (err: any) {
+  //     console.error("Error al crear usuario invitado:", err.response?.data || err.message);
+  //     throw new Error("No se pudo crear el usuario invitado.");
+  //   }
+  // }
+
+async syncUser(subject: string): Promise<UserResponse> {
+    try {
+      const { data } = await axios.post<UserResponse>(
+        `${USER_API_BASE_URL}/me/sync`,
+        null, // No enviamos BODY
+        {
+          headers: {
+            'X-Auth-Subject': subject // <-- ¡LA SOLUCIÓN! Enviamos el 'sub' como header.
+          }
+        }
+      );
+      return data;
+    } catch (err: any) {
+      console.error(`Error en syncUser con sub=${subject}:`, err.response?.data || err.message);
+      throw new Error("Fallo al sincronizar el usuario.");
+    }
   }
 
-  // Método helper para crear un usuario temporal (para testing)
-  async createTemporaryUser(username: string): Promise<UserResponse> {
-    // Generar un sub temporal
-    const tempSub = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Primero sincronizamos para crear el usuario
+  async createTemporaryUser(): Promise<UserResponse> {
+    const tempSub = `temp_guest_${Date.now()}`;
     const user = await this.syncUser(tempSub);
-    
-    // En una implementación real, aquí actualizarías el username
-    // Pero como tu API no tiene endpoint para update, lo dejamos así
-    
     return user;
   }
+  
 }
-
 export const userService = new UserService();

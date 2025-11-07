@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { Link } from 'react-router-dom';
+import CheckoutButton from '../Checkout/CheckoutButton';
 
 
 interface CartDrawerProps {
@@ -41,10 +42,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
   if (!isCartOpen) return null;
 
   return (
-    // Contenedor principal para el overlay y el drawer
-    // Agregamos clases para el blur y la transición de opacidad del overlay
     <div className="fixed inset-0 z-50 flex backdrop-blur-lg">
-      {/* Overlay con blur y opacidad */}
       <div 
         className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out ${
           isCartOpen ? "opacity-50 backdrop-blur-sm" : "opacity-0 pointer-events-none"
@@ -52,7 +50,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
         onClick={closeCart}
       />
 
-      {/* Drawer en sí */}
       <div 
         className={`fixed inset-y-0 right-0 w-full max-w-md bg-primary shadow-xl 
           transition-transform duration-300 ease-in-out z-50 flex flex-col
@@ -100,10 +97,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
             <div className="p-4 space-y-4">
               {/* Cart Items */}
               {cartItems.map((item) => {
-                // Asumo que item.product ahora existe debido a la lógica de fusión en useCart
                 const productName = item.product?.name || `Producto #${item.productId}`;
                 const productImage = item.product?.imageUrl || '/images/placeholder-product.jpg';
-                const productPrice = item.product?.price || item.price || 0; // Fallback al precio del item del carrito si product.price no está
+                const productPrice = item.product?.price || item.price || 0;
 
                 return (
                   <div key={item.id} className="flex items-center space-x-3 bg-gray-800 rounded-lg p-3">
@@ -127,7 +123,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
                       <div className="flex items-center space-x-2 mt-2">
                         <button
                           onClick={() => handleQuantityChange(item.id, item.productId, item.quantity - 1)}
-                          disabled={loading} // Habilitamos/deshabilitamos basado en el estado de carga
+                          disabled={loading}
                           className="p-1 rounded-full hover:bg-gray-300 text-secondary disabled:opacity-50 transition-colors"
                         >
                           <Minus className="w-3 h-3" />
@@ -139,7 +135,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
                         
                         <button
                           onClick={() => handleQuantityChange(item.id, item.productId, item.quantity + 1)}
-                          disabled={loading} // Habilitamos/deshabilitamos basado en el estado de carga
+                          disabled={loading} 
                           className="p-1 rounded-full hover:bg-gray-300 text-secondary disabled:opacity-50 transition-colors"
                         >
                           <Plus className="w-3 h-3" />
@@ -147,7 +143,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
                       </div>
                     </div>
 
-                    {/* Price and Remove */}
                     <div className="text-right">
                       <p className="font-semibold text-sm text-gray-50">
                         ${(item.price * item.quantity).toFixed(2)}
@@ -192,6 +187,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
               >
                 Proceder al Pago
               </Link>
+              
             </div>
             
             <p className="text-xs text-gray-500 text-center">

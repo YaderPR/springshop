@@ -44,6 +44,7 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ onShippingSubmit }) => {
     const addressPayload: Omit<ShippingAddressRequest, 'userId'> = {
         street: address.street,
         country: address.country,
+        city: address.city,
         state: address.state,
         zipCode: address.zipCode,
         phoneNumber: address.phoneNumber || undefined,
