@@ -12,7 +12,7 @@ export default function App() {
   return (
     <Router>
       <CartProvider>
-        <div className="bg-primary min-h-screen ">
+      <div className="min-h-screen bg-[radial-gradient(circle_at_600%_100%,_rgba(74,133,0,52)_50%,_rgba(0,2,1,1)_90%)] ">
           <Navbar />
             <CartDrawer />
           <Routes>

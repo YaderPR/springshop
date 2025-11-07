@@ -4,7 +4,7 @@ import React from 'react';
 
 export default function CtaSection() {
   return (
-    <section className="bg-primary py-16 px-6 sm:px-12 lg:px-20">
+    <section className=" py-16 px-6 sm:px-12 lg:px-20">
       <div className="container mx-auto bg-secondary text-primary p-8 sm:p-12 rounded-2xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           

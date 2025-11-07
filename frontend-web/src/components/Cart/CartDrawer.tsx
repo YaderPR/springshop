@@ -187,7 +187,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
               >
                 Proceder al Pago
               </Link>
-              <CheckoutButton/>
+              
             </div>
             
             <p className="text-xs text-gray-500 text-center">

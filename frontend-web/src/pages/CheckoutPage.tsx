@@ -6,10 +6,7 @@ import type { ShippingAddressResponse } from '../components/Checkout/ShippingFor
 import { Loader2 } from 'lucide-react';
 
 export default function CheckoutPage() {
-    // 1. Obtenemos los IDs del manager
     const { cartId, userId } = useCartManager();
-
-    // 2. Estados de esta página
     const [addressId, setAddressId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -102,7 +99,7 @@ export default function CheckoutPage() {
                         </div>
                     ) : (
                         <div className="text-center text-gray-400 mt-10">
-                            <p>Por favor, completa tu dirección de envío para continuar con el pago. AQUÍ ESTAS CARNALITO JEJE</p>
+                            <p>Por favor, completa tu dirección de envío para continuar con el pago.</p>
                         </div>
                     )}
                 </div>
