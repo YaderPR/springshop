@@ -6,7 +6,7 @@ class Category {
   final String id;
   final String name;
   final String? imageUrl;
-  final List<dynamic>? productIds;
+  final List<int>? productIds;
 
   const Category({
     required this.id,

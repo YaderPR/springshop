@@ -14,45 +14,68 @@ class CategoriesListWidget extends StatefulWidget {
 }
 
 class _CategoriesListWidgetState extends State<CategoriesListWidget> {
-  // 1. Declarar la variable para el Future
   late Future<List<Category>> _categoriesFuture;
 
-  // 2. Variable para almacenar la lista real de categorías
-  List<Category> _categories = [];
+  // ⚠️ La lista de categorías (List<Category>) se sigue guardando aquí, 
+  // ya que se usa *fuera* del FutureBuilder (en _handleCategoryClick)
+  List<Category> _categories = []; 
 
-  // 3. Estado de la categoría seleccionada
   String? _selectedCategoryId;
 
   @override
   void initState() {
     super.initState();
-    // 💡 IMPORTANTE: La inicialización del Future debe hacerse aquí,
-    // pero la llamada a 'context.read' debe hacerse en didChangeDependencies.
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // 4. Inicializar el Future llamando al repositorio (usando context.read)
-    // Usamos context.read para evitar escuchar cambios si no es necesario.
+    // 💡 BUENA PRÁCTICA: Inicializar el Future en initState.
     _categoriesFuture = context.read<CategoryRepository>().getCategories();
+    // ⚠️ ELIMINADO: didChangeDependencies ya no es necesario.
   }
 
   void _handleCategoryClick(String categoryId) {
     setState(() {
       _selectedCategoryId = categoryId;
     });
+
+    // 🔑 CORRECCIÓN CRÍTICA Y LÓGICA: 
+    // 1. Encontrar el objeto Category real usando el ID de tipo String.
+    final selectedCategory = _categories.firstWhere(
+      (cat) => cat.id == categoryId,
+      orElse: () => throw Exception('Categoría con ID $categoryId no encontrada.'),
+    );
+
+    // 2. Navegar, pasando la lista de IDs de producto
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ProductListWidget()),
+      MaterialPageRoute(
+          builder: (context) => ProductListWidget(
+                // 💡 Se accede de forma segura a la lista de IDs de producto
+                productIds: selectedCategory.productIds as List<int>, 
+              )),
     );
-    // 🚀 PROTOTIPO DE LÓGICA DE EVENTO
-    print('✅ CATEGORY CLICK EVENT: El ID seleccionado es: $categoryId');
-
-    // 💡 FUTURO: Aquí es donde se invocaría un UseCase o Notifier
-    // para notificar al sistema sobre el cambio de categoría,
-    // por ejemplo, para cargar productos relacionados.
-    // context.read<ProductNotifier>().loadProductsByCategory(categoryId);
+    print('✅ CATEGORY CLICK EVENT: El ID seleccionado es: $categoryId con ${selectedCategory.productIds?.length} productos.');
+  }
+  
+  // 💡 Función de ayuda para construir el contenido de la lista (Mejor legibilidad)
+  Widget _buildCategoryContent(List<Category> categories, ColorScheme colorScheme) {
+    // 💡 Inicializar la selección: Solo si no hay selección previa y la lista no está vacía.
+    if (_selectedCategoryId == null && categories.isNotEmpty) {
+        _selectedCategoryId = categories.first.id;
+    }
+    
+    return SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Wrap(
+          spacing: 20.0,
+          runSpacing: 16.0,
+          alignment: WrapAlignment.start,
+          children: categories.map((category) {
+            return CategoryItemWidget(
+              category: category,
+              isSelected: _selectedCategoryId == category.id,
+              onCategoryTap: _handleCategoryClick,
+            );
+          }).toList(),
+        ),
+      );
   }
 
   @override
@@ -62,8 +85,7 @@ class _CategoriesListWidgetState extends State<CategoriesListWidget> {
 
     return Container(
       height: screenHeight / 2,
-      // El color de fondo debería usar el colorScheme
-      color: colorScheme.surface,
+      color: Colors.black,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -82,8 +104,6 @@ class _CategoriesListWidgetState extends State<CategoriesListWidget> {
               ),
             ),
           ),
-
-          // 5. Usar FutureBuilder para manejar los estados de la solicitud
           Expanded(
             child: FutureBuilder<List<Category>>(
               future: _categoriesFuture,
@@ -100,33 +120,19 @@ class _CategoriesListWidgetState extends State<CategoriesListWidget> {
                 }
 
                 // Estado 2: Cargando
-                if (snapshot.connectionState != ConnectionState.done) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
                 // Estado 3: Datos listos
                 if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  // Guardar los datos y establecer la primera categoría como seleccionada
+                  // ⚠️ CORRECCIÓN: Guardar los datos SÓLO si es la primera vez que llegan.
+                  // Esto previene sobrescribir si hay una reconstrucción de setState.
                   if (_categories.isEmpty) {
                     _categories = snapshot.data!;
-                    _selectedCategoryId = _categories.first.id;
                   }
 
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Wrap(
-                      spacing: 20.0,
-                      runSpacing: 16.0,
-                      alignment: WrapAlignment.start,
-                      children: _categories.map((category) {
-                        return CategoryItemWidget(
-                          category: category,
-                          isSelected: _selectedCategoryId == category.id,
-                          onCategoryTap: _handleCategoryClick,
-                        );
-                      }).toList(),
-                    ),
-                  );
+                  return _buildCategoryContent(snapshot.data!, colorScheme);
                 }
 
                 // Estado 4: Sin datos

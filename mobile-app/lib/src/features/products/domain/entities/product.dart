@@ -5,16 +5,22 @@ import 'package:flutter/foundation.dart';
 class Product {
   final String id;
   final String name;
-  final String imageUrl;
+  final String description;
   final double price;
-  final String currency; // Añadimos para más flexibilidad
+  final int stock;
+  final String imageUrl;
+  final String categoryId;
+  final String categoryName;
 
   const Product({
     required this.id,
     required this.name,
-    required this.imageUrl,
+    required this.description,
     required this.price,
-    this.currency = 'C\$', // Por defecto, como en tu imagen
+    required this.stock,
+    required this.imageUrl,
+    required this.categoryId,
+    required this.categoryName
   });
 
   @override
@@ -24,8 +30,11 @@ class Product {
         other.id == id &&
         other.name == name &&
         other.imageUrl == imageUrl &&
-        other.price == price &&
-        other.currency == currency;
+        other.price == price && 
+        other.stock == stock &&
+        other.categoryId == categoryId &&
+        other.categoryName == categoryName &&
+        other.description == description;
   }
 
   @override
@@ -33,6 +42,9 @@ class Product {
       id.hashCode ^
       name.hashCode ^
       imageUrl.hashCode ^
-      price.hashCode ^
-      currency.hashCode;
+      price.hashCode ^ description.hashCode ^
+      stock.hashCode ^
+      categoryId.hashCode ^
+      description.hashCode ^
+      categoryName.hashCode;
 }

@@ -2,9 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:springshop/src/features/products/domain/entities/product.dart';
 
+// 💡 Nuevo tipo de callback: recibe el objeto Product
 class ProductListItemWidget extends StatelessWidget {
   final Product product;
-  final ValueChanged<String> onProductTap; // Callback para el clic, recibe el ID
+  final ValueChanged<Product> onProductTap; // Callback para el clic, ahora recibe Product
 
   const ProductListItemWidget({
     super.key,
@@ -18,11 +19,11 @@ class ProductListItemWidget extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
-      onTap: () => onProductTap(product.id), // Llama al callback con el ID
+      // 🔑 CAMBIO CLAVE: Llama al callback con el objeto product completo
+      onTap: () => onProductTap(product), 
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        // Color de fondo adaptable al tema, un poco más oscuro si es necesario para contrastar con el fondo general
-        color: colorScheme.surface, 
+        color: colorScheme.surface,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -33,9 +34,9 @@ class ProductListItemWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.0),
                 border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
-                color: colorScheme.surfaceContainerHighest, // Color de fondo para la imagen
+                color: colorScheme.surfaceContainerHighest,
               ),
-              clipBehavior: Clip.antiAlias, // Recortar la imagen si es más grande
+              clipBehavior: Clip.antiAlias,
               child: Image.network(
                 product.imageUrl,
                 fit: BoxFit.cover,
@@ -77,19 +78,13 @@ class ProductListItemWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${product.currency} ${product.price.toStringAsFixed(2)}', // Formato de precio
+                    '\$ ${product.price.toStringAsFixed(2)}', // Formato de precio
                     style: textTheme.titleLarge?.copyWith(
-                      color: colorScheme.primary, // Resaltar el precio con el color primario
+                      color: colorScheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // Aquí se podrían añadir más detalles como "Envío gratis", "Vendidos", etc.
-                  // Por ahora, lo dejamos simple como pediste.
-                  // Text(
-                  //   'Envío internacional gratis',
-                  //   style: textTheme.bodySmall?.copyWith(color: colorScheme.secondary),
-                  // ),
                 ],
               ),
             ),
