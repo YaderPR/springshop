@@ -9,6 +9,12 @@ import CartDrawer from "./components/Cart/CartDrawer";
 import CheckoutPage from "./pages/CheckoutPage";
 import PagoExitoso from "./pages/PagoExitoso";
 
+import AdminCategories from "./pages/AdminCategories";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminLayout from "./components/Layouts/AdminLayout";
+import AdminOrders from "./pages/AdminOrders";
+import AdminUsers from "./pages/AdminUsers";
+
 export default function App() {
   return (
     <Router>
@@ -17,8 +23,15 @@ export default function App() {
           <Navbar />
             <CartDrawer />
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/admin" element={<AdminLayout />} />
+            <Route index element={<AdminDashboard />} /> 
             <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+
+            <Route path="/" element={<HomePage />} />
+
             <Route path="/Checkout" element={<CheckoutPage />} />
             <Route path="/pago-exitoso" element={<PagoExitoso />} />
           </Routes>
