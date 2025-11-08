@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-keycloak/web": "^3.4.0",
     "@stripe/react-stripe-js": "^5.3.0",
     "@stripe/stripe-js": "^8.2.0",
     "axios": "^1.13.1",

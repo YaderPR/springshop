@@ -1,22 +1,36 @@
 import { useState } from "react";
-import { ShoppingCart, Menu, X, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ShoppingCart, Menu, X, Search, LogIn, LogOut } from "lucide-react"; // --- NUEVO: LogIn, LogOut
+import { Link, NavLink } from "react-router-dom"; // --- NUEVO: NavLink
 import { useCart } from "../../context/CartContext";
 import CartDrawer from "../Cart/CartDrawer";
+import { useKeycloak } from "@react-keycloak/web"; // --- NUEVO: Importamos el hook
 
 export default function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false); 
   const { cartItems } = useCart();
 
+  // --- NUEVO: Obtenemos el estado de Keycloak ---
+  const { keycloak, initialized } = useKeycloak();
+
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
-  //const totalItems = getCartItemCount();
   const totalItems = cartItems?.reduce((total, item) => total + item.quantity, 0) ?? 0;
-//  const totalItems = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) ?? 0;
 
-  // const isLoggedIn = false;
+  // --- NUEVO: Handlers para Login/Logout ---
+  const handleLogin = () => {
+    // Redirige a la página de login de Keycloak
+    keycloak.login();
+  };
+
+  const handleLogout = () => {
+    // Redirige a Keycloak para logout y luego vuelve a nuestra página de inicio
+    keycloak.logout({ redirectUri: window.location.origin });
+  };
+  
+  // --- NUEVO: Helper para saber si es admin ---
+  const isAdmin = initialized && keycloak.authenticated && keycloak.hasRealmRole("admin");
 
   return (
     <>
@@ -35,9 +49,12 @@ export default function Navbar() {
                 Shop
               </Link>
 
-              <Link to="/admin/products" className="hover:text-secondary transition-colors">
-                Productos
-              </Link>
+              {/* --- NUEVO: Ocultamos el link de Admin si no eres admin --- */}
+              {isAdmin && (
+                <Link to="/admin" className="hover:text-secondary transition-colors">
+                  Panel Admin
+                </Link>
+              )}
 
               <a href="#" className="hover:text-secondary transition-colors">
                 Categorías
@@ -50,52 +67,49 @@ export default function Navbar() {
 
             {/* Sección derecha */}
             <div className="flex items-center gap-4">
-              {/* Buscador */}
-              <div className="hidden sm:flex items-center bg-white rounded-full px-3 py-1">
-                <Search className="w-5 h-5 text-gray-500" />
-                <input
-                  type="text"
-                  placeholder="Buscar..."
-                  className="ml-2 outline-none border-none bg-transparent text-gray-700 text-sm"
-                />
-              </div>
-
-              {/* Carrito */}
+             
               <button
                 onClick={openCart}
                 className="relative text-white hover:text-secondary transition-colors"
               >
                 <ShoppingCart size={24} />
                 {totalItems > 0 && (
-                  <span
-                    className="
-                      absolute -top-2 -right-3 
-                      bg-red-600 text-white 
-                      text-xs font-bold 
-                      w-5 h-5 
-                      rounded-full 
-                      flex items-center justify-center
-                    "
-                  >
+                  <span className="absolute -top-2 -right-3 ...">
                     {totalItems}
                   </span>
                 )}
               </button>
 
-            {/* User / Login */}
-            {/* {isLoggedIn ? (
-              <div className="relative">
-                <img
-                  src="/path/to/avatar.jpg"
-                  alt="Avatar"
-                  className="w-8 h-8 rounded-full border-2 border-secondary cursor-pointer"
-                />
+              {/* --- NUEVO: Lógica de Login/Logout --- */}
+              <div className="flex items-center gap-4">
+                {!initialized ? (
+                  // Muestra un placeholder mientras Keycloak se inicializa
+                  <div className="w-24 h-8 bg-gray-700 rounded-full animate-pulse"></div>
+                ) : !keycloak.authenticated ? (
+                  // --- ESTADO: No Autenticado ---
+                  <button
+                    onClick={handleLogin}
+                    className="bg-secondary text-primary font-semibold px-4 py-1.5 rounded-full hover:bg-lime-400 transition-colors flex items-center gap-2"
+                  >
+                    <LogIn size={16} />
+                    Login
+                  </button>
+                ) : (
+                  // --- ESTADO: Autenticado ---
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-300 hidden sm:block">
+                      Hola, {keycloak.tokenParsed?.preferred_username || 'Usuario'}
+                    </span>
+                    <button
+                      onClick={handleLogout}
+                      className="bg-gray-600 text-white font-semibold px-4 py-1.5 rounded-full hover:bg-gray-500 transition-colors flex items-center gap-2"
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : ( */}
-               {/* Login */}
-              <button className="bg-secondary text-primary font-semibold px-4 py-1.5 rounded-full hover:bg-primary hover:text-accent transition-colors">
-                Login
-              </button>
 
               {/* Menú móvil */}
               <button
@@ -115,9 +129,14 @@ export default function Navbar() {
               <Link to="/" className="hover:text-secondary transition-colors">
                 Shop
               </Link>
-              <Link to="/admin/products" className="hover:text-secondary transition-colors">
-                Productos
-              </Link>
+              
+              {/* --- NUEVO: Lógica de Admin en Móvil --- */}
+              {isAdmin && (
+                <Link to="/admin" className="hover:text-secondary transition-colors">
+                  Panel Admin
+                </Link>
+              )}
+              
               <a href="#" className="hover:text-secondary transition-colors">
                 Categorías
               </a>
@@ -125,9 +144,24 @@ export default function Navbar() {
                 Contacto
               </a>
               
-              <button className="bg-secondary text-primary font-semibold px-4 py-1.5 rounded-full hover:bg-green-400 transition-colors">
-                Login
-              </button>
+              {/* --- NUEVO: Lógica de Login/Logout en Móvil --- */}
+              {!initialized ? (
+                <div className="h-8 bg-gray-700 rounded-full animate-pulse"></div>
+              ) : !keycloak.authenticated ? (
+                <button
+                  onClick={handleLogin}
+                  className="bg-secondary text-primary font-semibold px-4 py-1.5 rounded-full hover:bg-lime-400 transition-colors"
+                >
+                  Login
+                </button>
+              ) : (
+                <button
+                  onClick={handleLogout}
+                  className="bg-gray-600 text-white font-semibold px-4 py-1.5 rounded-full hover:bg-gray-500 transition-colors"
+                >
+                  Logout ({keycloak.tokenParsed?.preferred_username})
+                </button>
+              )}
             </div>
           </div>
         )}
