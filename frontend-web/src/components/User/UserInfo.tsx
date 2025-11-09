@@ -1,4 +1,3 @@
-// components/User/UserInfo.tsx
 import React from 'react';
 import { useUser } from '../../hooks/useUser';
 import { User, Loader2 } from 'lucide-react';
@@ -70,3 +69,5 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId }) => {
     </div>
   );
 };
+
+//export UserInfo();

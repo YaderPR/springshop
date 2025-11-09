@@ -27,7 +27,7 @@ public class CheckoutService {
         
         // 2. DEFINIR LAS URLs DE REDIRECCIÓN
         // {CHECKOUT_SESSION_ID} es una variable de Stripe que se reemplazará automáticamente.
-        String baseUrl = "http://localhost:8080"; 
+        String baseUrl = "http://localhost:5173"; 
         
         SessionCreateParams params = SessionCreateParams.builder()
                 .setSuccessUrl(baseUrl + "/pago-exitoso?session_id={CHECKOUT_SESSION_ID}")

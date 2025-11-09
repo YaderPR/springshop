@@ -37,7 +37,7 @@ export default function ProductsSection() {
   }, []); 
 
   return (
-    <section className="bg-primary py-16 px-6 sm:px-12 lg:px-20">
+    <section className=" py-16 px-6 sm:px-12 lg:px-20">
       
       <div className="flex flex-col md:flex-row justify-between items-center mb-12">
 
