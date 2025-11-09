@@ -1,32 +1,60 @@
 import axios from 'axios';
-import type { CheckoutRequestDto, CheckoutResponseDto } from '../../types/order.types'; 
-const ORDER_API_BASE_URL = 'http://localhost:8087/api/v2/orders'; 
+import type { CheckoutRequestDto, CheckoutResponseDto, OrderResponseDto } from '../../types/order.types'; 
 
-class OrderService {
+const orderApi = axios.create({
+  baseURL: "http://localhost:8087/api/v2/orders",
+  headers: { "Content-Type" : "application/json" },
+});
 
-  /**
-   * Esta es la llamada principal que inicia todo.
-   * Llama al endpoint que crea la Orden, reserva el stock y crea la sesión de Stripe.
-   */
-  async startCheckout(checkoutData: CheckoutRequestDto): Promise<CheckoutResponseDto> {
-    try {
-      const { data } = await axios.post<CheckoutResponseDto>(
-        `${ORDER_API_BASE_URL}/checkout`, 
-        checkoutData
-      );
-      return data;
-    } catch (error: any) {
-      // Si el backend devuelve un error (ej. 409 por Stock), lo relanzamos
-      // para que el componente de React pueda manejarlo y mostrar un mensaje.
-      if (error.response && error.response.data) {
-        throw new Error(error.response.data.error || 'Error al iniciar el checkout');
+
+export async function getOrders(token: string): Promise<OrderResponseDto[]> {
+  try {
+    const { data } = await orderApi.get<OrderResponseDto[]>('', {
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
-      throw new Error('Error de conexión al iniciar el checkout');
-    }
+    });
+    return data;
+  } catch (err: any) {
+    console.error("Error al obtener órdenes:", err.response?.data || err.message);
+    throw new Error(err.response?.data?.message || "Error al obtener órdenes ");
   }
-
-  // (Aquí irán otras llamadas a 'order' en el futuro, como 'getOrderHistory', etc.)
 }
 
-export const orderService = new OrderService();
+export async function getOrderById(id: number, token: string): Promise<OrderResponseDto> {
+  try {
+    const { data } = await orderApi.get<OrderResponseDto>(`/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return data;
+  } catch (err: any) {
+    console.error(`Error al obtener la orden ${id}:`, err.response?.data || err.message);
+    throw new Error(err.response?.data?.message || "Error al obtener la orden");
+  }
+}
+
+export async function startCheckout(
+  checkoutData: CheckoutRequestDto, 
+  token: string
+): Promise<CheckoutResponseDto> {
+  try {
+    const { data } = await orderApi.post<CheckoutResponseDto>(
+      '/checkout', 
+      checkoutData,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    return data;
+  } catch (error: any) {
+    console.error("Error al iniciar checkout:", error.response?.data || error.message);
+    // Relanzamos el error específico del backend (ej. "Stock insuficiente")
+    throw new Error(error.response?.data?.message || 'Error al iniciar el checkout');
+  }
+}
+
 

@@ -1,14 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import React  from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
 import { ReactKeycloakProvider } from '@react-keycloak/web'
 import Keycloak from 'keycloak-js'
-
-import ProtectedRoute from './components/Auth/ProtectedRoute.tsx'
 
 const keycloakClient = new Keycloak({
   url: 'http://localhost:8080', 
@@ -23,13 +21,11 @@ const initOptions = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-
     <ReactKeycloakProvider
       authClient={keycloakClient}
       initOptions={initOptions}
     >
-
-    <App />
+      <App />
     </ReactKeycloakProvider>
   </StrictMode>,
 )

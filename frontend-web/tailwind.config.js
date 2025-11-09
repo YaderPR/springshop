@@ -16,7 +16,7 @@ export default {
         text: "#333333", // Dark gray for text
       },
        backgroundImage: {
-        "green-radial": "radial-gradient(circle, rgba(137,97,30,1) 0%, rgba(0,2,1,1) 100%)",
+        "green-radial": "radial-gradient(circle, rgba(25,30,15,.4) 70%, rgba(25,30,15,1,1) 10%)",
       },
     },
   },

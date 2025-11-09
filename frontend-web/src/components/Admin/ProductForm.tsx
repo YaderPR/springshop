@@ -308,15 +308,19 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
               <input name="flavor" placeholder="Sabor" value={specificFormData.flavor} onChange={handleChange} className="p-3 rounded bg-gray-800 border border-gray-600" />
               <input name="size" placeholder="Tamaño (ej. 500g)" value={specificFormData.size} onChange={handleChange} className="p-3 rounded bg-gray-800 border border-gray-600" />
             </div>
-            <textarea name="ingredients" placeholder="Ingredientes" value={specificFormData.ingredients} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" />
-            <textarea name="usageInstructions" placeholder="Instrucciones de uso" value={specificFormData.usageInstructions} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" />
-            <textarea name="warnings" placeholder="Advertencias" value={specificFormData.warnings} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" />
-            <select name="categoryId" value={specificFormData.categoryId || ""} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600">
+
+            <div className="grid grid-cols-3 gap-4">
+              <textarea name="ingredients" placeholder="Ingredientes" value={specificFormData.ingredients} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" />
+              <textarea name="usageInstructions" placeholder="Instrucciones de uso" value={specificFormData.usageInstructions} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" />
+              <textarea name="warnings" placeholder="Advertencias" value={specificFormData.warnings} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" />
+            </div>
+            
+            {/* <select name="categoryId" value={specificFormData.categoryId || ""} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600">
               <option value="">Seleccione una categoría Genérica</option>
               {categories.generic.map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
-            </select>
+            </select> */}
           </>
         );
       case "WORKOUT_ACCESSORY":
@@ -342,12 +346,13 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
   };
 
   return (
-    <div className="max-w-xl -ml-40 bg-gray-950/50 backdrop-blur-md p-10 rounded-2xl shadow-lg border border-secondary/50 text-gray-100">
-      <h2 className="text-xl text-center font-bold mb-6 text-secondary">
+    
+    <div className=" items-center w-full bg-gray-950/40 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-secondary/50 text-gray-100">
+      <h2 className="text-xl text-center font-bold mb-2  text-secondary">
         {productToEdit ? "Editar producto" : "Registrar nuevo producto"}
       </h2>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <form onSubmit={handleSubmit} className="space-y-4">
         
         <select
           name="productType"
@@ -357,14 +362,16 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
           required
           //disabled={!!productToEdit} 
         >
-          <option value="APPAREL">Tipo: Ropa (Apparel)</option>
-          <option value="SUPPLEMENT">Tipo: Suplemento (Supplement)</option>
-          <option value="WORKOUT_ACCESSORY">Tipo: Accesorio (Workout Accessory)</option>
+          <option value="APPAREL">Tipo: Ropa </option>
+          <option value="SUPPLEMENT">Tipo: Suplemento </option>
+          <option value="WORKOUT_ACCESSORY">Tipo: Accesorio </option>
         </select>
 
         {/* --- CAMPOS COMUNES --- */}
-        <input name="name" placeholder="Nombre del producto" value={baseFormData.name} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" required />
-        <textarea name="description" placeholder="Descripción" value={baseFormData.description} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" />
+        <div className="grid grid-cols-2 gap-4">
+          <input name="name" placeholder="Nombre del producto" value={baseFormData.name} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" required />
+          <textarea name="description" placeholder="Descripción" value={baseFormData.description} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" />
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <input name="price" type="number" step="0.01" placeholder="Precio" value={baseFormData.price} onChange={handleChange} className="p-3 rounded bg-gray-800 border border-gray-600" required />
           <input name="stock" type="number" step="1" placeholder="Stock" value={baseFormData.stock} onChange={handleChange} className="p-3 rounded bg-gray-800 border border-gray-600" required />
@@ -384,6 +391,9 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
           {productToEdit && <button type="button" onClick={onCancelEdit} className="flex-1 bg-gray-600 text-white py-3 rounded-full hover:bg-gray-500">Cancelar</button>}
         </div>
       </form>
+      </div>
+
+      
 
       {message && <p className="mt-4 text-center text-lg font-medium">{message}</p>}
     </div>

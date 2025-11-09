@@ -1,6 +1,6 @@
 // hooks/useUser.ts
 import { useState, useEffect } from 'react';
-import { userService } from '../services/user/userService';
+import { getUserBySub, getUserById } from '../services/user/userService';
 import { UserResponse } from '../types/User.types';
 
 export const useUser = (userId?: number) => {

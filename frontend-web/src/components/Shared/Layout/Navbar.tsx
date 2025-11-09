@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { ShoppingCart, Menu, X, Search, LogIn, LogOut } from "lucide-react"; // --- NUEVO: LogIn, LogOut
-import { Link, NavLink } from "react-router-dom"; // --- NUEVO: NavLink
-import { useCart } from "../../context/CartContext";
-import CartDrawer from "../Cart/CartDrawer";
-import { useKeycloak } from "@react-keycloak/web"; // --- NUEVO: Importamos el hook
+import { ShoppingCart, Menu, X, Search, LogIn, LogOut } from "lucide-react"; 
+import { Link, NavLink } from "react-router-dom";
+import { useCart } from "../../../context/CartContext";
+import CartDrawer from "../../Shop/Cart/CartDrawer";
+import { useKeycloak } from "@react-keycloak/web"; 
+
 
 export default function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false); 
   const { cartItems } = useCart();
 
-  // --- NUEVO: Obtenemos el estado de Keycloak ---
   const { keycloak, initialized } = useKeycloak();
 
   const openCart = () => setIsCartOpen(true);
@@ -18,18 +18,15 @@ export default function Navbar() {
 
   const totalItems = cartItems?.reduce((total, item) => total + item.quantity, 0) ?? 0;
 
-  // --- NUEVO: Handlers para Login/Logout ---
+  
   const handleLogin = () => {
-    // Redirige a la página de login de Keycloak
     keycloak.login();
   };
 
   const handleLogout = () => {
-    // Redirige a Keycloak para logout y luego vuelve a nuestra página de inicio
     keycloak.logout({ redirectUri: window.location.origin });
   };
   
-  // --- NUEVO: Helper para saber si es admin ---
   const isAdmin = initialized && keycloak.authenticated && keycloak.hasRealmRole("admin");
 
   return (

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'; 
 import { Search } from "lucide-react";
-import CategorySidebar from "./CategorySidebar";
-import type { Product } from "../types/Product";
-import { getProducts, getApparels } from '../services/product/ProductService'; 
-import ProductCard from '../components/Products/ProductCard'; 
+import CategorySidebar from "../../Shared/Layout/CategorySidebar";
+import type { Product } from "../../../types/Product";
+import { getProducts, getApparels } from '../../../services/product/ProductService'; 
+import ProductCard from './ProductCard'; 
 
 export default function ProductsSection() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -47,14 +47,7 @@ export default function ProductsSection() {
             Encuentra los mejores accesorios y equipos de gimnasio, seleccionados para ti.
           </p>
         </div>
-        <div className="mt-6 md:mt-0 flex items-center bg-white rounded-full shadow px-4 py-2 w-full md:w-80">
-          <Search className="w-5 h-5 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Buscar producto..."
-            className="ml-2 flex-1 outline-none border-none bg-transparent text-gray-700 text-sm"
-          />
-        </div>
+        
       </div>
 
       

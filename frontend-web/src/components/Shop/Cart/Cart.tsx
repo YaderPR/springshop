@@ -1,6 +1,6 @@
 // components/Cart/Cart.tsx
 import React from 'react';
-import { useCart } from '../../hooks/useCart';
+import { useCart } from '../../../hooks/useCart';
 import { ShoppingCart, Trash2, Plus, Minus, Loader2 } from 'lucide-react';
 
 interface CartProps {

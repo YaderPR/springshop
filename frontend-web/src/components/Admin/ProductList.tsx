@@ -157,12 +157,12 @@ export default function ProductList({ refreshSignal, onEdit }: Props) {
   };
 
   return (
-    <div className="p-7 rounded-lg">
-      <div className="  bg-gray-950/70 rounded-2xl border-spacing-4 ring-1 ring-secondary/50">
-        <h2 className="text-xl p-3.5 font-bold text-center  text-secondary">
+    <div className="mt-6 rounded-lg">
+      <div className="bg-gray-950/40 rounded-2xl  ring-1 ring-secondary/50">
+        <h2 className="text-xl p-6 font-bold text-center  text-secondary">
           Listado de Productos
         </h2>
-        <div className="space-y-4 p-10  flex-col justify-center h-[600px] overflow-y-auto no-scrollbar">
+        <div className="space-y-4 p-8 max-h-[500px] overflow-y-auto no-scrollbar">
           {products.length > 0 ? (
             products.map((p) => (
               <div
