@@ -1,21 +1,23 @@
 // lib/src/features/products/presentation/widgets/product_list_widget.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:springshop/src/features/products/data/services/apparel_service.dart';
-import 'package:springshop/src/features/products/data/services/supplement_service.dart'; // ¡Nueva Importación!
-import 'package:springshop/src/features/products/data/services/workout_accessory_service.dart'; // ¡Nueva Importación!
+import 'package:springshop/src/features/products/data/services/supplement_service.dart'; 
+import 'package:springshop/src/features/products/data/services/workout_accessory_service.dart'; 
 import 'package:springshop/src/features/products/data/services/product_service.dart'; 
 import 'package:springshop/src/features/products/domain/entities/product.dart';
 import 'package:springshop/src/features/products/presentation/widgets/product_list_item_widget.dart';
 import 'package:springshop/src/features/products/presentation/screens/product_detail_screen.dart';
 
-const int SUPPLEMENT_CATEGORY_ID = 3;
+// IDs de Categoría Globales (Se asume que son enteros)
+const int WORKOUT_ACCESSORY_CATEGORY_ID = 3;
 const int APPAREL_CATEGORY_ID = 4;
-const int WORKOUT_ACCESSORY_ID = 5;
+const int SUPPLEMENT_CATEGORY_ID = 5;
 
 class ProductListWidget extends StatefulWidget {
   final List<int> productIds;
-  final int? categoryId;
+  final int? categoryId; 
 
   const ProductListWidget({
     super.key,
@@ -38,39 +40,37 @@ class _ProductListWidgetState extends State<ProductListWidget> {
   
   Future<List<Product>> _fetchProducts() async {
     final int? filterCategoryId = widget.categoryId;
-    List<Product> products = [];
     
+    // 1. Determinar y usar el servicio especializado o genérico
     if (filterCategoryId == APPAREL_CATEGORY_ID) {
 
       print('🛒 Usando ApparelService (ID $APPAREL_CATEGORY_ID).');
       final apparelService = context.read<ApparelService>();
-      products = await apparelService.getApparelsByIds(widget.productIds);
+      // Los IDs ya están filtrados por subcategoría o son el mix completo de Apparel.
+      return await apparelService.getApparelsByIds(widget.productIds);
     
     } else if (filterCategoryId == SUPPLEMENT_CATEGORY_ID) {
 
       print('💊 Usando SupplementService (ID $SUPPLEMENT_CATEGORY_ID).');
       final supplementService = context.read<SupplementService>();
-      products = await supplementService.getSupplementsByIds(widget.productIds);
+      return await supplementService.getSupplementsByIds(widget.productIds);
       
-    } else if (filterCategoryId == WORKOUT_ACCESSORY_ID) {
+    } else if (filterCategoryId == WORKOUT_ACCESSORY_CATEGORY_ID) {
 
-      print('⚙️ Usando WorkoutAccessoryService (ID $WORKOUT_ACCESSORY_ID).');
+      print('⚙️ Usando WorkoutAccessoryService (ID $WORKOUT_ACCESSORY_CATEGORY_ID).');
       final accessoryService = context.read<WorkoutAccessoryService>();
-      products = await accessoryService.getWorkoutAccessoriesByIds(widget.productIds);
+      return await accessoryService.getWorkoutAccessoriesByIds(widget.productIds);
 
     } else {
-
-      print('📦 Usando ProductService para obtener productos genéricos.');
+      // 2. Usar el servicio genérico para cualquier otro caso
+      print('📦 Usando ProductService para obtener productos genéricos (ID: $filterCategoryId).');
       final productService = context.read<ProductService>();
-      products = await productService.getProductsByIds(widget.productIds);
+      return await productService.getProductsByIds(widget.productIds);
     }
-
-    if (filterCategoryId != null) {
-      final String filterId = filterCategoryId.toString(); 
-      products = products.where((product) => product.categoryId == filterId).toList();
-    }
-
-    return products;
+    
+    // NOTA: Se eliminó la lógica de filtrado por categoryId (product.categoryId == filterId)
+    // porque es innecesaria y potencialmente incorrecta, ya que los IDs que recibimos
+    // (widget.productIds) ya representan la lista final de productos deseada.
   }
 
   void _handleProductTap(Product product) {
@@ -98,9 +98,9 @@ class _ProductListWidgetState extends State<ProductListWidget> {
               Text(
                 'Opciones de Filtro',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
