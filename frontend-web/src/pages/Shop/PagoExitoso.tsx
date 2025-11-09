@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import AnimatedCheck from '../components/Common/AnimatedChecked';
-import DeliveryTruck from '../components/Common/DeliveryTruck';
+import AnimatedCheck from '../../components/Shared/Common/AnimatedChecked';
+import DeliveryTruck from '../../components/Shared/Common/DeliveryTruck';
 
 export default function PagoExitoso() {
   // Opcional: Hook para leer los parámetros de la URL (ej. ?session_id=...)

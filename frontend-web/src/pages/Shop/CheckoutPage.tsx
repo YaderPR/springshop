@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { useCartManager } from '../hooks/useCartManager';
-import { orderService } from '../services/order/OderService';
-import ShippingForm from '../components/Checkout/ShippingForm';
-import type { ShippingAddressResponse } from '../components/Checkout/ShippingForm';
+import { useCartManager } from '../../hooks/useCartManager';
 import { Loader2 } from 'lucide-react';
+import ShippingForm from '../../components/shop/checkout/ShippingForm'; 
+import type { ShippingAddressResponse } from '../../components/shop/checkout/ShippingForm'; 
+
+import { startCheckout } from '../../services/order/OderService';
+import { useKeycloak } from '@react-keycloak/web';
+
 
 export default function CheckoutPage() {
+    // Obtenemos los IDs y el estado de Keycloak
     const { cartId, userId } = useCartManager();
+    const { keycloak, initialized } = useKeycloak(); // <-- Añadido
+
+    // Estados de esta página
     const [addressId, setAddressId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // 3. Callback que el ShippingForm nos dará
+    // Callback que el ShippingForm nos dará
     const handleShippingSubmit = (savedAddress: ShippingAddressResponse | null) => {
         if (savedAddress && savedAddress.id) {
             setAddressId(savedAddress.id);
@@ -21,10 +28,19 @@ export default function CheckoutPage() {
         }
     };
 
-    // 4. El manejador del botón final de pago
+    // --- ¡ARREGLO 3! ---
+    // El manejador del botón final de pago
     const handleFinalCheckout = async () => {
+        // Verificamos que todo esté listo
         if (!cartId || !userId || !addressId) {
             setError("Faltan datos (Carrito, Usuario o Dirección) para continuar.");
+            return;
+        }
+        
+        // Verificamos que tengamos el token
+        if (!initialized || !keycloak.token) {
+            setError("Sesión no válida. Por favor, inicie sesión de nuevo.");
+            keycloak.login(); // Forzar login
             return;
         }
 
@@ -32,14 +48,13 @@ export default function CheckoutPage() {
         setError(null);
 
         try {
-            // 5. Llamamos al backend (OrderController)
-            const response = await orderService.startCheckout({
-                cartId,
-                userId, // Este ID ahora es real (ej. 125)
-                addressId
-            });
+            // Llamamos a la FUNCIÓN 'startCheckout' directamente
+            const response = await startCheckout(
+                { cartId, userId, addressId }, // DTO
+                keycloak.token               // ¡Token!
+            );
 
-            // 6. ¡ÉXITO! Redirigimos a Stripe
+            // ¡ÉXITO! Redirigimos a Stripe
             if (response.checkoutUrl) {
                 window.location.href = response.checkoutUrl;
             } else {
@@ -48,14 +63,13 @@ export default function CheckoutPage() {
             }
 
         } catch (err: any) {
-            // 7. ¡ERROR! El backend nos dice qué pasó (ej. "Stock insuficiente")
             console.error('Error al iniciar checkout:', err);
             setError(err.message); // El mensaje de error viene del backend
             setIsLoading(false);
         }
     };
 
-    // 8. Renderizado condicional
+    // Renderizado condicional
     return (
         <div className="container mx-auto py-10 px-4">
             <h1 className="text-3xl font-bold text-secondary mb-6 text-center">Checkout</h1>
@@ -63,30 +77,26 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div>
                     <h2 className="text-xl font-semibold text-white mb-4">1. Dirección de Envío</h2>
-                    {/* El formulario de dirección */}
                     {!addressId && (
                         <ShippingForm onShippingSubmit={handleShippingSubmit} />
                     )}
-                    
-                    {/* Mensaje de confirmación de dirección */}
                     {addressId && (
                         <div className="bg-gray-800 p-4 rounded-lg shadow-lg text-gray-300">
-                            <p className="text-green-400"> Dirección guardada (ID: {addressId}).</p>
+                            <p className="text-green-400">? Dirección guardada (ID: {addressId}).</p>
                         </div>
                     )}
                 </div>
 
                 <div>
                     <h2 className="text-xl font-semibold text-white mb-4">2. Resumen y Pago</h2>
-                    {/* Mostramos el botón de pago SÓLO si ya tenemos la dirección */}
                     {addressId ? (
                         <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-                            <p className="text-gray-300 mb-4">Todo listo. Serás redirigido a Stripe, nuestro proveedor de pagos seguro, para completar la transacción.</p>
+                            <p className="text-gray-300 mb-4">Todo listo. Serás redirigido a Stripe para completar la transacción.</p>
                             
                             <button
                                 onClick={handleFinalCheckout}
-                                disabled={isLoading}
-                                className="w-full bg-secondary text-black font-bold py-3 px-4 rounded-lg hover:bg-lime-400 transition-colors disabled:opacity-50"
+                                disabled={isLoading || !initialized} // Deshabilitado si Keycloak no está listo
+                                className="w-full bg-secondary text-primary font-bold py-3 px-4 rounded-lg hover:bg-lime-400 transition-colors disabled:opacity-50"
                             >
                                 {isLoading ? (
                                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />

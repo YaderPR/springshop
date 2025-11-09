@@ -1,5 +1,5 @@
 import React from "react";
-import heroBg from "../assets/hero-bg.png"; // asegúrate que la ruta sea correcta
+import heroBg from "../../../assets/hero-bg.png"; // asegúrate que la ruta sea correcta
 
 export default function Hero() {
   return (

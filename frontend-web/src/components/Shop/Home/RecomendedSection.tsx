@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
-import ProductCard from '../components/Products/ProductCard';
-import type { Product } from "../types/Product";
-import { getProducts, getApparels } from '../services/product/ProductService';
+import ProductCard from '../../Shop/Product/ProductCard';
+import type { Product } from "../../../types/Product";
+import { getProducts, getApparels } from '../../../services/product/ProductService';
 
 export default function RecommendedSection() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);

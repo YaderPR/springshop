@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { createShippingAddress } from '../../services/ShippingService';
-import type { ShippingAddressResponse } from '../../services/ShippingService';
+import { createShippingAddress } from '../../../services/shipment/ShippingService';
+import type { ShippingAddressResponse } from '../../../services/shipment/ShippingService';
 
 interface ShippingAddressFormState {
     

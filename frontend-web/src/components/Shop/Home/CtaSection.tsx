@@ -4,8 +4,8 @@ import React from 'react';
 
 export default function CtaSection() {
   return (
-    <section className=" py-16 px-6 sm:px-12 lg:px-20">
-      <div className="container mx-auto bg-secondary text-primary p-8 sm:p-12 rounded-2xl">
+    <section className=" py-14 px-6 sm:px-10 lg:px-20">
+      <div className="container mx-auto bg-primary text-secondary shadow-[0_0_15px_rgba(137,254,0,.7)] p-8 sm:p-12 rounded-2xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           
           {/* Columna Izquierda: Título y Formulario */}
@@ -19,14 +19,12 @@ export default function CtaSection() {
                 placeholder="Your email" 
                 className="flex-grow bg-transparent outline-none px-4 text-gray-700"
               />
-              <button className="bg-secondary text-primary font-bold py-2 px-6 rounded-full hover:bg-black hover:text-white transition-colors">
-                Search
-              </button>
+              
             </div>
           </div>
 
           {/* Columna Derecha: Texto descriptivo */}
-          <div className="space-y-2 text-primary/90">
+          <div className="space-y-2 text-secondary/80">
             <p>
               <strong className="text-lg font-bold" >Products, accessories and more for your fitness life</strong>
             </p>

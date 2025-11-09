@@ -1,4 +1,3 @@
-// src/services/product/ProductService.ts
 import axios from "axios";
 import type { 
   Product, 
@@ -10,7 +9,6 @@ import type {
   WorkoutAccessoryCategory
 } from "../../types/Product";
 
-// --- INSTANCIA BASE DE AXIOS ---
 const api = axios.create({
   baseURL: "http://localhost:8085/api/v2/products",
   headers: {
@@ -18,7 +16,6 @@ const api = axios.create({
   },
 });
 
-// --- PRODUCTOS GENÉRICOS ---
 export async function getProducts(): Promise<Product[]> {
   const { data } = await api.get<Product[]>("");
   return data;
@@ -107,4 +104,54 @@ export async function deleteWorkoutAccessory(id: number): Promise<void> {
 export async function getWorkoutAccessoryCategories(): Promise<WorkoutAccessoryCategory[]> {
   const { data } = await api.get<WorkoutAccessoryCategory[]>("/workoutaccessories/categories");
   return data;
+}
+
+//Sección de categorías CRUD
+// --- CATEGORÍAS GENÉRICAS (para Suplementos) ---
+
+export async function createCategory(data: { name: string }): Promise<Category> {
+  const { data: newCategory } = await api.post<Category>("/categories", data);
+  return newCategory;
+}
+
+export async function updateCategory(id: number, data: { name: string }): Promise<Category> {
+  const { data: updatedCategory } = await api.put<Category>(`/categories/${id}`, data);
+  return updatedCategory;
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  await api.delete(`/categories/${id}`);
+}
+
+// --- CATEGORÍAS DE APPAREL (ROPA) ---
+
+export async function createApparelCategory(data: { name: string }): Promise<ApparelCategory> {
+  const { data: newCategory } = await api.post<ApparelCategory>("/apparels/categories", data);
+  return newCategory;
+}
+
+export async function updateApparelCategory(id: number, data: { name: string }): Promise<ApparelCategory> {
+  const { data: updatedCategory } = await api.put<ApparelCategory>(`/apparels/categories/${id}`, data);
+  return updatedCategory;
+}
+
+export async function deleteApparelCategory(id: number): Promise<void> {
+  await api.delete(`/apparels/categories/${id}`);
+}
+
+
+// --- CATEGORÍAS DE WORKOUT ACCESSORIES (ACCESORIOS) ---
+
+export async function createWorkoutAccessoryCategory(data: { name: string }): Promise<WorkoutAccessoryCategory> {
+  const { data: newCategory } = await api.post<WorkoutAccessoryCategory>("/workoutaccessories/categories", data);
+  return newCategory;
+}
+
+export async function updateWorkoutAccessoryCategory(id: number, data: { name: string }): Promise<WorkoutAccessoryCategory> {
+  const { data: updatedCategory } = await api.put<WorkoutAccessoryCategory>(`/workoutaccessories/categories/${id}`, data);
+  return updatedCategory;
+}
+
+export async function deleteWorkoutAccessoryCategory(id: number): Promise<void> {
+  await api.delete(`/workoutaccessories/categories/${id}`);
 }

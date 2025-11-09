@@ -1,6 +1,6 @@
 // src/components/CheckoutButton.tsx
 import React from "react";
-import { useStripeCheckout } from "../../hooks/useStripeCheckout";
+import { useStripeCheckout } from "../../../hooks/useStripeCheckout";
 
 const CheckoutButton: React.FC = () => {
   const { startCheckout, loading } = useStripeCheckout();
