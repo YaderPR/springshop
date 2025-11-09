@@ -1,19 +1,26 @@
 // lib/src/features/products/presentation/widgets/product_list_widget.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:springshop/src/features/products/data/services/apparel_service.dart';
+import 'package:springshop/src/features/products/data/services/supplement_service.dart'; // ¡Nueva Importación!
+import 'package:springshop/src/features/products/data/services/workout_accessory_service.dart'; // ¡Nueva Importación!
 import 'package:springshop/src/features/products/data/services/product_service.dart'; 
 import 'package:springshop/src/features/products/domain/entities/product.dart';
 import 'package:springshop/src/features/products/presentation/widgets/product_list_item_widget.dart';
-// 🔑 Importar la pantalla de detalles que creamos antes
 import 'package:springshop/src/features/products/presentation/screens/product_detail_screen.dart';
 
+const int SUPPLEMENT_CATEGORY_ID = 3;
+const int APPAREL_CATEGORY_ID = 4;
+const int WORKOUT_ACCESSORY_ID = 5;
 
 class ProductListWidget extends StatefulWidget {
   final List<int> productIds;
+  final int? categoryId;
 
   const ProductListWidget({
     super.key,
-    required this.productIds, 
+    required this.productIds,
+    this.categoryId
   });
 
   @override
@@ -30,18 +37,45 @@ class _ProductListWidgetState extends State<ProductListWidget> {
   }
   
   Future<List<Product>> _fetchProducts() async {
-    // Nota: La ruta de importación del servicio ha sido corregida 
-    // a 'application/services/product_service.dart' para seguir la arquitectura Domain/Application/Data/Presentation
-    // Si tu servicio está en otra ruta, ajústalo.
-    final productService = context.read<ProductService>();
-    return productService.getProductsByIds(widget.productIds);
+    final int? filterCategoryId = widget.categoryId;
+    List<Product> products = [];
+    
+    if (filterCategoryId == APPAREL_CATEGORY_ID) {
+
+      print('🛒 Usando ApparelService (ID $APPAREL_CATEGORY_ID).');
+      final apparelService = context.read<ApparelService>();
+      products = await apparelService.getApparelsByIds(widget.productIds);
+    
+    } else if (filterCategoryId == SUPPLEMENT_CATEGORY_ID) {
+
+      print('💊 Usando SupplementService (ID $SUPPLEMENT_CATEGORY_ID).');
+      final supplementService = context.read<SupplementService>();
+      products = await supplementService.getSupplementsByIds(widget.productIds);
+      
+    } else if (filterCategoryId == WORKOUT_ACCESSORY_ID) {
+
+      print('⚙️ Usando WorkoutAccessoryService (ID $WORKOUT_ACCESSORY_ID).');
+      final accessoryService = context.read<WorkoutAccessoryService>();
+      products = await accessoryService.getWorkoutAccessoriesByIds(widget.productIds);
+
+    } else {
+
+      print('📦 Usando ProductService para obtener productos genéricos.');
+      final productService = context.read<ProductService>();
+      products = await productService.getProductsByIds(widget.productIds);
+    }
+
+    if (filterCategoryId != null) {
+      final String filterId = filterCategoryId.toString(); 
+      products = products.where((product) => product.categoryId == filterId).toList();
+    }
+
+    return products;
   }
 
-  // 🔑 CAMBIO CLAVE: Ahora recibe el objeto Product completo.
   void _handleProductTap(Product product) {
     print('Producto con ID ${product.id} clickeado. Navegando a detalles...');
     
-    // 💡 Implementación de la navegación a la ProductDetailScreen
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -121,7 +155,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
         child: FutureBuilder<List<Product>>(
           future: _productsFuture,
           builder: (context, snapshot) {
-            // ... manejo de estados (Error, Cargando) ...
+
             if (snapshot.hasError) {
               return Center(
                 child: Padding(
@@ -139,7 +173,6 @@ class _ProductListWidgetState extends State<ProductListWidget> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // Estado: Datos listos
             if (snapshot.hasData && snapshot.data!.isNotEmpty) {
               final List<Product> products = snapshot.data!;
               return ListView.separated(
@@ -155,14 +188,12 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                   final product = products[index];
                   return ProductListItemWidget(
                     product: product,
-                    // 💡 onProductTap ahora envía el objeto product completo
                     onProductTap: _handleProductTap, 
                   );
                 },
               );
             }
-            
-            // Estado: Lista vacía
+
             return Center(
               child: Text(
                 'No se encontraron productos para los IDs proporcionados.',

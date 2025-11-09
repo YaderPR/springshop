@@ -5,9 +5,18 @@ import 'package:springshop/src/core/auth/app_auth_service.dart';
 import 'package:springshop/src/core/config/app_config.dart';
 import 'package:springshop/src/features/categories/data/repositories/category_api_repository.dart';
 import 'package:springshop/src/features/categories/domain/repositories/category_repository.dart';
+import 'package:springshop/src/features/products/data/repositories/apparel_api_repository.dart';
 import 'package:springshop/src/features/products/data/repositories/product_api_repository.dart';
+import 'package:springshop/src/features/products/data/repositories/supplement_api_repository.dart';
+import 'package:springshop/src/features/products/data/repositories/workout_accessory_api_repository.dart';
+import 'package:springshop/src/features/products/data/services/apparel_service.dart';
 import 'package:springshop/src/features/products/data/services/product_service.dart';
+import 'package:springshop/src/features/products/data/services/supplement_service.dart';
+import 'package:springshop/src/features/products/data/services/workout_accessory_service.dart';
+import 'package:springshop/src/features/products/domain/repositories/apparel_repository.dart';
 import 'package:springshop/src/features/products/domain/repositories/product_repository.dart';
+import 'package:springshop/src/features/products/domain/repositories/supplement_repository.dart';
+import 'package:springshop/src/features/products/domain/repositories/workout_accessory_repository.dart';
 
 import '../../core/theme/theme_notifier.dart';
 import '../auth/auth_repository.dart';
@@ -47,8 +56,27 @@ List<SingleChildWidget> buildAppProviders() {
     Provider<ProductRepository>(
       create: (context) => ProductApiRepository(context.read<Dio>()),
     ),
+    Provider<ApparelRepository>(
+      create: (context) => ApparelApiRepository(_dioClient),
+    ),
+    Provider<SupplementRepository>(
+      create: (context) => SupplementApiRepository(_dioClient),
+    ),
+    Provider<WorkoutAccessoryRepository>(
+      create: (context) => WorkoutAccessoryApiRepository(_dioClient),
+    ),
     Provider<ProductService>(
       create: (context) => ProductService(context.read<ProductRepository>()),
+    ),
+    Provider<ApparelService>(
+      create: (context) => ApparelService(context.read<ApparelRepository>()),
+    ),
+    Provider<SupplementService>(
+      create: (context) => SupplementService(context.read<SupplementRepository>()),
+    ),
+    Provider<WorkoutAccessoryService>(
+      create: (context) =>
+          WorkoutAccessoryService(context.read<WorkoutAccessoryRepository>()),
     ),
     ChangeNotifierProvider<AuthStateNotifier>(
       create: (context) =>

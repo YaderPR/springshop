@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:springshop/src/features/categories/domain/entities/category.dart';
 import 'package:springshop/src/features/categories/domain/repositories/category_repository.dart';
 import 'package:springshop/src/features/categories/presentation/widgets/category_item_widget.dart';
-import 'package:springshop/src/features/products/presentation/widgets/product_list_widget.dart';
+import 'package:springshop/src/features/categories/presentation/screens/subcategory_list_screen.dart';
+
 
 class CategoriesListWidget extends StatefulWidget {
   const CategoriesListWidget({super.key});
@@ -15,48 +16,44 @@ class CategoriesListWidget extends StatefulWidget {
 
 class _CategoriesListWidgetState extends State<CategoriesListWidget> {
   late Future<List<Category>> _categoriesFuture;
-
-  // ⚠️ La lista de categorías (List<Category>) se sigue guardando aquí, 
-  // ya que se usa *fuera* del FutureBuilder (en _handleCategoryClick)
   List<Category> _categories = []; 
-
   String? _selectedCategoryId;
 
   @override
   void initState() {
     super.initState();
-    // 💡 BUENA PRÁCTICA: Inicializar el Future en initState.
     _categoriesFuture = context.read<CategoryRepository>().getCategories();
-    // ⚠️ ELIMINADO: didChangeDependencies ya no es necesario.
   }
 
+  // 🔑 LÓGICA DE CLICK ACTUALIZADA
   void _handleCategoryClick(String categoryId) {
     setState(() {
       _selectedCategoryId = categoryId;
     });
 
-    // 🔑 CORRECCIÓN CRÍTICA Y LÓGICA: 
-    // 1. Encontrar el objeto Category real usando el ID de tipo String.
+    // 1. Encontrar el objeto Category real usando el ID.
     final selectedCategory = _categories.firstWhere(
       (cat) => cat.id == categoryId,
       orElse: () => throw Exception('Categoría con ID $categoryId no encontrada.'),
     );
-
-    // 2. Navegar, pasando la lista de IDs de producto
+    final int categoryIdAsInt = int.parse(selectedCategory.id);
+    final List<int> productIdsAsIntList = selectedCategory.productIds as List<int>;
+    // 2. Navegar a la pantalla de Subcategorías, pasando el NOMBRE de la categoría
+    // (Ej. "Ropa", "Electrónica").
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => ProductListWidget(
-                // 💡 Se accede de forma segura a la lista de IDs de producto
-                productIds: selectedCategory.productIds as List<int>, 
-              )),
+          builder: (context) => SubcategoryListScreen(
+              categoryId: categoryIdAsInt,
+              categoryName: selectedCategory.name,
+              categoryProductIds: productIdsAsIntList,
+          )),
     );
-    print('✅ CATEGORY CLICK EVENT: El ID seleccionado es: $categoryId con ${selectedCategory.productIds?.length} productos.');
+    print('✅ CATEGORY CLICK EVENT: Navegando a Subcategorías de: ${selectedCategory.name}');
   }
   
-  // 💡 Función de ayuda para construir el contenido de la lista (Mejor legibilidad)
+  // 💡 Función de ayuda para construir el contenido de la lista (Sin cambios)
   Widget _buildCategoryContent(List<Category> categories, ColorScheme colorScheme) {
-    // 💡 Inicializar la selección: Solo si no hay selección previa y la lista no está vacía.
     if (_selectedCategoryId == null && categories.isNotEmpty) {
         _selectedCategoryId = categories.first.id;
     }
@@ -85,7 +82,7 @@ class _CategoriesListWidgetState extends State<CategoriesListWidget> {
 
     return Container(
       height: screenHeight / 2,
-      color: Colors.black,
+      color: colorScheme.surface, // Cambiado de 'Colors.black' a 'colorScheme.surface' para temas
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -108,7 +105,6 @@ class _CategoriesListWidgetState extends State<CategoriesListWidget> {
             child: FutureBuilder<List<Category>>(
               future: _categoriesFuture,
               builder: (context, snapshot) {
-                // Estado 1: Error
                 if (snapshot.hasError) {
                   return Center(
                     child: Text(
@@ -119,23 +115,17 @@ class _CategoriesListWidgetState extends State<CategoriesListWidget> {
                   );
                 }
 
-                // Estado 2: Cargando
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                // Estado 3: Datos listos
                 if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  // ⚠️ CORRECCIÓN: Guardar los datos SÓLO si es la primera vez que llegan.
-                  // Esto previene sobrescribir si hay una reconstrucción de setState.
                   if (_categories.isEmpty) {
                     _categories = snapshot.data!;
                   }
-
                   return _buildCategoryContent(snapshot.data!, colorScheme);
                 }
 
-                // Estado 4: Sin datos
                 return Center(
                   child: Text(
                     'No hay categorías disponibles.',

@@ -1,6 +1,7 @@
 // lib/src/features/categories/presentation/screens/subcategory_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:springshop/src/features/categories/domain/entities/subcategory.dart';
+import 'package:springshop/src/features/categories/presentation/widgets/subcategory_card.dart';
 import 'package:springshop/src/features/products/presentation/widgets/product_list_widget.dart';
 
 // --------------------
@@ -8,10 +9,14 @@ import 'package:springshop/src/features/products/presentation/widgets/product_li
 class SubcategoryListScreen extends StatelessWidget {
   // Recibe el nombre de la categoría principal (ej. "Ropa")
   final String categoryName;
+  final int categoryId;
+  final List<int> categoryProductIds;
 
   const SubcategoryListScreen({
     super.key,
-    required this.categoryName,
+    required this.categoryId,
+    required this.categoryName, 
+    required this.categoryProductIds, 
   });
 
   // Datos mock para las subcategorías dinámicas
@@ -58,10 +63,6 @@ class SubcategoryListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
-    // IDs mock para la opción genérica (trae todos los productos posibles)
-    const List<int> genericProductIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-
     return Scaffold(
       appBar: AppBar(
         title: Text(categoryName), // Título de la categoría principal (ej. "Ropa")
@@ -88,11 +89,12 @@ class SubcategoryListScreen extends StatelessWidget {
               SubcategoryCard(
                 title: 'Genérica / Mix',
                 icon: '🛒',
-                color: colorScheme.primaryContainer, // Color que destaca
+                color: colorScheme.primaryContainer,
                 onTap: () => _handleSubcategoryClick(
                   context, 
                   'Genérica / Mix', 
-                  genericProductIds // Pasa todos los IDs
+                  // 🔑 CAMBIO 2: Usar los IDs recibidos de la Categoría Principal
+                  categoryProductIds 
                 ),
               ),
               
@@ -127,56 +129,6 @@ class SubcategoryListScreen extends StatelessWidget {
             Icon(Icons.search),
             Icon(Icons.person_outline),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-
-class SubcategoryCard extends StatelessWidget {
-  final String title;
-  final String icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const SubcategoryCard({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: color,
-      elevation: 0, // Usamos elevación cero para un diseño más plano
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell( // InkWell para el efecto visual de click
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Nombre de la subcategoría
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              // Icono/Emoji
-              Text(
-                icon,
-                style: const TextStyle(fontSize: 30),
-              ),
-            ],
-          ),
         ),
       ),
     );
