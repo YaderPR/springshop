@@ -18,6 +18,7 @@ import org.springshop.user_service.service.user.UserService;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v2/users")
@@ -29,6 +30,10 @@ public class UserController {
     public UserController(UserService userService, UserProfileService userProfileService) {
         this.userService = userService;
         this.userProfileService = userProfileService;
+    }
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(userService.findAllUsers());
     }
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getProfile(@RequestHeader(name = "X-Auth-Subject", required = false) String subject) { 

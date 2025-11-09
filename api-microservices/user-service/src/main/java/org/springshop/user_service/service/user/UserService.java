@@ -6,8 +6,9 @@ import org.springshop.user_service.dto.user.UserResponse;
 import org.springshop.user_service.mapper.user.UserMapper;
 import org.springshop.user_service.model.user.User;
 import org.springshop.user_service.repository.user.UserRepository;
-
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import jakarta.persistence.EntityNotFoundException; // Para manejo de 404
 
 @Service
@@ -58,13 +59,10 @@ public class UserService {
         return userRepository.findById(id)
                 .map(UserMapper::toResponseDTO).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
-    
-    // -------------------- MÉTODOS DE SOPORTE PARA OTROS SERVICIOS --------------------
-
-    /**
-     * Busca la entidad User por su ID o lanza EntityNotFoundException.
-     * Este es el método central de soporte que usarán otros servicios (e.g., AddressService, OrderService).
-     */
+    @Transactional(readOnly = true)
+    public List<UserResponse> findAllUsers() {
+        return userRepository.findAll().stream().map(UserMapper::toResponseDTO).collect(Collectors.toList());
+    }
     @Transactional(readOnly = true)
     public User findUserEntityByIdOrThrow(Integer userId) {
         return userRepository.findById(userId)
