@@ -10,4 +10,5 @@ public class ApparelCategoryRequest {
     
     @NotBlank 
     private String name;
+    private String imageUrl;
 }

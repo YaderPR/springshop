@@ -10,5 +10,6 @@ public class WorkoutAccessoryCategoryRequest {
 
     @NotBlank 
     private String name;
+    private String imageUrl;
 
 }

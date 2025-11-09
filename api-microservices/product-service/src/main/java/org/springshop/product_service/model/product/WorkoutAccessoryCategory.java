@@ -25,6 +25,8 @@ public class WorkoutAccessoryCategory {
     private Integer id;
     @Column(name = "name", nullable = false, length = 100)
     private String name;
+    @Column(name = "image_url", nullable = true, length = 200)
+    private String imageUrl;
     @OneToMany(mappedBy = "workoutAccessoryCategory")
     private Set<WorkoutAccessory> workoutAccessories;
     public WorkoutAccessoryCategory(String name) {
