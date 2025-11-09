@@ -14,6 +14,7 @@ public class CategoryMapper {
             return null;
         Category category = new Category();
         category.setName(dto.getName());
+        category.setImageUrl(dto.getImageUrl());
         return category;
     }
 
@@ -22,6 +23,7 @@ public class CategoryMapper {
             return;
 
         existing.setName(dto.getName());
+        existing.setImageUrl(dto.getImageUrl());
     }
 
     public static CategoryResponse toResponseDTO(Category category) {
@@ -31,6 +33,7 @@ public class CategoryMapper {
         CategoryResponse dto = new CategoryResponse();
         dto.setId(category.getId());
         dto.setName(category.getName());
+        dto.setImageUrl(category.getImageUrl());
         if (category.getProducts() != null) {
             dto.setProductIds(
                     category.getProducts()

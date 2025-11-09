@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../auth/auth_state_notifier.dart';
+import '../auth/auth_state_notifier.dart';
 import '../../features/home/presentation/screens/home_screen.dart'; 
 import '../../features/auth/presentation/screens/sign_in_screen.dart'; 
 

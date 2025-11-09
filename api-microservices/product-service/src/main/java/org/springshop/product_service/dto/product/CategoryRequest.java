@@ -1,6 +1,6 @@
 package org.springshop.product_service.dto.product;
 
-import jakarta.validation.constraints.NotBlank; 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,4 +10,5 @@ public class CategoryRequest {
     
     @NotBlank 
     private String name;
+    private String imageUrl;
 }
