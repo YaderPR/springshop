@@ -5,7 +5,7 @@ import 'package:springshop/src/features/products/domain/repositories/supplement_
 class SupplementApiRepository implements SupplementRepository {
   final Dio _dioClient;
   SupplementApiRepository(this._dioClient);
-  static final productPath = "/products/suplements";
+  static final productPath = "/products/supplements";
   @override
   Future<Supplement> findById(int id) async {
     try {

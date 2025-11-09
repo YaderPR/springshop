@@ -3,7 +3,11 @@ import 'package:provider/single_child_widget.dart';
 import 'package:dio/dio.dart';
 import 'package:springshop/src/core/auth/app_auth_service.dart';
 import 'package:springshop/src/core/config/app_config.dart';
+import 'package:springshop/src/features/categories/data/repositories/accessory_category_api_repository.dart';
+import 'package:springshop/src/features/categories/data/repositories/apparel_category_api_repository.dart';
 import 'package:springshop/src/features/categories/data/repositories/category_api_repository.dart';
+import 'package:springshop/src/features/categories/domain/repositories/accessory_category_repository.dart';
+import 'package:springshop/src/features/categories/domain/repositories/apparel_category_repository.dart';
 import 'package:springshop/src/features/categories/domain/repositories/category_repository.dart';
 import 'package:springshop/src/features/products/data/repositories/apparel_api_repository.dart';
 import 'package:springshop/src/features/products/data/repositories/product_api_repository.dart';
@@ -27,7 +31,7 @@ import '../api/auth_interceptor.dart';
 // =======================================================
 final AppAuthService _appAuthService = AppAuthService();
 final AppConfig _appConfig = AppConfig(
-  apiBaseUrl: 'http://10.183.167.191:8085/api/v2',
+  apiBaseUrl: 'http://10.189.147.191:8085/api/v2',
 );
 
 final Dio _dioClient = Dio(
@@ -53,6 +57,12 @@ List<SingleChildWidget> buildAppProviders() {
     Provider<CategoryRepository>(
       create: (context) => CategoryApiRepository(context.read<Dio>()),
     ),
+    Provider<AccessoryCategoryRepository>(
+      create: (context) => AccessoryCategoryApiRepository(context.read<Dio>()),
+    ),
+    Provider<ApparelCategoryRepository>(
+      create: (context) => ApparelCategoryApiRepository(context.read<Dio>()),
+    ),
     Provider<ProductRepository>(
       create: (context) => ProductApiRepository(context.read<Dio>()),
     ),
@@ -69,15 +79,16 @@ List<SingleChildWidget> buildAppProviders() {
       create: (context) => ProductService(context.read<ProductRepository>()),
     ),
     Provider<ApparelService>(
-      create: (context) => ApparelService(context.read<ApparelRepository>()),
+      create: (context) => ApparelService(context.read<ApparelRepository>(), context.read<ProductService>()),
     ),
     Provider<SupplementService>(
-      create: (context) => SupplementService(context.read<SupplementRepository>()),
+      create: (context) => SupplementService(context.read<SupplementRepository>() , context.read<ProductService>()),
     ),
     Provider<WorkoutAccessoryService>(
       create: (context) =>
-          WorkoutAccessoryService(context.read<WorkoutAccessoryRepository>()),
+          WorkoutAccessoryService(context.read<WorkoutAccessoryRepository>(), context.read<ProductService>()),
     ),
+
     ChangeNotifierProvider<AuthStateNotifier>(
       create: (context) =>
           AuthStateNotifier(context.read<AuthRepository>())

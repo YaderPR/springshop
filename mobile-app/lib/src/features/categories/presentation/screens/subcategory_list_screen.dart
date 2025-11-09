@@ -1,13 +1,18 @@
 // lib/src/features/categories/presentation/screens/subcategory_list_screen.dart
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:springshop/src/features/categories/domain/entities/subcategory.dart';
 import 'package:springshop/src/features/categories/presentation/widgets/subcategory_card.dart';
 import 'package:springshop/src/features/products/presentation/widgets/product_list_widget.dart';
 
-// --------------------
+import 'package:springshop/src/features/categories/domain/repositories/apparel_category_repository.dart'; 
+import 'package:springshop/src/features/categories/domain/repositories/accessory_category_repository.dart'; 
+const int WORKOUT_ACCESSORY_CATEGORY_ID = 3;
+const int APPAREL_CATEGORY_ID = 4;
+const int SUPPLEMENT_CATEGORY_ID = 5;
 
-class SubcategoryListScreen extends StatelessWidget {
-  // Recibe el nombre de la categoría principal (ej. "Ropa")
+class SubcategoryListScreen extends StatefulWidget {
   final String categoryName;
   final int categoryId;
   final List<int> categoryProductIds;
@@ -19,43 +24,67 @@ class SubcategoryListScreen extends StatelessWidget {
     required this.categoryProductIds, 
   });
 
-  // Datos mock para las subcategorías dinámicas
-  final List<Subcategory> _mockSubcategories = const [
-    Subcategory(
-      id: 'sub1', 
-      name: 'Pantalones', 
-      imageUrl: '👖', // Usamos un emoji como mock de imagen
-      productIdsMock: [1, 5, 8, 12, 15],
-    ),
-    Subcategory(
-      id: 'sub2', 
-      name: 'Camisetas', 
-      imageUrl: '👕',
-      productIdsMock: [2, 6, 9, 13, 16],
-    ),
-    Subcategory(
-      id: 'sub3', 
-      name: 'Vestidos', 
-      imageUrl: '👗',
-      productIdsMock: [3, 7, 10, 14, 17],
-    ),
-    Subcategory(
-      id: 'sub4', 
-      name: 'Calzado', 
-      imageUrl: '👟',
-      productIdsMock: [4, 11, 18],
-    ),
-  ];
+  @override
+  State<SubcategoryListScreen> createState() => _SubcategoryListScreenState();
+}
+
+class _SubcategoryListScreenState extends State<SubcategoryListScreen> {
+  // Estado para manejar la lista de subcategorías cargadas
+  late Future<List<Subcategory>> _subcategoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicia la carga de datos al inicializar el estado
+    _subcategoriesFuture = _fetchSubcategories();
+  }
+  
+  // 🚀 Lógica Central para Obtener Subcategorías
+  Future<List<Subcategory>> _fetchSubcategories() async {
+    // 1. Determinar qué servicio usar (si aplica)
+    final int id = widget.categoryId;
+    
+    try {
+      if (id == APPAREL_CATEGORY_ID) {
+        print('Cargando subcategorías de Apparel (ID $APPAREL_CATEGORY_ID) desde API.');
+        // Usar context.read<T>() para acceder a la instancia del repositorio
+        final repository = context.read<ApparelCategoryRepository>();
+        
+        return repository.getCategories();
+        
+      } else if (id == WORKOUT_ACCESSORY_CATEGORY_ID) {
+        print('Cargando subcategorías de Workout Accessory (ID $WORKOUT_ACCESSORY_CATEGORY_ID) desde API.');
+        final repository = context.read<AccessoryCategoryRepository>();
+        return repository.getCategories();
+
+      // ⚠️ CASO ESPECIAL: SUPPLEMENTS y otras categorías Genéricas
+      } else if (id == SUPPLEMENT_CATEGORY_ID) { 
+         print('SUPPLEMENTS (ID $SUPPLEMENT_CATEGORY_ID) no tiene subcategorías dinámicas. Usando lista vacía.');
+         return [];
+         
+      } else {
+        // Para cualquier otra categoría no mapeada o genérica
+        print('Categoría ID $id no mapeada para subcategorías especializadas. Usando lista vacía.');
+        return [];
+      }
+    } catch (e) {
+      print('ERROR al cargar subcategorías para ID $id: $e');
+      // Puedes lanzar el error para mostrarlo en el FutureBuilder o retornar una lista vacía
+      rethrow; 
+    }
+  }
 
   // 💡 Lógica de redirección a ProductListWidget
   void _handleSubcategoryClick(BuildContext context, String title, List<int> productIds) {
     print('Evento Click: Navegando a productos de $title con ${productIds.length} IDs.');
     
     // Redirección al ProductListWidget, pasándole los IDs correspondientes
+    // NOTA: No pasamos categoryId aquí, ya que el ProductListWidget debe usar
+    // los IDs de producto que le proporcione la subcategoría/categoría genérica.
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductListWidget(productIds: productIds),
+        builder: (context) => ProductListWidget(productIds: productIds, categoryId: widget.categoryId),
       ),
     );
   }
@@ -63,11 +92,11 @@ class SubcategoryListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
       appBar: AppBar(
-        title: Text(categoryName), // Título de la categoría principal (ej. "Ropa")
+        title: Text(widget.categoryName),
         actions: const [
-          // Iconos de búsqueda y carrito como en tu boceto
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Icon(Icons.search),
@@ -87,35 +116,69 @@ class SubcategoryListScreen extends StatelessWidget {
             children: [
               // --- 3. Card Genérica/Mix (FIJA) ---
               SubcategoryCard(
-                title: 'Genérica / Mix',
+                title: widget.categoryName + ' (General)',
                 icon: '🛒',
                 color: colorScheme.primaryContainer,
                 onTap: () => _handleSubcategoryClick(
                   context, 
                   'Genérica / Mix', 
-                  // 🔑 CAMBIO 2: Usar los IDs recibidos de la Categoría Principal
-                  categoryProductIds 
+                  // Usar los IDs recibidos de la Categoría Principal para el Mix
+                  widget.categoryProductIds 
                 ),
               ),
               
               const SizedBox(height: 16),
               
               // --- 4. Cards Dinámicas (Subcategorías) ---
-              ..._mockSubcategories.map((subcategory) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: SubcategoryCard(
-                    title: subcategory.name,
-                    icon: subcategory.imageUrl,
-                    color: colorScheme.surfaceContainer, // Color más sutil
-                    onTap: () => _handleSubcategoryClick(
-                      context, 
-                      subcategory.name, 
-                      subcategory.productIdsMock // Pasa los IDs de la subcategoría
-                    ),
-                  ),
-                );
-              }).toList(),
+              // Usar FutureBuilder para mostrar la lista de subcategorías
+              FutureBuilder<List<Subcategory>>(
+                future: _subcategoriesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error al cargar subcategorías: ${snapshot.error}', 
+                                   style: TextStyle(color: colorScheme.error)),
+                    );
+                  }
+                  
+                  final List<Subcategory> subcategories = snapshot.data ?? [];
+                  
+                  if (subcategories.isEmpty && widget.categoryId != SUPPLEMENT_CATEGORY_ID) {
+                      // Si no hay subcategorías (y no es Supplements)
+                      return Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          'No hay subcategorías especializadas disponibles.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      );
+                  }
+                  
+                  // Mostrar las subcategorías obtenidas de la API
+                  return Column(
+                    children: subcategories.map((subcategory) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: SubcategoryCard(
+                          title: subcategory.name,
+                          // Usar un placeholder si imageUrl es null o vacío
+                          icon: subcategory.imageUrl.isNotEmpty ? subcategory.imageUrl : '📦', 
+                          color: colorScheme.surfaceContainer, 
+                          onTap: () => _handleSubcategoryClick(
+                            context, 
+                            subcategory.name, 
+                            subcategory.ids // Pasa los IDs de producto de la subcategoría
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
             ],
           ),
         ),
