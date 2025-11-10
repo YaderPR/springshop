@@ -41,6 +41,7 @@ export interface WorkoutAccessory extends Product {
 export interface Category { 
   id: number;
   name: string;
+  imageUrl: string;
 }
 
 export interface ApparelCategory {

@@ -72,20 +72,3 @@ export async function getUserBySub(userSub: string): Promise<UserResponse> {
 export async function getProfilePictureUrl(userId: number): Promise<UserProfilePictureURLResponse>{
   const { data } = await userApi.get<UserProfilePictureURLResponse>(`/${userId}/profile-url`)
 }
-
-// class UserService {
-
-//   // async getUserBySub(userSub: string): Promise<UserResponse> {
-//   //   const { data } = await axios.get<UserResponse>(`${USER_API_BASE_URL}/subject/${userSub}`);
-//   //   return data;
-//   // }
-
-//   // Obtener URL de imagen de perfil
-//   // async getProfilePictureUrl(userId: number): Promise<UserProfilePictureURLResponse> {
-//   //   const { data } = await axios.get<UserProfilePictureURLResponse>(`${USER_API_BASE_URL}/${userId}/profile-url`);
-//   //   return data;
-//   // }
-
-  
-// }
-// export const userService = new UserService();
