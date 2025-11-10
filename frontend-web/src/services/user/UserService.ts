@@ -27,9 +27,18 @@ export async function getUsers(token: string): Promise<UserResponse[]> {
 }
 
 
-export async function getUserById(userId: number): Promise<UserResponse> {
-  const { data } = await userApi.get<UserResponse>(`/${userId}`);
-  return data;
+export async function getUserById(id: number, token: string): Promise<UserResponse> {
+  try {
+    const { data } = await userApi.get<UserResponse>(`/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return data;
+  } catch (err: any) {
+    console.error(`Error al obtener el usuario ${id}:`, err.response?.data || err.message);
+    throw new Error(err.response?.data?.message || "Error al obtener el usuario");
+  }
 }
 
 

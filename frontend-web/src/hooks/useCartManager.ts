@@ -10,7 +10,6 @@ export const useCartManager = () => {
   const [loading, setLoading] = useState<boolean>(true); 
   const [error, setError] = useState<string | null>(null);
 
-
   const initializeGuestSession = async () => {
     setLoading(true);
     setError(null);
@@ -37,7 +36,6 @@ export const useCartManager = () => {
         console.log(`Nuevo usuario invitado creado: ${userId}`);
       }
 
-      userService
 
       setCurrentUserId(userId);
       setIsUserCart(false); // Es un invitado, no un usuario autenticado
