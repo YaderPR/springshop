@@ -41,6 +41,7 @@ dependencies:
   dio: ^5.9.0
   flutter_appauth: ^11.0.0  # Latest as of 2025; handles PKCE automatically
   flutter_secure_storage: ^9.2.2  # For secure token storage on mobile
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

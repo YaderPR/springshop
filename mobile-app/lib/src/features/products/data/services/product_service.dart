@@ -41,4 +41,7 @@ class ProductService {
       return []; 
     }
   }
+  Future<List<Product>> findAll() async {
+    return await _productRepository.findAll();
+  }
 }
