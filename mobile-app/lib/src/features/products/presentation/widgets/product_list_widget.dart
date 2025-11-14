@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+// 💡 Importamos el BottomNavBarWidget para la navegación persistente
+import 'package:springshop/src/features/home/presentation/widgets/bottom_nav_bar_widget.dart'; 
 import 'package:springshop/src/features/products/data/services/apparel_service.dart';
 import 'package:springshop/src/features/products/data/services/supplement_service.dart'; 
 import 'package:springshop/src/features/products/data/services/workout_accessory_service.dart'; 
@@ -43,20 +45,16 @@ class _ProductListWidgetState extends State<ProductListWidget> {
     
     // 1. Determinar y usar el servicio especializado o genérico
     if (filterCategoryId == APPAREL_CATEGORY_ID) {
-
       print('🛒 Usando ApparelService (ID $APPAREL_CATEGORY_ID).');
       final apparelService = context.read<ApparelService>();
-      // Los IDs ya están filtrados por subcategoría o son el mix completo de Apparel.
       return await apparelService.getApparelsByIds(widget.productIds);
     
     } else if (filterCategoryId == SUPPLEMENT_CATEGORY_ID) {
-
       print('💊 Usando SupplementService (ID $SUPPLEMENT_CATEGORY_ID).');
       final supplementService = context.read<SupplementService>();
       return await supplementService.getSupplementsByIds(widget.productIds);
       
     } else if (filterCategoryId == WORKOUT_ACCESSORY_CATEGORY_ID) {
-
       print('⚙️ Usando WorkoutAccessoryService (ID $WORKOUT_ACCESSORY_CATEGORY_ID).');
       final accessoryService = context.read<WorkoutAccessoryService>();
       return await accessoryService.getWorkoutAccessoriesByIds(widget.productIds);
@@ -67,10 +65,6 @@ class _ProductListWidgetState extends State<ProductListWidget> {
       final productService = context.read<ProductService>();
       return await productService.getProductsByIds(widget.productIds);
     }
-    
-    // NOTA: Se eliminó la lógica de filtrado por categoryId (product.categoryId == filterId)
-    // porque es innecesaria y potencialmente incorrecta, ya que los IDs que recibimos
-    // (widget.productIds) ya representan la lista final de productos deseada.
   }
 
   void _handleProductTap(Product product) {
@@ -120,6 +114,19 @@ class _ProductListWidgetState extends State<ProductListWidget> {
       },
     );
   }
+
+  // 💡 Lógica para manejar el onTap de la barra de navegación persistente
+  void _handleNavBarTap(int index) {
+      // 1. Desapila todas las rutas hasta la raíz (HomeScreen)
+      Navigator.of(context).popUntil((route) => route.isFirst); 
+      
+      // 2. Nota: La lógica para cambiar el índice en el HomeScreen principal 
+      // (si index != 0) se manejaría en el HomeScreen (a través de un Provider/GlobalKey).
+      if (index != 0) {
+        print('Navegación global solicitada a índice $index. Volviendo a la raíz.');
+      }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +209,11 @@ class _ProductListWidgetState extends State<ProductListWidget> {
             );
           },
         ),
+      ),
+      
+      bottomNavigationBar: BottomNavBarWidget(
+        currentIndex: 0,
+        onTap: _handleNavBarTap,
       ),
     );
   }
