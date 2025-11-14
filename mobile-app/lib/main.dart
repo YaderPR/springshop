@@ -47,9 +47,6 @@ class MyApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(backgroundColor: Colors.black, foregroundColor: Colors.white),
         useMaterial3: true,
       ),
-      
-      // 🚀 CORRECCIÓN: El punto de entrada es ahora la pantalla pública.
-      // Las secciones protegidas serán envueltas por AuthGate dentro de HomeScreen.
       home: const HomeScreen(), 
     );
   }

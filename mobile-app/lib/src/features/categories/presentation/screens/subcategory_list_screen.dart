@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:springshop/src/features/categories/domain/entities/subcategory.dart';
 import 'package:springshop/src/features/categories/presentation/widgets/subcategory_card.dart';
 import 'package:springshop/src/features/products/presentation/widgets/product_list_widget.dart';
+// 💡 Importamos el BottomNavBarWidget para la navegación persistente
+import 'package:springshop/src/features/home/presentation/widgets/bottom_nav_bar_widget.dart'; 
 
 import 'package:springshop/src/features/categories/domain/repositories/apparel_category_repository.dart'; 
 import 'package:springshop/src/features/categories/domain/repositories/accessory_category_repository.dart'; 
@@ -29,27 +31,22 @@ class SubcategoryListScreen extends StatefulWidget {
 }
 
 class _SubcategoryListScreenState extends State<SubcategoryListScreen> {
-  // Estado para manejar la lista de subcategorías cargadas
   late Future<List<Subcategory>> _subcategoriesFuture;
 
   @override
   void initState() {
     super.initState();
-    // Inicia la carga de datos al inicializar el estado
     _subcategoriesFuture = _fetchSubcategories();
   }
   
-  // 🚀 Lógica Central para Obtener Subcategorías
+  // 🚀 Lógica Central para Obtener Subcategorías (Sin Cambios)
   Future<List<Subcategory>> _fetchSubcategories() async {
-    // 1. Determinar qué servicio usar (si aplica)
     final int id = widget.categoryId;
     
     try {
       if (id == APPAREL_CATEGORY_ID) {
         print('Cargando subcategorías de Apparel (ID $APPAREL_CATEGORY_ID) desde API.');
-        // Usar context.read<T>() para acceder a la instancia del repositorio
         final repository = context.read<ApparelCategoryRepository>();
-        
         return repository.getCategories();
         
       } else if (id == WORKOUT_ACCESSORY_CATEGORY_ID) {
@@ -57,30 +54,24 @@ class _SubcategoryListScreenState extends State<SubcategoryListScreen> {
         final repository = context.read<AccessoryCategoryRepository>();
         return repository.getCategories();
 
-      // ⚠️ CASO ESPECIAL: SUPPLEMENTS y otras categorías Genéricas
       } else if (id == SUPPLEMENT_CATEGORY_ID) { 
-         print('SUPPLEMENTS (ID $SUPPLEMENT_CATEGORY_ID) no tiene subcategorías dinámicas. Usando lista vacía.');
-         return [];
-         
+        print('SUPPLEMENTS (ID $SUPPLEMENT_CATEGORY_ID) no tiene subcategorías dinámicas. Usando lista vacía.');
+        return [];
+        
       } else {
-        // Para cualquier otra categoría no mapeada o genérica
         print('Categoría ID $id no mapeada para subcategorías especializadas. Usando lista vacía.');
         return [];
       }
     } catch (e) {
       print('ERROR al cargar subcategorías para ID $id: $e');
-      // Puedes lanzar el error para mostrarlo en el FutureBuilder o retornar una lista vacía
       rethrow; 
     }
   }
 
-  // 💡 Lógica de redirección a ProductListWidget
+  // 💡 Lógica de redirección a ProductListWidget (Sin Cambios)
   void _handleSubcategoryClick(BuildContext context, String title, List<int> productIds) {
     print('Evento Click: Navegando a productos de $title con ${productIds.length} IDs.');
     
-    // Redirección al ProductListWidget, pasándole los IDs correspondientes
-    // NOTA: No pasamos categoryId aquí, ya que el ProductListWidget debe usar
-    // los IDs de producto que le proporcione la subcategoría/categoría genérica.
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -88,6 +79,21 @@ class _SubcategoryListScreenState extends State<SubcategoryListScreen> {
       ),
     );
   }
+  
+  // 💡 Lógica para manejar el onTap de la barra de navegación persistente
+  void _handleNavBarTap(int index) {
+      // 1. Desapila todas las rutas hasta la raíz (HomeScreen)
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      
+      // 2. Si el índice no es 0 (Portada), se necesitaría un mecanismo (Provider o GlobalKey) 
+      // para cambiar la pestaña en HomeScreen. Como esto es complejo desde una ruta apilada,
+      // por ahora, solo aseguramos que regrese a la Portada.
+      if (index != 0) {
+        // Aquí iría la lógica para cambiar el índice en HomeScreen
+        print('Navegación global solicitada a índice $index.');
+      }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +128,6 @@ class _SubcategoryListScreenState extends State<SubcategoryListScreen> {
                 onTap: () => _handleSubcategoryClick(
                   context, 
                   'Genérica / Mix', 
-                  // Usar los IDs recibidos de la Categoría Principal para el Mix
                   widget.categoryProductIds 
                 ),
               ),
@@ -130,7 +135,6 @@ class _SubcategoryListScreenState extends State<SubcategoryListScreen> {
               const SizedBox(height: 16),
               
               // --- 4. Cards Dinámicas (Subcategorías) ---
-              // Usar FutureBuilder para mostrar la lista de subcategorías
               FutureBuilder<List<Subcategory>>(
                 future: _subcategoriesFuture,
                 builder: (context, snapshot) {
@@ -148,7 +152,6 @@ class _SubcategoryListScreenState extends State<SubcategoryListScreen> {
                   final List<Subcategory> subcategories = snapshot.data ?? [];
                   
                   if (subcategories.isEmpty && widget.categoryId != SUPPLEMENT_CATEGORY_ID) {
-                      // Si no hay subcategorías (y no es Supplements)
                       return Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Text(
@@ -158,20 +161,18 @@ class _SubcategoryListScreenState extends State<SubcategoryListScreen> {
                       );
                   }
                   
-                  // Mostrar las subcategorías obtenidas de la API
                   return Column(
                     children: subcategories.map((subcategory) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: SubcategoryCard(
                           title: subcategory.name,
-                          // Usar un placeholder si imageUrl es null o vacío
                           icon: subcategory.imageUrl.isNotEmpty ? subcategory.imageUrl : '📦', 
                           color: colorScheme.surfaceContainer, 
                           onTap: () => _handleSubcategoryClick(
                             context, 
                             subcategory.name, 
-                            subcategory.ids // Pasa los IDs de producto de la subcategoría
+                            subcategory.ids 
                           ),
                         ),
                       );
@@ -183,16 +184,12 @@ class _SubcategoryListScreenState extends State<SubcategoryListScreen> {
           ),
         ),
       ),
-      // Barra de navegación inferior (simulada)
-      bottomNavigationBar: const BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Icon(Icons.home_outlined),
-            Icon(Icons.search),
-            Icon(Icons.person_outline),
-          ],
-        ),
+      
+      // 🔑 Barra de navegación funcional persistente
+      bottomNavigationBar: BottomNavBarWidget(
+        // Asumimos que la navegación es desde la portada (índice 0)
+        currentIndex: 0,
+        onTap: _handleNavBarTap, // Usamos la nueva función que desapila la ruta
       ),
     );
   }
