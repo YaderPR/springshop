@@ -1,3 +1,5 @@
+import 'package:springshop/src/features/auth/domain/user.dart'; // 💡 Asegúrate de importar tu clase User
+
 abstract class AuthRepository {
   /// Devuelve true si existe un token de refresco válido.
   Future<bool> isAuthenticated();
@@ -15,4 +17,10 @@ abstract class AuthRepository {
 
   /// Obtiene el access token actual. Intenta refrescarlo si está cerca de expirar.
   Future<String?> getAccessToken();
+  
+  // 🔑 MÉTODO AÑADIDO: Obtiene la información detallada del usuario desde el endpoint userinfo.
+  /// Llama al endpoint userinfo de Keycloak usando el Access Token para obtener
+  /// los detalles de la identidad del usuario autenticado.
+  /// Lanza una excepción si el token es inválido o la petición falla.
+  Future<User> getUserInfo(); 
 }
