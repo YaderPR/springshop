@@ -1,8 +1,10 @@
 // lib/src/features/auth/domain/entities/user.dart
 
 class User {
+  // 🔑 ID interno del User Service (el que queremos guardar)
+  final String id;
   // Identificador único del usuario (sub de OIDC)
-  final String userId; // Cambiado de 'id' a 'userId' para mayor claridad
+  final String sub; 
   
   // Nombre de usuario preferido (o nombre de login)
   final String username;
@@ -26,20 +28,43 @@ class User {
   final List<String> roles; 
 
   const User({
-    required this.userId,
+    required this.id,
+    required this.sub,
     required this.username,
     required this.fullName,
     required this.firstName,
     required this.lastName,
     required this.email,
     required this.isEmailVerified,
-    required this.roles, // 🔑 Añadir al constructor
+    required this.roles,
   });
-
+  User copyWith({
+    String? id,
+    String? sub,
+    String? username,
+    String? fullName,
+    String? firstName,
+    String? lastName,
+    String? email,
+    bool? isEmailVerified,
+    List<String>? roles,
+  }) {
+    return User(
+      id: id ?? this.id,
+      sub: sub ?? this.sub,
+      username: username ?? this.username,
+      fullName: fullName ?? this.fullName,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      roles: roles ?? this.roles,
+    );
+  }
   // Método opcional para facilitar la depuración
   @override
   String toString() {
-    return 'User(id: $userId, name: $fullName, email: $email, roles: $roles)';
+    return 'User(id: $id, name: $fullName, email: $email, roles: $roles)';
   }
   
   // ----------------------------------------------------
@@ -47,11 +72,17 @@ class User {
   // ----------------------------------------------------
 
   factory User.fromJson(Map<String, dynamic> json) {
-    // Usamos el operador ?? '' (null-aware coalescing) para proveer un valor por defecto.
-    
-    // Keycloak usa 'sub' para el ID y 'preferred_username' para el nombre de usuario
+    // 🔑 FIX: Manejar el ID que puede ser int (0) o String
+    final dynamic rawId = json['id'];
+    final String id = (rawId is int) 
+        ? rawId.toString() 
+        : (rawId as String? ?? '');
+
+    // Keycloak usa 'sub' para el ID.
     final String sub = json['sub'] ?? '';
-    final String username = json['preferred_username'] ?? '';
+    
+    // FIX: Priorizar 'username' del backend simple, sino usar 'preferred_username' de Keycloak
+    final String username = json['username'] ?? json['preferred_username'] ?? '';
 
     // Nombre completo y partes
     final String name = json['name'] ?? '';
@@ -62,24 +93,22 @@ class User {
     final String email = json['email'] ?? '';
     final bool emailVerified = json['email_verified'] ?? false;
     
-    // 🔑 Mapeo de Roles
-    // Keycloak típicamente anida los roles bajo una claim específica (ej: 'resource_access' o 'realm_access').
-    // Si asumes que los roles de REALM están directamente en el nivel superior bajo 'realm_access', 
-    // y solo necesitamos los nombres de los roles:
+    // Mapeo de Roles (asumiendo que viene de realm_access)
     final realmAccess = json['realm_access'] as Map<String, dynamic>?;
     final List<String> userRoles = (realmAccess?['roles'] as List<dynamic>?)
         ?.map((role) => role.toString())
         .toList() ?? [];
 
     return User(
-      userId: sub,
+      id: id,
+      sub: sub,
       username: username,
       fullName: name,
       firstName: givenName,
       lastName: familyName,
       email: email,
       isEmailVerified: emailVerified,
-      roles: userRoles, // 🔑 Pasar la lista de roles
+      roles: userRoles, 
     );
   }
 }
