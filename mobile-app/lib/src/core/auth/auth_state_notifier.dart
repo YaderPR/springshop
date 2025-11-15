@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:springshop/src/features/auth/domain/user.dart'; // 💡 Importar la entidad User
+import 'package:springshop/src/features/auth/domain/entities/user.dart'; // 💡 Importar la entidad User
 import 'auth_repository.dart'; // 💡 Usar la interfaz, no la clase concreta
 
 class AuthStateNotifier extends ChangeNotifier {
@@ -63,21 +63,28 @@ class AuthStateNotifier extends ChangeNotifier {
   }
   
   // 🔑 3. Manejo de Inicio de Sesión (Actualizado)
-  @override
   Future<void> login() async {
     try {
-      await _authService.signIn(); 
+      // 1. Inicia el flujo OIDC
+      await _authService.signIn();
       
-      // 🚀 Después de un signIn exitoso, OBTENEMOS la información del usuario
-      await _fetchAndSetUser();
+      // 2. Obtiene datos detallados de Keycloak Y sincroniza el ID interno
+      final userModel = await _authService.getAndSyncUser(); // 💡 CAMBIO CLAVE
       
+      // 3. Establece el estado
+      _user = userModel;
+      _isLoggedIn = true;
       notifyListeners();
       
+      print('✅ [Notifier] Login completo. Usuario ID: ${_user!.id}');
+
     } catch (e) {
+      print('❌ [Notifier] Fallo en el flujo de login: $e');
+      // Asegurar que el estado es deslogeado en caso de fallo post-signIn
       _isLoggedIn = false;
-      _user = null; // Limpiar el usuario en caso de fallo
+      _user = null;
       notifyListeners();
-      rethrow; 
+      rethrow;
     }
   }
 

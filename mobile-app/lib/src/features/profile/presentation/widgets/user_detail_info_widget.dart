@@ -1,7 +1,7 @@
 // lib/src/features/profile/presentation/widgets/user_detail_info_widget.dart
 
 import 'package:flutter/material.dart';
-import 'package:springshop/src/features/auth/domain/user.dart';
+import 'package:springshop/src/features/auth/domain/entities/user.dart';
 
 class UserDetailInfoWidget extends StatelessWidget {
   final User user;
@@ -41,7 +41,7 @@ class UserDetailInfoWidget extends StatelessWidget {
                   children: [
                     _buildInfoRow(context, Icons.person, 'Nombre Completo', user.fullName),
                     _buildInfoRow(context, Icons.email, 'Correo Electrónico', user.email),
-                    _buildInfoRow(context, Icons.badge, 'ID de Keycloak', user.userId),
+                    _buildInfoRow(context, Icons.badge, 'ID de Keycloak', user.sub),
                     
                     // Solo si existen en la entidad User
                     if (user.firstName.isNotEmpty) 

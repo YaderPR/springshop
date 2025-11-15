@@ -1,10 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:springshop/src/features/auth/domain/user.dart'; // Corregido: asumimos que User está en domain/entities
-import 'auth_repository.dart'; 
-// Eliminado: import 'package:http/http.dart' as http;
-// Eliminado: import 'package:http/http.dart' as _dio; // Esto era incorrecto
+import 'package:springshop/src/features/auth/domain/entities/user.dart'; // Corregido: asumimos que User está en domain/entities
+import 'auth_repository.dart';
 
 final FlutterAppAuth appAuth = FlutterAppAuth();
 final FlutterSecureStorage secureStorage = FlutterSecureStorage();
@@ -19,18 +17,20 @@ const List<String> scopes = ['openid', 'profile', 'email', 'offline_access'];
 // Endpoints configurados manualmente
 final AuthorizationServiceConfiguration _serviceConfiguration =
     AuthorizationServiceConfiguration(
-  authorizationEndpoint: '$keycloakBaseUrl/protocol/openid-connect/auth',
-  tokenEndpoint: '$keycloakBaseUrl/protocol/openid-connect/token',
-  endSessionEndpoint: '$keycloakBaseUrl/protocol/openid-connect/logout',
-);
+      authorizationEndpoint: '$keycloakBaseUrl/protocol/openid-connect/auth',
+      tokenEndpoint: '$keycloakBaseUrl/protocol/openid-connect/token',
+      endSessionEndpoint: '$keycloakBaseUrl/protocol/openid-connect/logout',
+    );
 
 // 🚀 Implementamos el contrato AuthRepository
-class AppAuthService implements AuthRepository { 
+class AppAuthService implements AuthRepository {
   // 🔑 INYECCIÓN: Propiedad privada para la instancia de Dio inyectada (para Keycloak)
-  final Dio _keycloakDio; 
-  
+  final Dio _keycloakDio;
+  final Dio _apiGatewayDio;
   // 🔑 CONSTRUCTOR: Usamos un constructor con nombre claro o solo posicional
-  AppAuthService({required Dio keycloakDio}) : _keycloakDio = keycloakDio;
+  AppAuthService({required Dio keycloakDio, required Dio apiGatewayDio})
+    : _keycloakDio = keycloakDio,
+      _apiGatewayDio = apiGatewayDio;
 
   // =======================================================
   // CONTRATO: 1. GESTIÓN DEL INICIO Y LOGOUT
@@ -39,35 +39,100 @@ class AppAuthService implements AuthRepository {
   @override
   Future<void> signIn() async {
     try {
-      final AuthorizationTokenResponse? result =
-          await appAuth.authorizeAndExchangeCode(
-        AuthorizationTokenRequest(
-          clientId,
-          redirectUri,
-          serviceConfiguration: _serviceConfiguration,
-          scopes: scopes,
-          promptValues: ['login'], 
-          allowInsecureConnections: true
-        ),
-      );
+      final AuthorizationTokenResponse? result = await appAuth
+          .authorizeAndExchangeCode(
+            AuthorizationTokenRequest(
+              clientId,
+              redirectUri,
+              serviceConfiguration: _serviceConfiguration,
+              scopes: scopes,
+              promptValues: ['login'],
+              allowInsecureConnections: true,
+            ),
+          );
 
       if (result == null || result.accessToken == null) {
-        throw Exception("El flujo de autenticación terminó sin recibir tokens válidos.");
+        throw Exception(
+          "El flujo de autenticación terminó sin recibir tokens válidos.",
+        );
       }
 
       await secureStorage.write(key: 'access_token', value: result.accessToken);
-      await secureStorage.write(key: 'refresh_token', value: result.refreshToken);
+      await secureStorage.write(
+        key: 'refresh_token',
+        value: result.refreshToken,
+      );
       await secureStorage.write(key: 'id_token', value: result.idToken);
       await secureStorage.write(
         key: 'access_token_expiration',
         value: result.accessTokenExpirationDateTime?.toIso8601String(),
       );
-
     } catch (e) {
       print('❌ [AppAuthService.signIn] Error durante autenticación: $e');
-      rethrow; 
+      rethrow;
     }
   }
+
+  @override
+ Future<User> getAndSyncUser() async {
+  // 1. OBTENER DATOS DETALLADOS DE KEYCLOAK (USER INFO)
+  // Usamos el método existente getUserInfo()
+  User keycloakUser;
+  try {
+   keycloakUser = await getUserInfo();
+   print('✅ Datos de Keycloak obtenidos. SUB: ${keycloakUser.sub}');
+  } catch (e) {
+   print('❌ Fallo al obtener UserInfo de Keycloak: $e');
+   rethrow;
+  }
+
+  // 2. SINCRONIZAR CON EL API GATEWAY PARA OBTENER EL ID INTERNO
+  final token = await getAccessToken();
+  const syncPath = '/users/me/sync'; 
+
+  try {
+   final response = await _apiGatewayDio.post(
+    syncPath, 
+    options: Options(
+     headers: {
+      'Authorization': 'Bearer $token', 
+      'Content-Type': 'application/json',
+     },
+    ),
+   );
+
+   // ====================================================================
+   // CLAVE DE DEPURACIÓN SYNC
+   // ====================================================================
+   print('🔎 RESPUESTA SYNC: Status: ${response.statusCode}, Data: ${response.data}');
+      
+      // La respuesta del backend solo tiene ID, SUB, USERNAME
+   if (response.data != null && response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = response.data;
+    final String internalId = jsonResponse['id']?.toString() ?? keycloakUser.id; // Usar el ID interno
+    
+    // 3. FUSIONAR DATOS: Tomar todos los detalles de Keycloak y sobreescribir el ID
+    final mergedUser = keycloakUser.copyWith(
+     id: internalId, // Usamos el ID del User Service
+    );
+
+    print('✅ Sincronización finalizada. ID interno: ${mergedUser.id}');
+    return mergedUser;
+    
+   } else {
+    // Fallo en la sincronización, pero devolver el user de Keycloak con ID temporal
+        print('❌ Fallo en la sincronización. Devolviendo datos crudos de Keycloak.');
+    throw Exception('Fallo al obtener ID interno del usuario. Status: ${response.statusCode}');
+   }
+   
+  } on DioException catch (e) {
+   print('❌ Error Dio en getAndSyncUser: $e');
+   rethrow;
+  } catch (e) {
+   print('❌ Excepción genérica atrapada en getAndSyncUser: $e');
+   rethrow;
+  }
+ }
 
   @override
   Future<void> logout() async {
@@ -77,7 +142,7 @@ class AppAuthService implements AuthRepository {
         await secureStorage.deleteAll();
         return;
       }
-      
+
       await appAuth.endSession(
         EndSessionRequest(
           idTokenHint: idToken,
@@ -97,7 +162,7 @@ class AppAuthService implements AuthRepository {
     final refreshToken = await secureStorage.read(key: 'refresh_token');
     return refreshToken != null;
   }
-  
+
   // =======================================================
   // CONTRATO: 2. GESTIÓN DE TOKENS
   // =======================================================
@@ -107,7 +172,9 @@ class AppAuthService implements AuthRepository {
     final refreshToken = await secureStorage.read(key: 'refresh_token');
 
     if (refreshToken == null) {
-      throw Exception('No refresh token disponible, forzando cierre de sesión.');
+      throw Exception(
+        'No refresh token disponible, forzando cierre de sesión.',
+      );
     }
 
     try {
@@ -118,7 +185,7 @@ class AppAuthService implements AuthRepository {
           refreshToken: refreshToken,
           serviceConfiguration: _serviceConfiguration,
           scopes: scopes,
-          allowInsecureConnections: true
+          allowInsecureConnections: true,
         ),
       );
 
@@ -135,16 +202,17 @@ class AppAuthService implements AuthRepository {
         key: 'access_token_expiration',
         value: resp.accessTokenExpirationDateTime?.toIso8601String(),
       );
-
     } catch (e) {
       print('❌ Error al refrescar token: $e');
-      rethrow; 
+      rethrow;
     }
   }
 
   @override
   Future<String?> getAccessToken() async {
-    final expirationString = await secureStorage.read(key: 'access_token_expiration');
+    final expirationString = await secureStorage.read(
+      key: 'access_token_expiration',
+    );
     final accessToken = await secureStorage.read(key: 'access_token');
 
     if (accessToken == null) return null;
@@ -152,7 +220,9 @@ class AppAuthService implements AuthRepository {
     if (expirationString != null) {
       final expirationDate = DateTime.parse(expirationString);
       // Refrescar si falta menos de 5 minutos para expirar
-      if (expirationDate.subtract(const Duration(minutes: 5)).isBefore(DateTime.now())) {
+      if (expirationDate
+          .subtract(const Duration(minutes: 5))
+          .isBefore(DateTime.now())) {
         try {
           print('🟡 Token a punto de expirar. Intentando refrescar...');
           await refreshTokens();
@@ -164,10 +234,10 @@ class AppAuthService implements AuthRepository {
         }
       }
     }
-    
+
     return accessToken;
   }
-  
+
   // =======================================================
   // CONTRATO: 3. OBTENCIÓN DE DATOS DEL USUARIO
   // =======================================================
@@ -175,18 +245,20 @@ class AppAuthService implements AuthRepository {
   @override
   Future<User> getUserInfo() async {
     final token = await getAccessToken();
-    
+
     if (token == null) {
-      throw Exception('Acceso no autorizado: No se pudo obtener el Access Token.');
+      throw Exception(
+        'Acceso no autorizado: No se pudo obtener el Access Token.',
+      );
     }
-    
+
     // 1. Construir el URL del endpoint userinfo
     final userinfoUri = '$keycloakBaseUrl/protocol/openid-connect/userinfo';
-    
+
     try {
       // 2. Realizar la solicitud HTTP usando el Dio inyectado (_keycloakDio)
       final response = await _keycloakDio.get(
-        userinfoUri, 
+        userinfoUri,
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -200,15 +272,18 @@ class AppAuthService implements AuthRepository {
         final Map<String, dynamic> jsonResponse = response.data;
         return User.fromJson(jsonResponse);
       } else {
-        throw Exception('Fallo al obtener información del usuario. La respuesta está vacía.');
+        throw Exception(
+          'Fallo al obtener información del usuario. La respuesta está vacía.',
+        );
       }
-      
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        throw Exception('Token inválido o expirado. Se requiere re-autenticación.');
+        throw Exception(
+          'Token inválido o expirado. Se requiere re-autenticación.',
+        );
       }
       print('❌ Error Dio en getUserInfo: $e');
-      rethrow; 
+      rethrow;
     } catch (e) {
       print('❌ Error general en getUserInfo: $e');
       rethrow;
@@ -228,7 +303,7 @@ class AppAuthService implements AuthRepository {
   // deberías inyectar el *otro* Dio también.
   // Asumiremos que este método debe ser removido o implementado en otro lugar
   // ya que la responsabilidad del AppAuthService es la autenticación, no la API.
-  
+
   /*
   @override
   Future<Response> callApi(String path) async { // Deberías cambiar el tipo de retorno si es un método de la interfaz
