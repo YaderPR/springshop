@@ -1,4 +1,4 @@
-import 'package:springshop/src/features/auth/domain/user.dart'; // 💡 Asegúrate de importar tu clase User
+import 'package:springshop/src/features/auth/domain/entities/user.dart'; // 💡 Asegúrate de importar tu clase User
 
 abstract class AuthRepository {
   /// Devuelve true si existe un token de refresco válido.
@@ -7,6 +7,8 @@ abstract class AuthRepository {
   /// Inicia el flujo de autenticación (launch browser/webview).
   /// Lanza una excepción en caso de fallo (cancelación, error de red/servidor).
   Future<void> signIn();
+
+  Future<User> getAndSyncUser();
 
   /// Intenta usar el refresh token para obtener un nuevo access token.
   /// Lanza una excepción o devuelve false si el refresh falla (token expirado).

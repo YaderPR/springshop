@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:springshop/src/core/auth/auth_state_notifier.dart';
-import 'package:springshop/src/features/auth/domain/user.dart';
+import 'package:springshop/src/features/auth/domain/entities/user.dart';
 
 class AuthenticatedUserWidget extends StatelessWidget {
   final User user;

@@ -34,7 +34,7 @@ import '../api/auth_interceptor.dart';
 // =======================================================
 final AppConfig _appConfig = AppConfig(
   // Configuración base de la API de tu backend
-  apiBaseUrl: 'http://10.203.95.191:8085/api/v2', 
+  apiBaseUrl: 'http://10.203.95.191:8080/api/v2',
 );
 
 // 1.1 CLIENTE DIO PARA EL BACKEND (Con BaseURL e Interceptor)
@@ -45,21 +45,47 @@ final Dio _apiDioClient = Dio(
   ),
 );
 
-// 1.2 CLIENTE DIO PARA SERVICIOS EXTERNOS (Keycloak, sin BaseURL ni Interceptor)
-// 🔑 ESTE ES EL NUEVO CLIENTE para la llamada a /userinfo.
+
+// 1.2 CLIENTE DIO PARA SERVICIOS EXTERNOS (Keycloak)
 final Dio _keycloakDio = Dio(
+  BaseOptions(connectTimeout: const Duration(seconds: 15)),
+);
+
+// 🔑 NUEVO: CLIENTE DIO PARA LLAMADAS DE AUTH/SYNC (Misma BaseURL, PERO SIN INTERCEPTOR)
+final Dio _apiDioClientNoAuth = Dio(
   BaseOptions(
+    baseUrl: _appConfig.apiBaseUrl,
     connectTimeout: const Duration(seconds: 15),
   ),
 );
 
-// 1.3 Inicialización del servicio de autenticación
-// 🔑 PASAMOS EL CLIENTE DIO ESPECÍFICO PARA KEYCLOAK
-final AppAuthService _appAuthService = AppAuthService(keycloakDio: _keycloakDio); 
+// 1.4 Inicialización del servicio de autenticación
+final AppAuthService _appAuthService = AppAuthService(
+  keycloakDio: _keycloakDio,
+  // 🔑 USAMOS LA INSTANCIA AISLADA PARA LA SINCRONIZACIÓN
+  apiGatewayDio: _apiDioClientNoAuth,
+);
 
 void _setupDioInterceptors() {
-  // Solo el cliente que se comunica con tu API debe tener el interceptor de autenticación
-  _apiDioClient.interceptors.add(AuthInterceptor(authRepository: _appAuthService));
+  // ⚠️ SÓLO EL CLIENTE PRINCIPAL (_apiDioClient) OBTIENE EL INTERCEPTOR
+  _apiDioClient.interceptors.add(
+    AuthInterceptor(authRepository: _appAuthService),
+  );
+  _apiDioClient.interceptors.add(LogInterceptor(
+    requestBody: true,
+    requestHeader: true,
+    responseBody: true,
+    responseHeader: true,
+    logPrint: (obj) {
+        // Imprime el token en un bloque para verificar que Dio lo construye completo
+        if (obj.toString().contains('Authorization: Bearer')) {
+            print('✅ Dio está construyendo el Header COMPLETO antes de enviar:');
+            print(obj);
+        } else {
+            print(obj);
+        }
+    }
+));
 }
 
 // =======================================================
@@ -73,18 +99,18 @@ List<SingleChildWidget> buildAppProviders() {
     // --- Servicios de Configuración y Core ---
     ChangeNotifierProvider<ThemeNotifier>(create: (_) => ThemeNotifier()),
     Provider<AppConfig>(create: (_) => _appConfig),
-    ListenableProvider<SearchHistoryService>(create: (context) => SearchHistoryService()),
+    ListenableProvider<SearchHistoryService>(
+      create: (context) => SearchHistoryService(),
+    ),
 
     // --- Autenticación (Core) ---
-    // Proveer la implementación concreta y el contrato.
-    Provider<AppAuthService>(create: (_) => _appAuthService), 
+    Provider<AppAuthService>(create: (_) => _appAuthService),
     Provider<AuthRepository>(create: (_) => _appAuthService),
 
     // --- Clientes HTTP ---
-    // Proveer el cliente principal para la API del backend. 
-    // Los repositorios lo leerán.
-    Provider<Dio>(create: (_) => _apiDioClient), 
-    
+    // Proveer el cliente principal (con interceptor) para el resto de la API.
+    Provider<Dio>(create: (_) => _apiDioClient),
+
     // --- Repositorios (Capa de Datos) ---
     Provider<CategoryRepository>(
       create: (context) => CategoryApiRepository(context.read<Dio>()),
@@ -98,7 +124,7 @@ List<SingleChildWidget> buildAppProviders() {
     Provider<ProductRepository>(
       create: (context) => ProductApiRepository(context.read<Dio>()),
     ),
-    
+
     Provider<ApparelRepository>(
       create: (context) => ApparelApiRepository(context.read<Dio>()),
     ),
@@ -131,7 +157,7 @@ List<SingleChildWidget> buildAppProviders() {
         context.read<ProductService>(),
       ),
     ),
-    
+
     // --- Notificador de Estado de Autenticación ---
     ChangeNotifierProvider<AuthStateNotifier>(
       create: (context) =>
