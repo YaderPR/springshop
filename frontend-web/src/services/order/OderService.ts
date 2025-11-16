@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { CheckoutRequestDto, CheckoutResponseDto, OrderResponseDto } from '../../types/order.types'; 
+import type { CheckoutRequestDto, CheckoutResponseDto, OrderResponseDto, OrderUpdateStatus } from '../../types/order.types'; 
 
 const orderApi = axios.create({
   baseURL: "http://localhost:8087/api/v2/orders",
@@ -57,4 +57,26 @@ export async function startCheckout(
   }
 }
 
+export async function updateOrderStatus(
+  id: number, 
+  statusUpdate: OrderUpdateStatus, 
+  token: string
+): Promise<OrderResponseDto> {
+  try {
+    // Llama al endpoint PATCH /api/v2/orders/{id}
+    const { data } = await orderApi.patch<OrderResponseDto>(
+      `/${id}`, 
+      statusUpdate, // Envía el body { "status": "NUEVO_ESTADO" }
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    return data;
+  } catch (err: any) {
+    console.error(`Error al actualizar estado de la orden ${id}:`, err.response?.data || err.message);
+    throw new Error(err.response?.data?.message || "Error al actualizar la orden");
+  }
+}
 

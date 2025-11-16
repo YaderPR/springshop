@@ -25,7 +25,7 @@ import type {
   WorkoutAccessory
 } from "../../types/Product";
 
-// Definimos los 3 tipos de producto
+// Definimos los 3 Categorías de producto
 type ProductType = "APPAREL" | "SUPPLEMENT" | "WORKOUT_ACCESSORY";
 
 interface Props {
@@ -101,7 +101,7 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
   // --- ¡LÓGICA DE EDICIÓN AÑADIDA AQUÍ! ---
   useEffect(() => {
     if (productToEdit) {
-      // 1. Detectar el tipo de producto
+      // 1. Detectar el Categoría de producto
       let type: ProductType = "APPAREL"; // Default
       if ('flavor' in productToEdit) {
         type = "SUPPLEMENT";
@@ -215,7 +215,7 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
       let createFunction: (data: any) => Promise<any>;
       let updateFunction: (id: number, data: any) => Promise<any>;
 
-      // Asignamos el payload y las funciones correctas según el tipo
+      // Asignamos el payload y las funciones correctas según el Categoría
       switch (productType) {
         case "APPAREL":
           payload = {
@@ -362,9 +362,9 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
           required
           //disabled={!!productToEdit} 
         >
-          <option value="APPAREL">Tipo: Ropa </option>
-          <option value="SUPPLEMENT">Tipo: Suplemento </option>
-          <option value="WORKOUT_ACCESSORY">Tipo: Accesorio </option>
+          <option value="APPAREL">Categoría: Ropa </option>
+          <option value="SUPPLEMENT">Categoría: Suplemento </option>
+          <option value="WORKOUT_ACCESSORY">Categoría: Accesorio </option>
         </select>
 
         {/* --- CAMPOS COMUNES --- */}

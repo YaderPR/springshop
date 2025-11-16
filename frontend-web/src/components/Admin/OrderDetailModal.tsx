@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useKeycloak } from '@react-keycloak/web';
-import { getOrderById } from '../../services/order/OderService';
+import { getOrderById, updateOrderStatus } from '../../services/order/OderService';
 import type { OrderResponseDto } from '../../types/Order.types';
-import { Loader2, X, AlertTriangle } from 'lucide-react';
+import { Loader2, X, AlertTriangle, Save } from 'lucide-react';
 
 interface Props {
   orderId: number | null; // El ID de la orden a mostrar
   onClose: () => void;     // Función para cerrar el modal
+  onOrderUpdate: () => void;
 }
+
+const ORDER_STATUSES = ["PENDING", "PAID", "FAILED", "REFUNDED", "SHIPPED"];
 
 export default function OrderDetailModal({ orderId, onClose }: Props) {
   const { keycloak, initialized } = useKeycloak();
@@ -15,10 +18,11 @@ export default function OrderDetailModal({ orderId, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Efecto que se dispara CADA VEZ que el 'orderId' cambia
+  const [selectedStatus, setSelectedStatus] = useState<String>('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   useEffect(() => {
-    // No hacer nada si el modal no está abierto (orderId es null)
-    // o si Keycloak no está listo
     if (!orderId || !initialized) {
       return;
     }
@@ -32,10 +36,12 @@ export default function OrderDetailModal({ orderId, onClose }: Props) {
       setLoading(true);
       setError(null);
       setOrder(null); // Limpiar orden anterior mientras carga
+
       try {
         // Llama al servicio con el ID y el token
         const data = await getOrderById(orderId, keycloak.token);
         setOrder(data);
+        setSelectedStatus(data.status);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -46,18 +52,49 @@ export default function OrderDetailModal({ orderId, onClose }: Props) {
     loadOrderDetails();
   }, [orderId, initialized, keycloak.token]); // Dependencias del efecto
 
-  // No renderizar nada si el modal no debe estar abierto
+
+const handleStatusUpdate = async () => {
+    if (!orderId || !keycloak.token || !selectedStatus || selectedStatus === order?.status) {
+      return; // No hacer nada si no hay token o el estado no cambió
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      // 1. Preparamos el DTO de actualización
+      const statusUpdateDto: OrderUpdateStatus = {
+        status: selectedStatus
+      };
+
+      // 2. Llamamos al servicio
+      const updatedOrder = await updateOrderStatus(orderId, statusUpdateDto, keycloak.token);
+
+      // 3. Actualizamos la UI localmente
+      setOrder(updatedOrder);
+      setSelectedStatus(updatedOrder.status);
+      
+      // 4. Avisamos al padre (AdminOrders) que debe refrescar su lista
+      onOrderUpdated(); 
+
+    } catch (err: any) {
+      setSaveError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+
   if (!orderId) {
     return null;
   }
 
   return (
-    // Overlay (fondo oscuro)
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center bg-primary bg-opacity-10 backdrop-blur-sm p-4"
-      onClick={onClose} // Cierra al hacer clic en el fondo
+      onClick={onClose} 
     >
-      {/* Contenedor del Modal */}
+     
       <div
         className="relative w-full max-w-2xl p-6 bg-primary/95 rounded-2xl border border-secondary text-gray-100 shadow-[0_0_15px_rgba(137,254,0,.7)]"
         onClick={(e) => e.stopPropagation()} // Evita que el clic en el modal lo cierre
@@ -113,6 +150,29 @@ export default function OrderDetailModal({ orderId, onClose }: Props) {
               <span className="text-secondary font-bold text-xl">
                 ${order.totalAmount.toFixed(2)}
               </span>
+            </div>
+
+            <div className="space-y-3 mb-4 pt-4 border-t border-gray-700">
+              <h3 className="text-xl font-semibold text-white">Actualizar Estado</h3>
+              <div className="flex items-center gap-3">
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="flex-1 p-3 rounded bg-gray-800 border border-gray-600 text-white"
+                >
+                  {ORDER_STATUSES.map(status => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleStatusUpdate}
+                  disabled={isSaving || selectedStatus === order.status}
+                  className="bg-secondary text-primary font-bold py-3 px-5 rounded-full hover:bg-lime-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? <Loader2 className="animate-spin" /> : <Save size={20} />}
+                </button>
+              </div>
+              {saveError && <p className="text-red-500 text-sm">{saveError}</p>}
             </div>
 
             {/* Items de la Orden */}

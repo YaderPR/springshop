@@ -1,7 +1,7 @@
 // hooks/useCartManager.ts
 import { useState, useEffect } from 'react';
 import { cartService } from '../services/cart/cartService';
-import { userService } from '../services/user/userService'; 
+import { getUserById, createGuestUser, createTemporaryUser } from '../services/user/UserService'; 
 
 export const useCartManager = () => {
   const [currentCartId, setCurrentCartId] = useState<number | null>(null);
@@ -9,7 +9,6 @@ export const useCartManager = () => {
   const [isUserCart, setIsUserCart] = useState<boolean>(false); 
   const [loading, setLoading] = useState<boolean>(true); 
   const [error, setError] = useState<string | null>(null);
-
 
   const initializeGuestSession = async () => {
     setLoading(true);
@@ -26,7 +25,7 @@ export const useCartManager = () => {
       } else {
 
         console.log("No se encontró usuario invitado. Creando uno nuevo...");
-        const newGuestUser = await userService.createTemporaryUser();
+        const newGuestUser = await createTemporaryUser();
 
         if (!newGuestUser || !newGuestUser.id) {
           throw new Error("La respuesta de 'createTemporaryUser', no contenía un ID.");
@@ -36,6 +35,7 @@ export const useCartManager = () => {
         localStorage.setItem('guestUserId', userId.toString());
         console.log(`Nuevo usuario invitado creado: ${userId}`);
       }
+
 
       setCurrentUserId(userId);
       setIsUserCart(false); // Es un invitado, no un usuario autenticado
