@@ -5,6 +5,7 @@ import type { OrderResponseDto } from '../../types/Order.types';
 import { Loader2, AlertTriangle, CheckCircle, CircleAlert, Eye } from 'lucide-react'; 
 import OrderDetailModal from '../../components/Admin/OrderDetailModal';
 
+
 export default function AdminOrders() {
   const { keycloak, initialized } = useKeycloak();
   const [orders, setOrders] = useState<OrderResponseDto[]>([]);
@@ -12,7 +13,9 @@ export default function AdminOrders() {
   const [error, setError] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
-  // --- (TODA TU LÓGICA DE useEffect, loadOrders, etc. va aquí... ES CORRECTA) ---
+  const [refreshSignal, setRefreshSignal] = useState(false);
+  const triggerRefresh = () => setRefreshSignal(prev => !prev);
+
   useEffect(() => {
     if (!initialized) {
       return;
@@ -37,7 +40,7 @@ export default function AdminOrders() {
     loadOrders();
   }, [initialized, keycloak.token]);
 
-  // --- Renderizado Condicional (SIN CAMBIOS) ---
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -49,13 +52,11 @@ export default function AdminOrders() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64 bg-red-900/20 border border-red-700 p-6 rounded-lg">
-        {/* ... (Tu JSX de error es correcto) ... */}
       </div>
     );
   }
 
-  // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
-  // --- Renderizado de Éxito (Reemplazamos <table> por Cards) ---
+  
   return (
     <> 
       <div>
@@ -63,8 +64,7 @@ export default function AdminOrders() {
           Administrar Órdenes
         </h1>
         
-        {/* Contenedor de las Tarjetas */}
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {orders.length > 0 ? (
             orders.map((order) => (
               <div 
@@ -74,7 +74,7 @@ export default function AdminOrders() {
               hover:ring-secondary
               hover:shadow-[0_0_15px_rgba(137,254,0,.7)] items-center gap-4 text-gray-100 border-gray-700 rounded-lg shadow-md p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center"
               >
-                {/* ... (Toda tu tarjeta de orden es perfecta) ... */}
+               
                 <div className="space-y-2">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
                     <span className="text-xl font-bold text-white whitespace-nowrap">
@@ -101,9 +101,9 @@ export default function AdminOrders() {
                   <div className="text-2xl font-bold text-secondary mb-2">
                     ${order.totalAmount.toFixed(2)}
                   </div>
-                  {/* --- 4. Conectar el botón --- */}
+                  
                   <button 
-                    onClick={() => setSelectedOrderId(order.id)} // <-- Abre el modal
+                    onClick={() => setSelectedOrderId(order.id)}
                     className="flex items-center gap-1 sm:ml-auto hover:text-secondary"
                   >
                     <Eye size={16} />
@@ -121,11 +121,12 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      {/* --- 5. Renderizar el Modal --- */}
+      
       {/* El modal se renderiza aquí, pero solo es visible si 'selectedOrderId' no es null */}
       <OrderDetailModal 
         orderId={selectedOrderId}
-        onClose={() => setSelectedOrderId(null)} // Función para cerrar
+        onClose={() => setSelectedOrderId(null)}
+        onOrderUpdate={triggerRefresh} //se refresca la lista
       />
     </>
   );
