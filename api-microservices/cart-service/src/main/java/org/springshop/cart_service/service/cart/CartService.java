@@ -33,6 +33,20 @@ public class CartService {
                 this.cartItemRepository = cartItemRepository;
         }
 
+        public Optional<CartResponseDto> findLastCartByUser(Integer id) {
+                User user = findUserOrThrow(id);
+                Optional<Cart> latestCart = cartRepository.findTopByUserIdOrderByIdDesc(user.getId());
+
+                if (latestCart.isPresent()) {
+                        // Carrito encontrado
+                        return Optional.of(CartMapper.toResponseDto(latestCart.get()));
+                } else {
+                        // No hay carritos
+                        return null;
+                }
+
+        }
+
         public CartResponseDto createCart(CartRequestDto dto) {
                 User user = findUserOrThrow(dto.getUserId());
 
