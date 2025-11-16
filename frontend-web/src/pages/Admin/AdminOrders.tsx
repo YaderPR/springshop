@@ -4,7 +4,15 @@ import { getOrders } from '../../services/order/OderService';
 import type { OrderResponseDto } from '../../types/Order.types';
 import { Loader2, AlertTriangle, CheckCircle, CircleAlert, Eye } from 'lucide-react'; 
 import OrderDetailModal from '../../components/Admin/OrderDetailModal';
+import ExportButtons from '../../components/Shared/Common/ExportButtons';
 
+const reportColumns = [
+  { header: 'ID Orden', accessor: 'id' },
+  { header: 'ID Usuario', accessor: 'userId' },
+  { header: 'Estado', accessor: 'status' },
+  { header: 'Total', accessor: 'totalAmount' },
+  { header: 'Fecha', accessor: 'createAt' } 
+];
 
 export default function AdminOrders() {
   const { keycloak, initialized } = useKeycloak();
@@ -12,7 +20,6 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
-
   const [refreshSignal, setRefreshSignal] = useState(false);
   const triggerRefresh = () => setRefreshSignal(prev => !prev);
 
@@ -60,9 +67,23 @@ export default function AdminOrders() {
   return (
     <> 
       <div>
-        <h1 className="text-3xl font-bold text-secondary mb-6">
-          Administrar Órdenes
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-secondary">
+            Administrar Órdenes
+          </h1>
+          {/* Añadimos los botones de exportación si hay datos */}
+          {!loading && orders.length > 0 && (
+            <ExportButtons
+              data={orders.map(order => ({
+                ...order,
+                
+                createAt: new Date(order.createAt).toLocaleString() 
+              }))}
+              filename="reporte_ordenes"
+              columns={reportColumns}
+            />
+          )}
+        </div>
         
         <div className="grid grid-cols-2 gap-4">
           {orders.length > 0 ? (
