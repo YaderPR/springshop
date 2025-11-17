@@ -1,126 +1,158 @@
-// hooks/useCartManager.ts
 import { useState, useEffect } from 'react';
-import { cartService } from '../services/cart/cartService';
+import { cartService } from '../services/cart/CartService';
 import { getUserById, createGuestUser, createTemporaryUser } from '../services/user/UserService'; 
+import type { UserProfileRequest } from '../types/User.types';
+import { useKeycloak } from '@react-keycloak/web'; 
 
 export const useCartManager = () => {
+  const { keycloak, initialized } = useKeycloak();
+  
   const [currentCartId, setCurrentCartId] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [isUserCart, setIsUserCart] = useState<boolean>(false); 
-  const [loading, setLoading] = useState<boolean>(true); 
+  const [isUserCart, setIsUserCart] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // --- LÓGICA 1: USUARIO INVITADO (Sin sesión) ---
   const initializeGuestSession = async () => {
     setLoading(true);
-    setError(null);
-
     try {
       let userId: number;
       const storedGuestId = localStorage.getItem('guestUserId');
 
       if (storedGuestId) {
-
         userId = parseInt(storedGuestId, 10);
-        console.log(`Usuario invitado existente: ${userId}`);
       } else {
-
-        console.log("No se encontró usuario invitado. Creando uno nuevo...");
+        // Crear usuario invitado nuevo
+        // Usamos un objeto simple ya que syncUser no necesita body,
+        // pero si usas createGuestUser, mantén la estructura que definimos antes.
+        // Para simplificar y usar la lógica robusta de 'syncUser' (header),
+        // aquí usamos createTemporaryUser que ya arreglamos.
         const newGuestUser = await createTemporaryUser();
-
-        if (!newGuestUser || !newGuestUser.id) {
-          throw new Error("La respuesta de 'createTemporaryUser', no contenía un ID.");
-        }
         
+        if (!newGuestUser || !newGuestUser.id) throw new Error("Fallo al crear invitado");
         userId = newGuestUser.id;
         localStorage.setItem('guestUserId', userId.toString());
-        console.log(`Nuevo usuario invitado creado: ${userId}`);
       }
 
-
       setCurrentUserId(userId);
-      setIsUserCart(false); // Es un invitado, no un usuario autenticado
+      setIsUserCart(false);
 
+      // Gestión del Carrito Invitado
       let cartId: number;
-      const storedCartId = localStorage.getItem('guestCartId'); 
+      const storedCartId = localStorage.getItem('guestCartId');
 
       if (storedCartId) {
-
         try {
           const existingCart = await cartService.getCartById(parseInt(storedCartId, 10));
-          
           if (existingCart.userId === userId) {
             cartId = existingCart.id;
           } else {
-
-            console.warn("El carrito guardado no pertenece al usuario invitado actual. Creando uno nuevo.");
             const newCart = await cartService.createUserCart(userId);
             cartId = newCart.id;
           }
-        } catch (err) {
-          // El 'getCartById' falló (ej. 404). El ID guardado es basura. Creamos uno nuevo.
-          console.warn("El carrito guardado no se encontró en el backend. Creando uno nuevo.");
+        } catch {
           const newCart = await cartService.createUserCart(userId);
           cartId = newCart.id;
         }
       } else {
-        // No hay ID de carrito guardado. Creamos uno nuevo para nuestro usuario.
-        console.log(`No hay carrito guardado para el usuario ${userId}. Creando uno nuevo.`);
         const newCart = await cartService.createUserCart(userId);
         cartId = newCart.id;
       }
 
-      // Guardamos el ID del carrito
       localStorage.setItem('guestCartId', cartId.toString());
       setCurrentCartId(cartId);
-      
+
     } catch (err: any) {
-      console.error('Falló la inicialización de la sesión de invitado:', err);
-      
-      let errorMessage = "Error al inicializar sesión.";
-      if (err.message.includes("invitado")) {
-          errorMessage = "Error crítico al crear usuario invitado. El servicio de usuarios puede estar desconectado.";
-      } else {
-          errorMessage = err.response?.data?.message || 'Error al inicializar carrito';
-      }
-      
-      setError(errorMessage);
-      
-      // Limpiamos el localStorage para reintentar desde cero la próxima vez
-      localStorage.removeItem('guestUserId');
-      localStorage.removeItem('guestCartId');
+      console.error('Error sesión invitado:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para el futuro (cuando integres Keycloak)
-  const convertToUserCart = async (registeredUserId: number) => {
-    if (!currentCartId) return;
+  // --- LÓGICA 2: USUARIO LOGUEADO (Fusión) ---
+  const initializeUserSession = async () => {
+    setLoading(true);
     try {
-      await cartService.updateCart(currentCartId, registeredUserId);
-      setCurrentUserId(registeredUserId);
+      // 1. Obtener el ID real de base de datos del usuario logueado
+      // Usamos syncUser para asegurarnos de que existe en nuestra BD local
+      const sub = keycloak.subject;
+      if (!sub) throw new Error("No subject found in token");
+
+      const realUser = await syncUser(sub);
+      const realUserId = realUser.id;
+
+      setCurrentUserId(realUserId);
       setIsUserCart(true);
-      // Limpiar localStorage de invitado
-      localStorage.removeItem('guestUserId');
-      localStorage.removeItem('guestCartId');
-      // (Aquí guardarías la info del usuario real)
-    } catch (error) {
-      console.error('Error converting to user cart:', error);
+
+      // 2. Verificar si hay un carrito de invitado pendiente de fusionar
+      const guestCartIdStr = localStorage.getItem('guestCartId');
+
+      if (guestCartIdStr) {
+        const guestCartId = parseInt(guestCartIdStr, 10);
+        console.log(`Fusionando carrito invitado ${guestCartId} al usuario ${realUserId}...`);
+        
+        try {
+          // ¡AQUÍ OCURRE LA MAGIA! Asignamos el carrito al usuario real
+          await cartService.updateCart(guestCartId, realUserId);
+          
+          // Fusión exitosa: usamos este carrito
+          setCurrentCartId(guestCartId);
+          
+          // Limpiamos rastros del invitado
+          localStorage.removeItem('guestUserId');
+          localStorage.removeItem('guestCartId');
+          
+        } catch (err) {
+          console.error("Error al fusionar carrito, buscando carrito existente del usuario...", err);
+          // Si falla la fusión (ej. conflicto), intentamos buscar un carrito existente del usuario
+          // Esto requeriría un endpoint tipo getCartByUserId, o crear uno nuevo.
+          // Por simplicidad, creamos uno nuevo si falla la fusión.
+          const newCart = await cartService.createUserCart(realUserId);
+          setCurrentCartId(newCart.id);
+        }
+      } else {
+        // 3. No hay carrito invitado. ¿El usuario ya tiene uno?
+        // Como tu API actual no tiene "getCartByUser", asumimos crear uno nuevo o 
+        // idealmente el backend debería manejar "obtener mi carrito activo".
+        // Por ahora, creamos uno nuevo asociado a su ID.
+        // (Nota: En un futuro, tu backend debería devolver el carrito activo si existe)
+        const newCart = await cartService.createUserCart(realUserId);
+        setCurrentCartId(newCart.id);
+      }
+
+    } catch (err: any) {
+      console.error('Error sesión usuario:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Efecto para inicializar al montar
+
+  // --- EFECTO PRINCIPAL: DECIDE QUÉ CAMINO TOMAR ---
   useEffect(() => {
-    initializeGuestSession();
-  }, []); // Se ejecuta solo una vez al cargar la app
+    if (!initialized) return;
+
+    if (keycloak.authenticated) {
+      // Camino A: Usuario Registrado
+      initializeUserSession();
+    } else {
+      // Camino B: Usuario Invitado
+      initializeGuestSession();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialized, keycloak.authenticated]);
+
 
   return {
     cartId: currentCartId,
-    userId: currentUserId, // <-- ¡Este ID ahora es real (ej. 125)!
+    userId: currentUserId,
     isUserCart,
     loading,
     error,
-    refreshCart: initializeGuestSession, 
-    convertToUserCart
+    // Exponemos una función para forzar recarga si es necesario
+    refreshCart: keycloak.authenticated ? initializeUserSession : initializeGuestSession
   };
 };

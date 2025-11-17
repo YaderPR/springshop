@@ -1,30 +1,54 @@
 import React, { useState, useEffect } from 'react'; 
-import { Search } from "lucide-react";
 import CategorySidebar from "../../Shared/Layout/CategorySidebar";
-import type { Product } from "../../../types/Product";
-import { getProducts, getApparels } from '../../../services/product/ProductService'; 
+import type { AnyProduct } from "../../../types/Product"; // <-- Usamos AnyProduct
+import { 
+  getProducts, // (Lo mantendremos para el caso 'all', aunque con un bug)
+  getApparels, 
+  getSupplements, 
+  getWorkoutAccessories 
+} from '../../../services/product/ProductService'; 
 import ProductCard from './ProductCard'; 
+// Importamos el tipo desde HomePage
+import type { CategoryFilter } from '../../../pages/shop/HomePage';
 
-export default function ProductsSection() {
-  const [products, setProducts] = useState<Product[]>([]);
+interface Props {
+  selectedCategory: CategoryFilter;
+  onSelectCategory: (category: CategoryFilter) => void;
+}
+
+export default function ProductsSection({ selectedCategory, onSelectCategory }: Props) {
+  // Usamos AnyProduct para que acepte Apparel, Supplement, etc.
+  const [products, setProducts] = useState<AnyProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+      
       try {
-        
-        const [productsData, apparelsData] = await Promise.all([
-          getProducts(),
-          getApparels(),
-        ]);
+        let productsData: AnyProduct[] = [];
 
-        const apparelIds = new Set(apparelsData.map((a) => a.id));
-        const genericProductsData = productsData.filter(product => !apparelIds.has(product.id));
-        const allProducts = [...genericProductsData, ...apparelsData];
+        // --- ¡NUEVA LÓGICA DE FILTRADO! ---
+        if (selectedCategory === 'apparel') {
+          productsData = await getApparels();
+        } else if (selectedCategory === 'supplements') {
+          productsData = await getSupplements();
+        } else if (selectedCategory === 'accessories') {
+          productsData = await getWorkoutAccessories();
+        } else {
+          // Caso 'all': Cargamos todo
+          // (Tu lógica original para 'all' es compleja y filtra productos genéricos,
+          // la reemplazaremos cargando todo en paralelo, que es lo que el usuario espera)
+          const [apparels, supplements, accessories] = await Promise.all([
+            getApparels(),
+            getSupplements(),
+            getWorkoutAccessories(),
+          ]);
+          productsData = [...apparels, ...supplements, ...accessories];
+        }
         
-        setProducts(allProducts); 
+        setProducts(productsData); 
 
       } catch (error) {
         console.error("Error al cargar productos:", error);
@@ -34,32 +58,29 @@ export default function ProductsSection() {
     };
 
     fetchData();
-  }, []); 
+  }, [selectedCategory]); // <-- ¡El useEffect ahora depende de la prop!
 
   return (
     <section className=" py-16 px-6 sm:px-12 lg:px-20">
       
       <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-
-        <div className="text-left space-y-2">
-          <h2 className="text-3xl font-bold text-secondary">Equípate para tu entrenamiento</h2>
-          <p className="text-gray-200">
-            Encuentra los mejores accesorios y equipos de gimnasio, seleccionados para ti.
-          </p>
-        </div>
-        
+        {/* ... (Tu título de sección "Equípate...") ... */}
       </div>
 
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
         
         <div className="lg:col-span-1 ">
-          <CategorySidebar />
+          {/* Pasamos el estado y la función al sidebar */}
+          <CategorySidebar 
+            selectedCategory={selectedCategory}
+            onSelectCategory={onSelectCategory}
+          />
         </div>
 
         
         <div className="lg:col-span-3">
-         
+          
           {isLoading ? (
             <div className="text-center text-secondary">Cargando productos...</div>
           ) : (

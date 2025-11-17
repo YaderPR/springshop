@@ -19,14 +19,7 @@ export default function Hero() {
           Encuentra productos increíbles con descuentos exclusivos. Todo lo que
           necesitas, en un solo lugar.
         </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
-          <button className="bg-secondary text-primary px-8 py-3 rounded-lg font-semibold hover:bg-primary hover:text-white transition-colors">
-            Comprar ahora
-          </button>
-          <button className="border border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-black transition-colors">
-            Ver catálogo
-          </button>
-        </div>
+        
       </div>
     </section>
   );

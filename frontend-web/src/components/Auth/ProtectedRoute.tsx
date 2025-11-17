@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 
 interface Props {
   children: JSX.Element;
-  role: string; 
+  role?: string; 
 }
 
 export default function ProtectedRoute({ children, role }: Props) {
@@ -24,7 +24,7 @@ export default function ProtectedRoute({ children, role }: Props) {
     return null; 
   }
 
-  if (!keycloak.hasRealmRole(role)) {
+  if (role && !keycloak.hasRealmRole(role)) {
     return <Navigate to="/" replace />;
   }
 

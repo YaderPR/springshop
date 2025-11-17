@@ -1,34 +1,60 @@
 import React from 'react';
-import { LayoutGrid, Flame, Percent } from 'lucide-react'; 
+import { LayoutGrid, Shirt, Sparkles, Dumbbell } from 'lucide-react';
+// Importamos el tipo desde HomePage
+import type { CategoryFilter } from '../../../pages/shop/HomePage';
 
-export default function CategorySidebar() {
-  const categories = [
-    { name: 'Todos los productos', icon: LayoutGrid },
-    { name: 'Lo más vendido', icon: Flame },
-    { name: 'En descuento', icon: Percent },
-  ];
+interface Props {
+  selectedCategory: CategoryFilter;
+  onSelectCategory: (category: CategoryFilter) => void;
+}
 
+// Helper para los estilos de los botones
+const getLinkClass = (isActive: boolean) => {
+  return `flex items-center gap-3 px-4 py-3 rounded-lg text-lg transition-colors w-full text-left
+    ${
+      isActive
+        ? 'bg-secondary text-primary font-bold' // Estilo activo
+        : 'text-gray-300 hover:bg-gray-800 hover:text-white' // Estilo inactivo
+    }`;
+};
+
+export default function CategorySidebar({ selectedCategory, onSelectCategory }: Props) {
   return (
-    <aside className="space-y-6">
-      <h2 className="text-4xl font-bold text-secondary">Categorias</h2>
-      <ul className="space-y-3">
-        {categories.map((category) => (
-          <li key={category.name}>
-            <a
-              href="#"
-              className="
-                flex items-center gap-4 
-                text-white text-lg font-semibold 
-                hover:text-secondary
-                transition-colors duration-200
-              "
-            >
-              <category.icon className="w-6 h-6" />
-              <span>{category.name}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
+    <aside className="w-full md:w-64 flex-shrink-0">
+      <h2 className="text-3xl font-bold text-secondary mb-6">
+        Categorías
+      </h2>
+      <nav className="flex flex-col gap-2">
+        {/* Ya no son NavLinks, son botones que llaman a la función del padre */}
+        <button 
+          onClick={() => onSelectCategory('all')} 
+          className={getLinkClass(selectedCategory === 'all')}
+        >
+          <LayoutGrid size={22} />
+          Todos los productos
+        </button>
+        <button 
+          onClick={() => onSelectCategory('apparel')}
+          className={getLinkClass(selectedCategory === 'apparel')}
+        >
+          <Shirt size={22} />
+          Ropa (Apparel)
+        </button>
+        <button 
+          onClick={() => onSelectCategory('supplements')}
+          className={getLinkClass(selectedCategory === 'supplements')}
+        >
+          <Sparkles size={22} />
+          Suplementos
+        </button>
+        <button 
+          onClick={() => onSelectCategory('accessories')}
+          className={getLinkClass(selectedCategory === 'accessories')}
+        >
+          <Dumbbell size={22} />
+          Accesorios
+        </button>
+      </nav>
     </aside>
   );
 }

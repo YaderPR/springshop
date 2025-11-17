@@ -4,7 +4,6 @@ const fileApi = axios.create({
   baseURL: "http://localhost:8092/api/v2/files"
 });
 
-
 export async function uploadImage(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
@@ -19,7 +18,6 @@ export async function uploadImage(file: File): Promise<string> {
         },
       }
     );
-
     return `http://localhost:8092/api/v2/files/${uploadedFile.filename}`;
     
   } catch (error: any) {

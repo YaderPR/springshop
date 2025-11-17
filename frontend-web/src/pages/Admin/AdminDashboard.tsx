@@ -14,9 +14,11 @@ import {
   CircleAlert,
   PackageSearch,
   LayoutDashboard,
+  FileText,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import InventoryReport from "../../components/Admin/IntentoryReport";
+import ProductReport from "../../components/Admin/ProductReport";
 
 const StatCard = ({
   title,
@@ -200,17 +202,17 @@ const DashboardSummary = () => {
 };
 
 // --- 3. El componente Dashboard principal (con Pestañas) ---
-type DashboardTab = "summary" | "inventory";
+type DashboardTab = "summary" | "inventory" | "products";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<DashboardTab>("summary");
+  const [activeTab, setActiveTab] = useState<DashboardTab>('summary');
 
   const getTabClass = (tabName: DashboardTab) => {
     return `flex items-center gap-2 py-3 px-5 font-semibold transition-colors
       ${
         activeTab === tabName
-          ? "border-b-2 border-secondary text-secondary"
-          : "text-gray-400 hover:text-white border-b-2 border-transparent"
+          ? 'border-b-2 border-secondary text-secondary'
+          : 'text-gray-400 hover:text-white border-b-2 border-transparent'
       }`;
   };
 
@@ -221,25 +223,34 @@ export default function AdminDashboard() {
       {/* Contenedor de Pestañas */}
       <div className="flex border-b border-gray-700">
         <button
-          onClick={() => setActiveTab("summary")}
-          className={getTabClass("summary")}
+          onClick={() => setActiveTab('summary')}
+          className={getTabClass('summary')}
         >
           <LayoutDashboard size={18} />
           Resumen
         </button>
         <button
-          onClick={() => setActiveTab("inventory")}
-          className={getTabClass("inventory")}
+          onClick={() => setActiveTab('inventory')}
+          className={getTabClass('inventory')}
         >
           <PackageSearch size={18} />
-          Reporte de Inventario
+          Reporte de bajo Stock
+        </button>
+        {/* --- 3. Añadimos la nueva pestaña --- */}
+        <button
+          onClick={() => setActiveTab('products')}
+          className={getTabClass('products')}
+        >
+          <FileText size={18} />
+          Reporte de Productos
         </button>
       </div>
 
       {/* Contenido de Pestañas (Renderizado Condicional) */}
       <div>
-        {activeTab === "summary" && <DashboardSummary />}
-        {activeTab === "inventory" && <InventoryReport />}
+        {activeTab === 'summary' && <DashboardSummary />}
+        {activeTab === 'inventory' && <InventoryReport />}
+        {activeTab === 'products' && <ProductReport />}
       </div>
     </div>
   );

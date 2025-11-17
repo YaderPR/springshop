@@ -1,21 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import Hero from "../../components/Shop/Home/Hero";
 import ProductsSection from "../../components/Shop/Product/ProductSection";
 import RecommendedSection from "../../components/Shop/Home/RecomendedSection";
 import CtaSection from "../../components/Shop/Home/CtaSection";
-import type { Product } from "../../types/Product";
-import { useCart } from "../../context/CartContext";
 
-// Este es el componente que será renderizado en la ruta "/"
+export type CategoryFilter = 'all' | 'apparel' | 'supplements' | 'accessories';
+
 const HomePage: React.FC = () => {
-    return (
-        <main>
-            <Hero />
-            <ProductsSection />
-            <RecommendedSection  className="no-scrollbar"/>
-            <CtaSection />
-        </main>
-    );
+
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
+
+  return (
+    <main>
+      <Hero />
+      <ProductsSection 
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
+      
+      <RecommendedSection className="no-scrollbar"/>
+      <CtaSection />
+    </main>
+  );
 };
 
 export default HomePage;

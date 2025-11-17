@@ -1,59 +1,78 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-
-import Navbar from "./components/Shared/layout/Navbar";
-import Footer from "./components/Shared/layout/Footer";
-import AdminLayout from "./Layouts/AdminLayout";
+import Navbar from "./components/shared/layout/Navbar";
+import Footer from "./components/shared/layout/Footer";
 import { CartProvider } from "./context/CartContext";
-import CartDrawer from "./components/Shop/Cart/CartDrawer"; 
-
-import HomePage from "./pages/Shop/HomePage";
-import CheckoutPage from "./pages/Shop/CheckoutPage";
-import PagoExitoso from "./pages/Shop/PagoExitoso";
-
-// Páginas de Admin
-import AdminCategories from "./pages/Admin/AdminCategories";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
-import AdminOrders from "./pages/Admin/AdminOrders";
-import AdminProducts from "./pages/Admin/AdminProducts";
-import AdminUsers from "./pages/Admin/AdminUsers";
-
-// Autenticación
+import CartDrawer from "./components/shop/cart/CartDrawer"; 
+import HomePage from "./pages/shop/HomePage";
+import CheckoutPage from "./pages/shop/CheckoutPage";
+import PagoExitoso from "./pages/shop/PagoExitoso";
+import ProductGridPage from "./pages/Shop/ProductGridPage";
+import ContactPage from "./pages/Shop/ContactPage"
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminUsers from "./pages/admin/AdminUsers";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
-
+import MyOrderPage from "./components/Shop/Checkout/MyOrderPage";
 
 export default function App() {
   return (
     <Router>
       <CartProvider>
-        <div className="min-h-screen bg-black bg-[radial-gradient(circle_at_center,#181e11_0%,#000000_60%)] ">
-        
+        <div className="min-h-screen bg-black bg-[radial-gradient(circle_at_center,#181e11_0%,#000000_60%)] flex flex-col">
+          
           <Navbar />
           <CartDrawer /> 
-          <Routes>
+          
+          {/* ¡ARREGLO! Quitamos 'container mx-auto' de aquí */}
+          <main className="flex-1 container mx-auto"> 
 
-            <Route path="/" element={<HomePage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/pago-exitoso" element={<PagoExitoso />} />
+            {/* ¡ARREGLO! Solo hay UN <Routes> que envuelve TODO */}
+            <Routes>
+              <Route path="/" element={<HomePage />}>
+                
+              </Route>
 
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute role="admin">
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<AdminDashboard />} /> 
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="categories" element={<AdminCategories />} />
-              <Route path="orders" element={<AdminOrders />} />
-              <Route path="users" element={<AdminUsers />} />
-            </Route>
+              {/* --- 2. RUTAS PÚBLICAS (Independientes) --- */}
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/pago-exitoso" element={<PagoExitoso />} />
+              <Route path="/contacto" element={<ContactPage />} />
 
-            {/* ¡ARREGLO AQUÍ! La ruta duplicada de /admin se ha eliminado */}
+              <Route 
+                path="/mis-pedidos" 
+                element={
+                  <ProtectedRoute> 
+                    <MyOrderPage />
+                  </ProtectedRoute>
+                } 
+              />
 
-          </Routes>
+              {/* --- 3. RUTAS DE ADMIN (Protegidas) --- */}
+              <Route 
+                path="/admin" 
+                element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/admin/products" 
+                element={<ProtectedRoute role="admin"><AdminProducts /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/admin/categories" 
+                element={<ProtectedRoute role="admin"><AdminCategories /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/admin/orders" 
+                element={<ProtectedRoute role="admin"><AdminOrders /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/admin/users" 
+                element={<ProtectedRoute role="admin"><AdminUsers /></ProtectedRoute>} 
+              />
+
+            </Routes>
+          </main>
           
           <Footer />
         </div>
