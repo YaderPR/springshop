@@ -10,6 +10,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 @RestController
@@ -39,6 +40,10 @@ public class AddressController {
         return ResponseEntity.ok(addressService.getAllAddresses());
     }
 
+    @GetMapping("/user/{userId:\\d+}")
+    public ResponseEntity<AddressResponseDto> getLastAddressByUser(@PathVariable Integer userId) {
+        return wrapOrNotFound(addressService.findLastAddressByUser(userId));
+    }
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<AddressResponseDto> getAddressById(@PathVariable Integer id) {
 

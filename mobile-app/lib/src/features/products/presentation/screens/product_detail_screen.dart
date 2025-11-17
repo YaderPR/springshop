@@ -93,9 +93,9 @@ class ProductDetailScreen extends StatelessWidget {
           ),
 
           // 2. Barra de acción del producto (FIJA en la parte inferior del BODY)
-          const Align(
+          Align(
             alignment: Alignment.bottomCenter,
-            child: ProductActionBar(), // 💡 Se coloca aquí y no como bottomNavigationBar
+            child: ProductActionBar(productId: product.id), // 💡 Se coloca aquí y no como bottomNavigationBar
           ),
         ],
       ),

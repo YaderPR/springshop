@@ -11,6 +11,10 @@ import 'package:springshop/src/features/categories/data/repositories/category_ap
 import 'package:springshop/src/features/categories/domain/repositories/accessory_category_repository.dart';
 import 'package:springshop/src/features/categories/domain/repositories/apparel_category_repository.dart';
 import 'package:springshop/src/features/categories/domain/repositories/category_repository.dart';
+import 'package:springshop/src/features/order/data/repositories/address_api_repository.dart';
+import 'package:springshop/src/features/order/data/services/address_api_service.dart';
+import 'package:springshop/src/features/order/domain/repositories/address_repository.dart';
+import 'package:springshop/src/features/order/domain/services/address_service.dart';
 import 'package:springshop/src/features/products/data/repositories/apparel_api_repository.dart';
 import 'package:springshop/src/features/products/data/repositories/product_api_repository.dart';
 import 'package:springshop/src/features/products/data/repositories/supplement_api_repository.dart';
@@ -96,7 +100,7 @@ List<SingleChildWidget> buildAppProviders() {
   // Paso 2: Crear el CartService como una instancia simple (fuera del árbol de Providers)
   // Esto nos permite pasarlo a AppAuthService de forma síncrona.
   final cartService = CartService(cartRepository, productService);
-
+  final addressRepository = AddressApiRepository(dio);
   // Paso 3: Configurar el CartService en AppAuthService
   _appAuthService.setCartService(cartService);
 
@@ -154,15 +158,15 @@ List<SingleChildWidget> buildAppProviders() {
 
     // 💡 SERVICIO DE CARRITO (Usamos .value porque ya fue creado)
     ChangeNotifierProvider<CartService>.value(value: cartService),
-
     // --- Servicios de Autenticación ---
     Provider<AppAuthService>.value(value: _appAuthService),
     Provider<AuthRepository>.value(value: _appAuthService),
-
+    Provider<AddressRepository>.value(value: addressRepository),
+    Provider<AddressService>(create: (context) => AddressApiService(context.read<AddressRepository>())),
     // --- Notificador de Estado de Autenticación (Debe ir al final) ---
     ChangeNotifierProvider<AuthStateNotifier>(
       create: (context) =>
-          AuthStateNotifier(context.read<AuthRepository>())
+          AuthStateNotifier(context.read<AuthRepository>(), context.read<CartService>())
             ..checkInitialAuthStatus(),
       lazy: false,
     ),

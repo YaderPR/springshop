@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:springshop/src/core/auth/auth_repository.dart';
 import 'package:springshop/src/features/auth/domain/entities/user.dart';
 import 'package:springshop/src/features/cart/data/services/cart_service.dart'; // 💡 AGREGADO: Importar CartService
-import 'auth_repository.dart';
 import 'dart:convert'; // AGREGADO: Necesario si se necesita decodificar JWT (lo mantengo por si acaso)
 
 final FlutterAppAuth appAuth = FlutterAppAuth();
@@ -145,10 +145,10 @@ class AppAuthService implements AuthRepository {
 
         print('✅ Sincronización finalizada. ID interno: ${mergedUser.id}');
 
-        // 🎯 NUEVA LÓGICA AGREGADA: Inicializar el carrito
+        // 🎯 LÓGICA DE CARRITO: Llama a la función auxiliar
         final int? cartUserId = int.tryParse(internalId);
         if (cartUserId != null) {
-          await setCartIdAfterLogin(cartUserId);
+          await _setCartIdAfterLogin(cartUserId); // USAMOS LA FUNCIÓN AUXILIAR
         }
         // --------------------------------------------------
 
@@ -324,6 +324,58 @@ class AppAuthService implements AuthRepository {
     } catch (e) {
       print('❌ Error general en getUserInfo: $e');
       rethrow;
+    }
+  }
+
+  Future<void> _setCartIdAfterLogin(int userId) async {
+    if (_cartService != null && userId != 0) {
+      print('🚀 Usuario $userId autenticado. Inicializando carrito...');
+      await _cartService!.initializeCart(userId);
+    }
+  }
+
+  // =======================================================
+  // IMPLEMENTACIÓN NUEVA: Sincronización al inicio de la App
+  // =======================================================
+  @override
+  Future<User?> syncUserAndInitializeCart() async {
+    try {
+      // 1. Obtener datos de Keycloak (Necesario para tener un token válido)
+      final keycloakUser = await getUserInfo();
+      print('✅ [AppAuthService] UserInfo de Keycloak obtenido en el inicio: SUB ${keycloakUser.sub}');
+
+      // 2. Sincronizar con el API Gateway para obtener el ID interno (Lógica de getAndSyncUser)
+      final token = await getAccessToken();
+      const syncPath = '/users/me/sync';
+
+      final response = await _apiGatewayDio.post(
+          syncPath,
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      if (response.data != null && response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = response.data;
+        final String internalId = jsonResponse['id']?.toString() ?? keycloakUser.id;
+
+        // 3. Fusionar y crear el modelo de usuario completo
+        final mergedUser = keycloakUser.copyWith(id: internalId);
+        
+        print('✅ [AppAuthService] Sincronización exitosa. ID interno: $internalId');
+
+        // 4. Inicializar el carrito
+        final int? cartUserId = int.tryParse(internalId);
+        if (cartUserId != null) {
+          await _setCartIdAfterLogin(cartUserId);
+        }
+
+        return mergedUser;
+      } else {
+        throw Exception('Fallo al obtener ID interno durante el chequeo inicial. Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ [AppAuthService.syncUserAndInitializeCart] Fallo en la sincronización: $e');
+      // No rethrow aquí; el AuthStateNotifier lo maneja limpiando la sesión si es necesario.
+      return null;
     }
   }
 }

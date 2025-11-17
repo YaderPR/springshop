@@ -16,6 +16,8 @@ abstract class AuthRepository {
 
   /// Cierra la sesión en Keycloak y limpia el almacenamiento local.
   Future<void> logout();
+  // 🔑 NUEVO MÉTODO: Para el chequeo inicial
+  Future<User?> syncUserAndInitializeCart();
 
   /// Obtiene el access token actual. Intenta refrescarlo si está cerca de expirar.
   Future<String?> getAccessToken();

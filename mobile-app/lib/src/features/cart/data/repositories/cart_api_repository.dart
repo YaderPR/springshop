@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:springshop/src/features/cart/data/models/cart_dto.dart'; 
+import 'package:springshop/src/features/cart/data/models/cart_dto.dart';
 import 'package:springshop/src/features/cart/domain/repositories/cart_repository.dart';
 
 class CartApiRepository implements CartRepository {
@@ -8,24 +8,44 @@ class CartApiRepository implements CartRepository {
 
   CartApiRepository(this._dio);
 
-  /// 🔑 Función clave: Intenta obtener el carrito, si falla (404/vacío), lo crea.
+  // ====================================================================
+  // NUEVOS MÉTODOS DE BÚSQUEDA Y CREACIÓN (IMPLEMENTACIÓN EXPLÍCITA)
+  // ====================================================================
+
+  /// 🎯 Intenta obtener un carrito activo para un usuario.
+  /// Devuelve [CartResponseDto] si se encuentra, o [null] si la API responde 404.
   @override
-  Future<CartResponseDto> getOrCreateCart(int userId) async {
+  Future<CartResponseDto?> getExistingCart(int userId) async {
     try {
-      // 1. Asumo que tienes un endpoint para buscar por UserID
+      // Endpoint asumido: GET /api/v2/carts/user/{userId}
+      print('🔎 [CartApiRepository] Buscando carrito existente para UserId: $userId');
       final response = await _dio.get('$_basePath/user/$userId');
       return CartResponseDto.fromJson(response.data);
     } on DioException catch (e) {
+      // Si la API regresa un 404 (Not Found), significa que no hay carrito activo.
       if (e.response?.statusCode == 404) {
-        // 2. Si el carrito no existe (404), lo creamos
-        print('Carrito no encontrado para userId $userId. Creando uno nuevo...');
-        final request = CartRequestDto(userId: userId);
-        final response = await _dio.post(_basePath, data: request.toJson());
-        return CartResponseDto.fromJson(response.data);
+        print('✅ [CartApiRepository] No se encontró carrito (404). Retornando null.');
+        return null;
       }
+      // Para cualquier otro error (500, timeout, etc.), relanzamos la excepción.
       rethrow;
     }
   }
+
+  /// 🎯 Crea un nuevo carrito para el usuario.
+  /// Se llama solo si [getExistingCart] devolvió null.
+  @override
+  Future<CartResponseDto> createCart(int userId) async {
+    print('✨ [CartApiRepository] Creando nuevo carrito para UserId: $userId');
+    // Endpoint asumido: POST /api/v2/carts
+    final request = CartRequestDto(userId: userId);
+    final response = await _dio.post(_basePath, data: request.toJson());
+    return CartResponseDto.fromJson(response.data);
+  }
+  
+  // ====================================================================
+  // MÉTODOS ANTERIORES (getOrCreateCart ELIMINADO)
+  // ====================================================================
 
   @override
   Future<CartResponseDto> getCartById(int cartId) async {
@@ -36,7 +56,9 @@ class CartApiRepository implements CartRepository {
 
   @override
   Future<CartItemResponseDto> addItem(
-      int cartId, CartItemCreateRequestDto item) async {
+    int cartId,
+    CartItemCreateRequestDto item,
+  ) async {
     // Si el producto ya existe en el carrito, la API debe actualizar la cantidad
     final response = await _dio.post(
       '$_basePath/$cartId/items',
@@ -47,9 +69,9 @@ class CartApiRepository implements CartRepository {
 
   // Los demás métodos son llamados por el CartService.
   @override
-  Future<void> updateItemQuantity(int cartId, int itemId, int quantity) async {
+  Future<void> updateItemQuantity(int cartId, int itemId, int quantity, int productId) async {
     // Solo necesitamos la cantidad en el DTO de actualización
-    final request = CartItemUpdateRequestDto(productId: 0, quantity: quantity); 
+    final request = CartItemUpdateRequestDto(productId: productId, quantity: quantity);
     // Endpoint: PUT /api/v2/carts/{cartId}/items/{itemId}
     await _dio.put('$_basePath/$cartId/items/$itemId', data: request.toJson());
   }
