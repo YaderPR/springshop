@@ -1,13 +1,27 @@
-// lib/src/features/products/presentation/widgets/product_action_bar.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:springshop/src/features/cart/data/services/cart_service.dart';
 
 class ProductActionBar extends StatelessWidget {
-  const ProductActionBar({super.key});
+  // 💡 Necesitamos el ID del producto que se está visualizando
+  final String productId;
+  
+  const ProductActionBar({super.key, required this.productId});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     
+    // Accedemos al CartService
+    final cartService = context.read<CartService>();
+    
+    // Función para mostrar un SnackBar de confirmación
+    void showConfirmation(String message) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
       decoration: BoxDecoration(
@@ -25,9 +39,14 @@ class ProductActionBar extends StatelessWidget {
           // Botón 1: Agregar a la cesta
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: () {
-                // TODO: Implementar lógica de agregar al carrito
-                print('Agregado a la Cesta (Simulado)');
+              onPressed: () async {
+                try {
+                  // Lógica: Agregar 1 unidad del producto al carrito
+                  await cartService.addItem(productId, quantity: 1);
+                  showConfirmation('Producto añadido a la cesta!');
+                } catch (e) {
+                  showConfirmation('Error al añadir: ${e.toString()}');
+                }
               },
               icon: const Icon(Icons.shopping_cart_outlined),
               label: const Text('Añadir a la cesta'),
@@ -45,8 +64,9 @@ class ProductActionBar extends StatelessWidget {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Implementar lógica de compra inmediata
-                print('Comprar Ahora (Simulado)');
+                // TODO: Implementar lógica de compra inmediata (generalmente es añadir al carrito y navegar a checkout)
+                print('Comprar Ahora (Simulado) - Producto ID: $productId');
+                showConfirmation('Funcionalidad de Compra Rápida Pendiente.');
               },
               child: const Text('Cómpralo ya'),
               style: ElevatedButton.styleFrom(

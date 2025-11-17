@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .pathMatchers("/actuator/**").permitAll()
                         
                         // Rutas protegidas de microservicios
-                        .pathMatchers("/api/v2/products/**").authenticated()
+                        .pathMatchers("/api/v2/products/**").permitAll()
                         .pathMatchers("/api/v2/carts/**").authenticated()
                         .pathMatchers("/api/v2/orders/**").authenticated()
                         .pathMatchers("/api/v2/payments/**").authenticated()

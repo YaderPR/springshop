@@ -33,7 +33,10 @@ public class CartController {
 
         return ResponseEntity.ok(cartService.getAllCarts());
     }
-
+    @GetMapping("/user/{userId:\\d+}")
+    public ResponseEntity<CartResponseDto> getLastCartByUser(@PathVariable Integer userId) {
+        return cartService.findLastCartByUser(userId).map(ResponseEntity::ok).orElseThrow(() -> new EntityNotFoundException("Cart not found"));
+    }
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<CartResponseDto> getCartById(@PathVariable Integer id) {
 

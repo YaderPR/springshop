@@ -80,7 +80,15 @@ public class AddressService {
         
         return AddressMapper.toResponseDto(savedAddress);
     }
-
+    public Optional<AddressResponseDto> findLastAddressByUser(Integer userId) {
+        User user = findUserOrThrow(userId);
+        Optional<Address> address = addressRepository.findTopByUserIdOrderByIdDesc(user.getId());
+        if(address.isPresent()) {
+            return Optional.of(AddressMapper.toResponseDto(address.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
     /**
      * Actualiza una dirección existente.
      */

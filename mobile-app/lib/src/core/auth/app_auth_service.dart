@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:springshop/src/features/auth/domain/entities/user.dart'; // Corregido: asumimos que User está en domain/entities
-import 'auth_repository.dart';
+import 'package:springshop/src/core/auth/auth_repository.dart';
+import 'package:springshop/src/features/auth/domain/entities/user.dart';
+import 'package:springshop/src/features/cart/data/services/cart_service.dart'; // 💡 AGREGADO: Importar CartService
+import 'dart:convert'; // AGREGADO: Necesario si se necesita decodificar JWT (lo mantengo por si acaso)
 
 final FlutterAppAuth appAuth = FlutterAppAuth();
 final FlutterSecureStorage secureStorage = FlutterSecureStorage();
@@ -24,13 +26,34 @@ final AuthorizationServiceConfiguration _serviceConfiguration =
 
 // 🚀 Implementamos el contrato AuthRepository
 class AppAuthService implements AuthRepository {
+  // 🔑 PROPIEDADES AGREGADAS PARA EL CARRO
+  CartService? _cartService;
+
   // 🔑 INYECCIÓN: Propiedad privada para la instancia de Dio inyectada (para Keycloak)
   final Dio _keycloakDio;
   final Dio _apiGatewayDio;
+
   // 🔑 CONSTRUCTOR: Usamos un constructor con nombre claro o solo posicional
   AppAuthService({required Dio keycloakDio, required Dio apiGatewayDio})
     : _keycloakDio = keycloakDio,
       _apiGatewayDio = apiGatewayDio;
+
+  // =======================================================
+  // LÓGICA DE CARRO ACOPLADA
+  // =======================================================
+
+  /// 🔑 SETTER: Para inyectar el CartService desde el Provider.
+  void setCartService(CartService service) {
+    _cartService = service;
+  }
+
+  /// 🎯 FUNCIÓN DE INICIALIZACIÓN DEL CARRO
+  Future<void> setCartIdAfterLogin(int userId) async {
+    if (_cartService != null && userId != 0) {
+      print('🚀 Usuario $userId autenticado. Inicializando carrito...');
+      await _cartService!.initializeCart(userId);
+    }
+  }
 
   // =======================================================
   // CONTRATO: 1. GESTIÓN DEL INICIO Y LOGOUT
@@ -74,65 +97,79 @@ class AppAuthService implements AuthRepository {
   }
 
   @override
- Future<User> getAndSyncUser() async {
-  // 1. OBTENER DATOS DETALLADOS DE KEYCLOAK (USER INFO)
-  // Usamos el método existente getUserInfo()
-  User keycloakUser;
-  try {
-   keycloakUser = await getUserInfo();
-   print('✅ Datos de Keycloak obtenidos. SUB: ${keycloakUser.sub}');
-  } catch (e) {
-   print('❌ Fallo al obtener UserInfo de Keycloak: $e');
-   rethrow;
-  }
+  Future<User> getAndSyncUser() async {
+    // 1. OBTENER DATOS DETALLADOS DE KEYCLOAK (USER INFO)
+    // Usamos el método existente getUserInfo()
+    User keycloakUser;
+    try {
+      keycloakUser = await getUserInfo();
+      print('✅ Datos de Keycloak obtenidos. SUB: ${keycloakUser.sub}');
+    } catch (e) {
+      print('❌ Fallo al obtener UserInfo de Keycloak: $e');
+      rethrow;
+    }
 
-  // 2. SINCRONIZAR CON EL API GATEWAY PARA OBTENER EL ID INTERNO
-  final token = await getAccessToken();
-  const syncPath = '/users/me/sync'; 
+    // 2. SINCRONIZAR CON EL API GATEWAY PARA OBTENER EL ID INTERNO
+    final token = await getAccessToken();
+    const syncPath = '/users/me/sync';
 
-  try {
-   final response = await _apiGatewayDio.post(
-    syncPath, 
-    options: Options(
-     headers: {
-      'Authorization': 'Bearer $token', 
-      'Content-Type': 'application/json',
-     },
-    ),
-   );
+    try {
+      final response = await _apiGatewayDio.post(
+        syncPath,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
 
-   // ====================================================================
-   // CLAVE DE DEPURACIÓN SYNC
-   // ====================================================================
-   print('🔎 RESPUESTA SYNC: Status: ${response.statusCode}, Data: ${response.data}');
-      
+      // ====================================================================
+      // CLAVE DE DEPURACIÓN SYNC
+      // ====================================================================
+      print(
+        '🔎 RESPUESTA SYNC: Status: ${response.statusCode}, Data: ${response.data}',
+      );
+
       // La respuesta del backend solo tiene ID, SUB, USERNAME
-   if (response.data != null && response.statusCode == 200) {
-    final Map<String, dynamic> jsonResponse = response.data;
-    final String internalId = jsonResponse['id']?.toString() ?? keycloakUser.id; // Usar el ID interno
-    
-    // 3. FUSIONAR DATOS: Tomar todos los detalles de Keycloak y sobreescribir el ID
-    final mergedUser = keycloakUser.copyWith(
-     id: internalId, // Usamos el ID del User Service
-    );
+      if (response.data != null && response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = response.data;
+        final String internalId =
+            jsonResponse['id']?.toString() ??
+            keycloakUser.id; // Usar el ID interno
 
-    print('✅ Sincronización finalizada. ID interno: ${mergedUser.id}');
-    return mergedUser;
-    
-   } else {
-    // Fallo en la sincronización, pero devolver el user de Keycloak con ID temporal
-        print('❌ Fallo en la sincronización. Devolviendo datos crudos de Keycloak.');
-    throw Exception('Fallo al obtener ID interno del usuario. Status: ${response.statusCode}');
-   }
-   
-  } on DioException catch (e) {
-   print('❌ Error Dio en getAndSyncUser: $e');
-   rethrow;
-  } catch (e) {
-   print('❌ Excepción genérica atrapada en getAndSyncUser: $e');
-   rethrow;
+        // 3. FUSIONAR DATOS: Tomar todos los detalles de Keycloak y sobreescribir el ID
+        final mergedUser = keycloakUser.copyWith(
+          id: internalId, // Usamos el ID del User Service
+        );
+
+        print('✅ Sincronización finalizada. ID interno: ${mergedUser.id}');
+
+        // 🎯 LÓGICA DE CARRITO: Llama a la función auxiliar
+        final int? cartUserId = int.tryParse(internalId);
+        if (cartUserId != null) {
+          await _setCartIdAfterLogin(cartUserId); // USAMOS LA FUNCIÓN AUXILIAR
+        }
+        // --------------------------------------------------
+
+        return mergedUser;
+      } else {
+        // Fallo en la sincronización, pero devolver el user de Keycloak con ID temporal
+        print(
+          '❌ Fallo en la sincronización. Devolviendo datos crudos de Keycloak.',
+        );
+        throw Exception(
+          'Fallo al obtener ID interno del usuario. Status: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ Error Dio en getAndSyncUser: $e');
+      rethrow;
+    } catch (e) {
+      print('❌ Excepción genérica atrapada en getAndSyncUser: $e');
+      rethrow;
+    }
   }
- }
 
   @override
   Future<void> logout() async {
@@ -164,7 +201,7 @@ class AppAuthService implements AuthRepository {
   }
 
   // =======================================================
-  // CONTRATO: 2. GESTIÓN DE TOKENS
+  // CONTRATO: 2. GESTIÓN DE TOKENS (SIN CAMBIOS)
   // =======================================================
 
   @override
@@ -239,7 +276,7 @@ class AppAuthService implements AuthRepository {
   }
 
   // =======================================================
-  // CONTRATO: 3. OBTENCIÓN DE DATOS DEL USUARIO
+  // CONTRATO: 3. OBTENCIÓN DE DATOS DEL USUARIO (SIN CAMBIOS)
   // =======================================================
 
   @override
@@ -290,31 +327,55 @@ class AppAuthService implements AuthRepository {
     }
   }
 
-  // =======================================================
-  // AUXILIAR: callApi (Corregido para usar Dio)
-  // =======================================================
-
-  // Este método asume que será llamado por un Interceptor o un cliente que
-  // también tiene un Dio inyectado (el cliente de la API).
-  // Si este método *va a ser* llamado por el Interceptor, debe estar en la interfaz.
-  // Pero si solo es un método auxiliar, la implementación cambia para usar el Dio correcto.
-  // 🔑 NOTA: Ya que no tenemos el Dio del API inyectado aquí, lo ideal es
-  // mover este método al repositorio de la API. Si es estrictamente necesario,
-  // deberías inyectar el *otro* Dio también.
-  // Asumiremos que este método debe ser removido o implementado en otro lugar
-  // ya que la responsabilidad del AppAuthService es la autenticación, no la API.
-
-  /*
-  @override
-  Future<Response> callApi(String path) async { // Deberías cambiar el tipo de retorno si es un método de la interfaz
-    final token = await getAccessToken();
-    if (token == null) {
-      throw Exception('No access token disponible.');
+  Future<void> _setCartIdAfterLogin(int userId) async {
+    if (_cartService != null && userId != 0) {
+      print('🚀 Usuario $userId autenticado. Inicializando carrito...');
+      await _cartService!.initializeCart(userId);
     }
-    
-    // Aquí necesitarías el DIO configurado para la API, no _keycloakDio.
-    // **Si lo dejas aquí, debes inyectar el Dio de la API también.**
-    throw UnimplementedError('callApi debe ser implementado en el Repositorio de la API o este servicio debe inyectar el Dio del API.');
   }
-  */
+
+  // =======================================================
+  // IMPLEMENTACIÓN NUEVA: Sincronización al inicio de la App
+  // =======================================================
+  @override
+  Future<User?> syncUserAndInitializeCart() async {
+    try {
+      // 1. Obtener datos de Keycloak (Necesario para tener un token válido)
+      final keycloakUser = await getUserInfo();
+      print('✅ [AppAuthService] UserInfo de Keycloak obtenido en el inicio: SUB ${keycloakUser.sub}');
+
+      // 2. Sincronizar con el API Gateway para obtener el ID interno (Lógica de getAndSyncUser)
+      final token = await getAccessToken();
+      const syncPath = '/users/me/sync';
+
+      final response = await _apiGatewayDio.post(
+          syncPath,
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      if (response.data != null && response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = response.data;
+        final String internalId = jsonResponse['id']?.toString() ?? keycloakUser.id;
+
+        // 3. Fusionar y crear el modelo de usuario completo
+        final mergedUser = keycloakUser.copyWith(id: internalId);
+        
+        print('✅ [AppAuthService] Sincronización exitosa. ID interno: $internalId');
+
+        // 4. Inicializar el carrito
+        final int? cartUserId = int.tryParse(internalId);
+        if (cartUserId != null) {
+          await _setCartIdAfterLogin(cartUserId);
+        }
+
+        return mergedUser;
+      } else {
+        throw Exception('Fallo al obtener ID interno durante el chequeo inicial. Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ [AppAuthService.syncUserAndInitializeCart] Fallo en la sincronización: $e');
+      // No rethrow aquí; el AuthStateNotifier lo maneja limpiando la sesión si es necesario.
+      return null;
+    }
+  }
 }
