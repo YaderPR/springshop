@@ -1,4 +1,3 @@
-// src/components/CtaSection.tsx
 
 import React from 'react';
 

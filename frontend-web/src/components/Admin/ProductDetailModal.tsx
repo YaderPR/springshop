@@ -51,8 +51,8 @@ export default function ProductDetailModal({ product, onClose, onDelete, categor
         {/* --- ¡AQUÍ ESTÁ EL ARREGLO DE LAYOUT! --- */}
         <div className="flex flex-col md:flex-row gap-6">
           
-          {/* --- COLUMNA 1: IMAGEN (40% de ancho en desktop) --- */}
-          <div className="max-w-sm md:w-2/5 flex-shrink-0">
+          {/* --- COLUMNA 1: IMAGEN (40% de ancho en desktop)  esto fue disque corregido, aquí es el control z--- */}
+          <div className="w-full md:w-2/5 flex-shrink-0">
             <img
               src={product.imageUrl}
               alt={product.name}
