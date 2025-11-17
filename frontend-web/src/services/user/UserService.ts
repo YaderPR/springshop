@@ -42,7 +42,7 @@ export async function getUserById(id: number, token: string): Promise<UserRespon
 }
 
 
-async function syncUser(subject: string): Promise<UserResponse> {
+export async function syncUser(subject: string): Promise<UserResponse> {
   try {
     const { data } = await userApi.post<UserResponse>(
       '/me/sync',
