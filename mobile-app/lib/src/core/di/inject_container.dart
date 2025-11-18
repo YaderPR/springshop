@@ -29,6 +29,11 @@ import 'package:springshop/src/features/products/domain/repositories/supplement_
 import 'package:springshop/src/features/products/domain/repositories/workout_accessory_repository.dart';
 import 'package:springshop/src/features/cart/data/repositories/cart_api_repository.dart';
 import 'package:springshop/src/features/cart/domain/repositories/cart_repository.dart';
+import 'package:springshop/src/features/order/data/repositories/order_api_repository.dart'; // Nuevo
+import 'package:springshop/src/features/order/data/services/order_api_service.dart'; // Nuevo
+import 'package:springshop/src/features/order/domain/repositories/order_repository.dart'; // Nuevo
+import 'package:springshop/src/features/order/domain/services/order_service.dart'; // Nuevo
+// ...
 
 import '../../core/theme/theme_notifier.dart';
 import '../auth/auth_repository.dart';
@@ -38,7 +43,7 @@ import '../api/auth_interceptor.dart';
 // --- Configuraciones Iniciales de DIO y AuthService ---
 
 final AppConfig _appConfig = AppConfig(
-  apiBaseUrl: 'http://10.203.95.191:8080/api/v2',
+  apiBaseUrl: 'http://172.24.84.191:8080/api/v2',
 );
 final Dio _apiDioClient = Dio(
   BaseOptions(
@@ -101,6 +106,10 @@ List<SingleChildWidget> buildAppProviders() {
   // Esto nos permite pasarlo a AppAuthService de forma síncrona.
   final cartService = CartService(cartRepository, productService);
   final addressRepository = AddressApiRepository(dio);
+
+  // --- INICIALIZACIÓN DE ORDEN (NUEVO) ---
+  final orderRepository = OrderApiRepository(dio);
+
   // Paso 3: Configurar el CartService en AppAuthService
   _appAuthService.setCartService(cartService);
 
@@ -134,6 +143,8 @@ List<SingleChildWidget> buildAppProviders() {
       create: (context) => WorkoutAccessoryApiRepository(context.read<Dio>()),
     ),
     Provider<CartRepository>.value(value: cartRepository),
+    // 🆕 REPOSITORIO DE ORDEN (creado arriba)
+    Provider<OrderRepository>.value(value: orderRepository),
 
     // --- Servicios de Dominio ---
     Provider<ProductService>.value(value: productService),
@@ -155,6 +166,10 @@ List<SingleChildWidget> buildAppProviders() {
         context.read<ProductService>(),
       ),
     ),
+    // 🆕 SERVICIO DE ORDEN (inyecta OrderRepository)
+    Provider<OrderService>(
+      create: (context) => OrderApiService(context.read<OrderRepository>()),
+    ),
 
     // 💡 SERVICIO DE CARRITO (Usamos .value porque ya fue creado)
     ChangeNotifierProvider<CartService>.value(value: cartService),
@@ -162,12 +177,15 @@ List<SingleChildWidget> buildAppProviders() {
     Provider<AppAuthService>.value(value: _appAuthService),
     Provider<AuthRepository>.value(value: _appAuthService),
     Provider<AddressRepository>.value(value: addressRepository),
-    Provider<AddressService>(create: (context) => AddressApiService(context.read<AddressRepository>())),
+    Provider<AddressService>(
+      create: (context) => AddressApiService(context.read<AddressRepository>()),
+    ),
     // --- Notificador de Estado de Autenticación (Debe ir al final) ---
     ChangeNotifierProvider<AuthStateNotifier>(
-      create: (context) =>
-          AuthStateNotifier(context.read<AuthRepository>(), context.read<CartService>())
-            ..checkInitialAuthStatus(),
+      create: (context) => AuthStateNotifier(
+        context.read<AuthRepository>(),
+        context.read<CartService>(),
+      )..checkInitialAuthStatus(),
       lazy: false,
     ),
   ];

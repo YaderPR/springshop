@@ -12,7 +12,7 @@ final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 // --- Configuración de Keycloak ---
 const String clientId = 'springshop-app-client';
 const String realm = 'master';
-const String keycloakBaseUrl = 'http://10.203.95.191:9090/realms/$realm';
+const String keycloakBaseUrl = 'http://172.24.84.191:9090/realms/$realm';
 const String redirectUri = 'org.springshop://callback';
 const List<String> scopes = ['openid', 'profile', 'email', 'offline_access'];
 
