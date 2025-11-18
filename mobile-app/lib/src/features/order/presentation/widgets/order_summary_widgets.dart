@@ -1,36 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:springshop/src/features/cart/domain/entities/cart_item.dart';
-// Importamos las clases de la pantalla principal (incluyendo OrderSummaryCalculated)
+import 'package:springshop/src/features/order/domain/services/order_service.dart';
+
+// Importamos OrderSummaryCalculated y otras pantallas
 import '../screens/order_summary_screen.dart';
 
 // ====================================================================
-// WIDGETS MODULARES
+//  WIDGETS MODULARES
 // ====================================================================
 
 /// Título de sección reusable.
 class SectionTitle extends StatelessWidget {
   final String title;
+
   const SectionTitle({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         title,
-        style: textTheme.titleLarge!.copyWith(
+        style: theme.textTheme.titleLarge!.copyWith(
           fontWeight: FontWeight.bold,
-          color: colorScheme.onSurface,
+          color: theme.colorScheme.onSurface,
         ),
       ),
     );
   }
 }
 
-/// Muestra los IDs de la orden (solo para demostración/debug).
+/// Muestra los IDs de la orden (para debug).
 class OrderIdsDebugInfo extends StatelessWidget {
   final int cartId;
   final int userId;
@@ -45,24 +50,23 @@ class OrderIdsDebugInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer,
+        color: theme.colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: colorScheme.outlineVariant),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'IDs para la Solicitud de Pago',
-            style: textTheme.bodyMedium!.copyWith(
+            style: theme.textTheme.bodyMedium!.copyWith(
               fontWeight: FontWeight.w600,
-              color: colorScheme.onSecondaryContainer,
+              color: theme.colorScheme.onSecondaryContainer,
             ),
           ),
           const Divider(height: 10),
@@ -75,13 +79,13 @@ class OrderIdsDebugInfo extends StatelessWidget {
   }
 }
 
-/// Muestra la información de la dirección de envío.
+/// Muestra información de la dirección de envío.
 class ShippingAddressCard extends StatelessWidget {
   final String addressLine1;
   final String? username;
   final String city;
   final String zipCode;
-  final String? phoneNumber; // 🚨 ¡Añadido el nuevo parámetro!
+  final String? phoneNumber;
 
   const ShippingAddressCard({
     super.key,
@@ -89,20 +93,24 @@ class ShippingAddressCard extends StatelessWidget {
     required this.addressLine1,
     required this.city,
     required this.zipCode,
-    this.phoneNumber, // Hacemos el teléfono opcional
+    this.phoneNumber,
   });
 
-  // Widget auxiliar para mostrar una línea de información
   Widget _buildInfoRow(BuildContext context, IconData icon, String text) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+          Icon(icon, size: 20, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(text, style: Theme.of(context).textTheme.bodyLarge),
+            child: Text(
+              text,
+              style: theme.textTheme.bodyLarge,
+            ),
           ),
         ],
       ),
@@ -111,8 +119,7 @@ class ShippingAddressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
     return Card(
       elevation: 2,
@@ -123,37 +130,28 @@ class ShippingAddressCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Destinatario ($username)", // Nombre hardcodeado para el ejemplo
-              style: textTheme.titleMedium!.copyWith(
+              username != null ? 'Destinatario ($username)' : 'Destinatario',
+              style: theme.textTheme.titleMedium!.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 8),
 
-            // 1. Dirección (Calle y Estado/País)
             _buildInfoRow(context, Icons.home_outlined, addressLine1),
+            _buildInfoRow(context, Icons.location_city_outlined, '$city, $zipCode'),
 
-            // 2. Ciudad y Zip
-            _buildInfoRow(
-              context,
-              Icons.location_city_outlined,
-              '$city, $zipCode',
-            ),
-
-            // 3. Teléfono (Condicional)
             if (phoneNumber != null && phoneNumber!.isNotEmpty)
               _buildInfoRow(context, Icons.phone_outlined, phoneNumber!),
 
             const SizedBox(height: 8),
             TextButton.icon(
               onPressed: () {
-                // Lógica futura para navegar a la selección de dirección
-                print('Navegar a la selección/edición de dirección...');
+                debugPrint('Navegar a la selección/edición de dirección...');
               },
-              icon: Icon(Icons.edit, size: 18, color: colorScheme.secondary),
+              icon: Icon(Icons.edit, size: 18, color: theme.colorScheme.secondary),
               label: Text(
                 'Cambiar',
-                style: TextStyle(color: colorScheme.secondary),
+                style: TextStyle(color: theme.colorScheme.secondary),
               ),
             ),
           ],
@@ -163,21 +161,18 @@ class ShippingAddressCard extends StatelessWidget {
   }
 }
 
-/// Muestra la lista de artículos en el pedido.
+/// Lista de productos en el pedido.
 class OrderItemsList extends StatelessWidget {
-  // Nota: CartItem está definida en order_summary_screen.dart
   final List<CartItem> items;
 
   const OrderItemsList({super.key, required this.items});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
     return Column(
       children: items.map((item) {
-        // Utilizamos el productDetails real, si existe.
         final product = item.productDetails;
 
         if (product == null) {
@@ -193,13 +188,10 @@ class OrderItemsList extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  Icons.shopping_bag_outlined,
-                  color: colorScheme.primary,
-                ),
+                child: Icon(Icons.shopping_bag_outlined, color: theme.colorScheme.primary),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -208,7 +200,7 @@ class OrderItemsList extends StatelessWidget {
                   children: [
                     Text(
                       product.name,
-                      style: textTheme.titleSmall!.copyWith(
+                      style: theme.textTheme.titleSmall!.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 2,
@@ -216,8 +208,8 @@ class OrderItemsList extends StatelessWidget {
                     ),
                     Text(
                       'Cantidad: ${item.quantity}',
-                      style: textTheme.bodySmall!.copyWith(
-                        color: colorScheme.outline,
+                      style: theme.textTheme.bodySmall!.copyWith(
+                        color: theme.colorScheme.outline,
                       ),
                     ),
                   ],
@@ -225,7 +217,7 @@ class OrderItemsList extends StatelessWidget {
               ),
               Text(
                 ' \$${item.subtotal.toStringAsFixed(2)}',
-                style: textTheme.titleMedium!.copyWith(
+                style: theme.textTheme.titleMedium!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -237,7 +229,7 @@ class OrderItemsList extends StatelessWidget {
   }
 }
 
-/// Fila individual para el detalle del precio (Subtotal, Envío, Impuestos, Total).
+/// Fila de resumen de precios.
 class _PriceRow extends StatelessWidget {
   final String label;
   final double amount;
@@ -251,8 +243,7 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -261,20 +252,20 @@ class _PriceRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: textTheme.bodyLarge!.copyWith(
+            style: theme.textTheme.bodyLarge!.copyWith(
               fontSize: isTotal ? 18 : 15,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               color: isTotal
-                  ? colorScheme.onSurface
-                  : colorScheme.onSurfaceVariant,
+                  ? theme.colorScheme.onSurface
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ),
           Text(
             '\$${amount.toStringAsFixed(2)}',
-            style: textTheme.bodyLarge!.copyWith(
+            style: theme.textTheme.bodyLarge!.copyWith(
               fontSize: isTotal ? 18 : 15,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
-              color: isTotal ? colorScheme.primary : colorScheme.onSurface,
+              color: isTotal ? theme.colorScheme.primary : theme.colorScheme.onSurface,
             ),
           ),
         ],
@@ -283,9 +274,8 @@ class _PriceRow extends StatelessWidget {
   }
 }
 
-/// Muestra el resumen de precios y el total a pagar.
+/// Muestra el resumen del precio y total.
 class PriceSummaryCard extends StatelessWidget {
-  // Nota: OrderSummaryCalculated está definida en order_summary_screen.dart
   final OrderSummaryCalculated summary;
 
   const PriceSummaryCard({super.key, required this.summary});
@@ -306,11 +296,7 @@ class PriceSummaryCard extends StatelessWidget {
               amount: summary.taxes,
             ),
             const Divider(height: 20),
-            _PriceRow(
-              label: 'Total a Pagar',
-              amount: summary.total,
-              isTotal: true,
-            ),
+            _PriceRow(label: 'Total a Pagar', amount: summary.total, isTotal: true),
           ],
         ),
       ),
@@ -318,45 +304,114 @@ class PriceSummaryCard extends StatelessWidget {
   }
 }
 
-/// Botón fijo en la parte inferior para proceder al pago.
-class PayNowButton extends StatelessWidget {
-  const PayNowButton({super.key});
+/// Botón “Pagar Ahora”.
+class PayNowButton extends StatefulWidget {
+  final int cartId;
+  final int userId;
+  final int addressId;
+
+  const PayNowButton({
+    super.key,
+    required this.cartId,
+    required this.userId,
+    required this.addressId,
+  });
+
+  @override
+  State<PayNowButton> createState() => _PayNowButtonState();
+}
+
+class _PayNowButtonState extends State<PayNowButton> {
+  bool _isLoading = false;
+
+  Future<void> _handleCheckout(BuildContext context) async {
+    if (_isLoading) return;
+
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    const deepLink = 'springshop://checkout';
+
+    setState(() => _isLoading = true);
+
+    final orderService = context.read<OrderService>();
+
+    try {
+      final result = await orderService.processCheckout(
+        cartId: widget.cartId,
+        userId: widget.userId,
+        addressId: widget.addressId,
+        redirectUrl: deepLink,
+      );
+
+      final checkoutUrl = result['checkoutUrl'];
+
+      if (checkoutUrl is! String || checkoutUrl.isEmpty) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Error: URL inválida del checkout')),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final uri = Uri.tryParse(checkoutUrl);
+
+      if (uri == null || !(await canLaunchUrl(uri))) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir el navegador')),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+      if (navigator.mounted) {
+        navigator.pushReplacementNamed('/payment-wait');
+      }
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Error en el checkout: $e')),
+      );
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.15),
+            color: theme.colorScheme.shadow.withOpacity(0.15),
             blurRadius: 5.0,
             offset: const Offset(0, -2),
           ),
         ],
       ),
       child: ElevatedButton(
-        onPressed: () {
-          // Lógica de pago
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('FUNCIONALIDAD PENDIENTE: Llamada a OrderService.'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        },
+        onPressed: _isLoading ? null : () => _handleCheckout(context),
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(double.infinity, 50),
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
           textStyle: const TextStyle(fontWeight: FontWeight.bold),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 0,
         ),
-        child: const Text('Pagar Ahora', style: TextStyle(fontSize: 18)),
+        child: _isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 3.0,
+                ),
+              )
+            : const Text('Pagar Ahora', style: TextStyle(fontSize: 18)),
       ),
     );
   }
