@@ -5,7 +5,8 @@ import lombok.Data;
 
 @Data
 public class CheckoutRequestDto {
-    private Integer cartId;
-    private Integer userId;
-    private Integer addressId;
+  private Integer cartId;
+  private Integer userId;
+  private Integer addressId;
+  private String redirectUrl; // 🔑 NUEVO CAMPO
 }

@@ -42,28 +42,35 @@ public class OrderController {
         this.checkoutService = checkoutService;
     }
 
-    @PostMapping("/checkout")
-    public ResponseEntity<Map<String, String>> createOrderAndStartCheckout(
-            @RequestBody CheckoutRequestDto requestDto) {
+@PostMapping("/checkout")
+  public ResponseEntity<Map<String, String>> createOrderAndStartCheckout(
+      @RequestBody CheckoutRequestDto requestDto) {
 
-        Integer cartId = requestDto.getCartId();
-        Integer userId = requestDto.getUserId();
-        Integer addressId = requestDto.getAddressId();
-        Integer tempOrderId = null;
-        try {
-            if (cartId == null || userId == null || addressId == null) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("error", "Faltan IDs de carrito, usuario o dirección."));
-            }
-            Order newOrder = orderService.createOrderFromCart(cartId, userId, addressId);
-            String checkoutUrl = checkoutService.createCheckoutSession(newOrder.getId(), cartId);
-            tempOrderId = newOrder.getId();
-            // URL de redirección
-            return ResponseEntity.ok(Map.of(
-                    "checkoutUrl", checkoutUrl,
-                    "orderId", newOrder.getId().toString()));
+    Integer cartId = requestDto.getCartId();
+    Integer userId = requestDto.getUserId();
+    Integer addressId = requestDto.getAddressId();
+        String redirectUrl = requestDto.getRedirectUrl(); // 🔑 Obtener la URL de redirección
+        
+    Integer tempOrderId = null;
+    try {
+      if (cartId == null || userId == null || addressId == null) {
+        return ResponseEntity.badRequest()
+            .body(Map.of("error", "Faltan IDs de carrito, usuario o dirección."));
+      }
+      Order newOrder = orderService.createOrderFromCart(cartId, userId, addressId);
+            // 🔑 Pasar el redirectUrl al servicio de checkout
+      String checkoutUrl = checkoutService.createCheckoutSession(
+                newOrder.getId(), 
+                cartId, 
+                redirectUrl
+            );
+      tempOrderId = newOrder.getId();
+      // URL de redirección
+      return ResponseEntity.ok(Map.of(
+          "checkoutUrl", checkoutUrl,
+          "orderId", newOrder.getId().toString()));
 
-        } catch (StockException e) {
+    } catch (StockException e) {
             //revertir los cambios
 
             // Stock agotado (409 Conflict)
