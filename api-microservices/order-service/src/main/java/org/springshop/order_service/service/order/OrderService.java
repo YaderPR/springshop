@@ -192,7 +192,15 @@ public class OrderService {
                 .mapToDouble(item -> item.getPrice() * item.getQuantity())
                 .sum();
     }
-
+    public List<OrderResponseDto> getOrdersByUserId(Integer userId) {
+        List<Order> orders = orderRepository.findByUserId(userId);
+        return orders.stream()
+                .map(OrderMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+    public Optional<OrderResponseDto> getLatestOrderByUserId(Integer userId) {
+        return orderRepository.findTopOrderByUserIdOrderByIdDesc(userId).map(OrderMapper::toResponseDto);
+    }
     @Transactional
     public void updateOrderTotal(Integer orderId) {
         Order order = findOrderOrThrow(orderId);

@@ -43,4 +43,13 @@ class OrderApiRepository implements OrderRepository {
     final response = await _dio.get('$_basePath/$orderId');
     return OrderResponseDto.fromJson(response.data);
   }
+  /// 🎯 Obtiene las órdenes de un usuario por su ID
+  @override
+  Future<List<OrderResponseDto>> getOrdersByUserId(int userId) async {
+    print('🔍 [OrderApiRepository] Buscando órdenes para UserId: $userId');
+    // Endpoint asumido: GET /api/v2/orders/users/{userId}
+    final response = await _dio.get('$_basePath/users/$userId');
+    final List<dynamic> data = response.data;
+    return data.map((json) => OrderResponseDto.fromJson(json)).toList();
+  }
 }

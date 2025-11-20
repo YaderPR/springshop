@@ -14,4 +14,5 @@ abstract class OrderService {
 
   /// Obtiene una orden existente por su ID.
   Future<OrderResponseDto> fetchOrderById(int orderId);
+  Future<List<OrderResponseDto>> fetchOrdersByUserId(int userId);
 }

@@ -78,6 +78,10 @@ public class ShipmentService {
         Shipment shipment = findShipmentOrThrow(id);
         shipmentRepository.delete(shipment);
     }
+    public Optional<ShipmentResponseDto> findLatestShipmentByOrder(Integer orderId) {
+        return shipmentRepository.findTopByOrderIdOrderByShippedAtDesc(orderId)
+                .map(ShipmentMapper::toResponseDto);
+    }
     @Async
     @Transactional 
     public void simulateShipment(Integer shipmentId) {

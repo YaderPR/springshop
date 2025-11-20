@@ -58,8 +58,8 @@ class AddressApiRepository implements AddressRepository {
   Future<AddressEntity?> getLastAddressByUser(int userId) async {
     print('🔎 [AddressApiRepository] Buscando última dirección para UserID: $userId');
     try {
-      // Endpoint asumido: GET /api/v2/addresses/user/{userId}
-      final response = await _dio.get('$_basePath/user/$userId');
+      // Endpoint asumido: GET /api/v2/addresses/users/{userId}/latest
+      final response = await _dio.get('$_basePath/users/$userId/latest');
       
       final responseDto = AddressResponseDto.fromJson(response.data);
       return responseDto.toEntity();
