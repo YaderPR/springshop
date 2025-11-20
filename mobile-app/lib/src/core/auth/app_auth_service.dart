@@ -4,15 +4,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:springshop/src/core/auth/auth_repository.dart';
 import 'package:springshop/src/features/auth/domain/entities/user.dart';
 import 'package:springshop/src/features/cart/data/services/cart_service.dart'; // 💡 AGREGADO: Importar CartService
-import 'dart:convert'; // AGREGADO: Necesario si se necesita decodificar JWT (lo mantengo por si acaso)
-
 final FlutterAppAuth appAuth = FlutterAppAuth();
 final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
 // --- Configuración de Keycloak ---
 const String clientId = 'springshop-app-client';
 const String realm = 'master';
-const String keycloakBaseUrl = 'http://172.24.84.191:9090/realms/$realm';
+const String keycloakBaseUrl = 'http://10.83.215.191:9090/realms/$realm';
 const String redirectUri = 'org.springshop://callback';
 const List<String> scopes = ['openid', 'profile', 'email', 'offline_access'];
 

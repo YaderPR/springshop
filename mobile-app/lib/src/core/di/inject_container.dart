@@ -33,8 +33,10 @@ import 'package:springshop/src/features/order/data/repositories/order_api_reposi
 import 'package:springshop/src/features/order/data/services/order_api_service.dart'; // Nuevo
 import 'package:springshop/src/features/order/domain/repositories/order_repository.dart'; // Nuevo
 import 'package:springshop/src/features/order/domain/services/order_service.dart'; // Nuevo
-// ...
-
+import 'package:springshop/src/features/shipment/data/repositories/shipment_api_repository.dart';
+import 'package:springshop/src/features/shipment/data/services/shipment_api_service.dart';
+import 'package:springshop/src/features/shipment/domain/repositories/shipment_service.dart';
+import 'package:springshop/src/features/shipment/domain/services/shipment_repository.dart';
 import '../../core/theme/theme_notifier.dart';
 import '../auth/auth_repository.dart';
 import '../auth/auth_state_notifier.dart';
@@ -43,7 +45,7 @@ import '../api/auth_interceptor.dart';
 // --- Configuraciones Iniciales de DIO y AuthService ---
 
 final AppConfig _appConfig = AppConfig(
-  apiBaseUrl: 'http://172.24.84.191:8080/api/v2',
+  apiBaseUrl: 'http://10.83.215.191:8080/api/v2',
 );
 final Dio _apiDioClient = Dio(
   BaseOptions(
@@ -106,9 +108,11 @@ List<SingleChildWidget> buildAppProviders() {
   // Esto nos permite pasarlo a AppAuthService de forma síncrona.
   final cartService = CartService(cartRepository, productService);
   final addressRepository = AddressApiRepository(dio);
-
-  // --- INICIALIZACIÓN DE ORDEN (NUEVO) ---
+  // --- INICIALIZACIÓN DE ORDEN ---
   final orderRepository = OrderApiRepository(dio);
+  
+  // 🔑 INICIALIZACIÓN DE ENVÍO
+  final shipmentRepository = ShipmentApiRepository(dio);
 
   // Paso 3: Configurar el CartService en AppAuthService
   _appAuthService.setCartService(cartService);
@@ -146,7 +150,10 @@ List<SingleChildWidget> buildAppProviders() {
     // 🆕 REPOSITORIO DE ORDEN (creado arriba)
     Provider<OrderRepository>.value(value: orderRepository),
 
-    // --- Servicios de Dominio ---
+    // 🔑 NUEVO REPOSITORIO DE ENVÍO
+    Provider<ShipmentRepository>.value(value: shipmentRepository),
+
+    // --- Servicios de Dominio (Productos) ---
     Provider<ProductService>.value(value: productService),
     Provider<ApparelService>(
       create: (context) => ApparelService(
@@ -169,6 +176,11 @@ List<SingleChildWidget> buildAppProviders() {
     // 🆕 SERVICIO DE ORDEN (inyecta OrderRepository)
     Provider<OrderService>(
       create: (context) => OrderApiService(context.read<OrderRepository>()),
+    ),
+    
+    // 🔑 NUEVO SERVICIO DE ENVÍO
+    Provider<ShipmentService>(
+      create: (context) => ShipmentApiService(context.read<ShipmentRepository>()),
     ),
 
     // 💡 SERVICIO DE CARRITO (Usamos .value porque ya fue creado)

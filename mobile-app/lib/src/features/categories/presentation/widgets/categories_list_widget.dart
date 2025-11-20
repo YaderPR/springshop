@@ -82,7 +82,6 @@ class _CategoriesListWidgetState extends State<CategoriesListWidget> {
 
     return Container(
       height: screenHeight / 2,
-      color: colorScheme.surface, // Cambiado de 'Colors.black' a 'colorScheme.surface' para temas
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

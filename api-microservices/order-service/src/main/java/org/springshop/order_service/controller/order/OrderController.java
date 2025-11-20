@@ -107,7 +107,6 @@ public class OrderController {
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + id));
     }
-
     @PutMapping("/{id:\\d+}")
     public ResponseEntity<OrderResponseDto> updateOrder(@PathVariable Integer id,
             @RequestBody OrderRequestDto requestDto) {
@@ -144,5 +143,19 @@ public class OrderController {
     public ResponseEntity<OrderResponseDto> updateStatus(@PathVariable Integer orderId, @RequestBody OrderUpdateStatus updatedStatus) {
 
         return ResponseEntity.ok(orderService.updateOrderStatus(orderId, updatedStatus));
+    }
+    @GetMapping("/users/{userId:\\d+}")
+    public ResponseEntity<List<OrderResponseDto>> getOrdersByUserId(@PathVariable Integer userId) {
+
+        List<OrderResponseDto> orders = orderService.getOrdersByUserId(userId);
+        
+        return ResponseEntity.ok(orders);
+    }
+    @GetMapping("/users/{userId:\\d+}/latest")
+    public ResponseEntity<OrderResponseDto> getLatestOrderByUserId(@PathVariable Integer userId) {
+
+        return orderService.getLatestOrderByUserId(userId)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new EntityNotFoundException("No orders found for user with id: " + userId));
     }
 }

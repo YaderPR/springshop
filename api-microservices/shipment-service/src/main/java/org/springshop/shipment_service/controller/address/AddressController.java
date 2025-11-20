@@ -40,7 +40,7 @@ public class AddressController {
         return ResponseEntity.ok(addressService.getAllAddresses());
     }
 
-    @GetMapping("/user/{userId:\\d+}")
+    @GetMapping("/users/{userId:\\d+}/latest")
     public ResponseEntity<AddressResponseDto> getLastAddressByUser(@PathVariable Integer userId) {
         return wrapOrNotFound(addressService.findLastAddressByUser(userId));
     }

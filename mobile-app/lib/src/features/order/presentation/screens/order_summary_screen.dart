@@ -5,7 +5,6 @@ import 'package:springshop/src/core/auth/auth_state_notifier.dart';
 // Importaciones de servicios y entidades
 import 'package:springshop/src/features/cart/data/services/cart_service.dart';
 import 'package:springshop/src/features/cart/domain/entities/cart_item.dart';
-import 'package:springshop/src/features/products/domain/entities/product.dart';
 
 // Importaciones de dirección real
 import 'package:springshop/src/features/order/domain/entities/address_entity.dart';

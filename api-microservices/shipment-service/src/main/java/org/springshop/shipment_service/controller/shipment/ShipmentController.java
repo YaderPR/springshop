@@ -37,7 +37,10 @@ public class ShipmentController {
 
         return ResponseEntity.ok(shipmentService.getAllShipments());
     }
-
+    @GetMapping("/orders/{orderId:\\d+}/latest")
+    public ResponseEntity<ShipmentResponseDto> getLatestShipmentByOrder(@PathVariable Integer orderId) {
+        return wrapOrNotFound(shipmentService.findLatestShipmentByOrder(orderId));
+    }
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<ShipmentResponseDto> getShipmentById(@PathVariable Integer id) {
 

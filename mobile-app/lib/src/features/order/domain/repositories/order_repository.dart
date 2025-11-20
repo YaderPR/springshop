@@ -9,4 +9,7 @@ abstract class OrderRepository {
 
   /// 🎯 Obtiene una orden por su ID.
   Future<OrderResponseDto> getOrderById(int orderId);
+
+  /// Obtiene las órdenes de un usuario por su ID.
+  Future<List<OrderResponseDto>> getOrdersByUserId(int userId);
 }
