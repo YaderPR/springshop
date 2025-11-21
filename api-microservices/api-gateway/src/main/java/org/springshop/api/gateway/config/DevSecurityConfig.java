@@ -13,7 +13,12 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -27,7 +32,7 @@ public class DevSecurityConfig {
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http,
             ReactiveJwtDecoder jwtDecoder) {
 
-        return http
+        return http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // 1. Activa CORS aquí
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
                         // Rutas públicas para Swagger
@@ -59,7 +64,18 @@ public class DevSecurityConfig {
     public ReactiveJwtDecoder jwtDecoder(@Value("${ISSUER_URI}") String issuerUri) {
         return ReactiveJwtDecoders.fromIssuerLocation(issuerUri);
     }
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Frontend permitido
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*")); // Permitir Authorization header
+        configuration.setAllowCredentials(true);
 
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
     @Bean
     public ReactiveJwtAuthenticationConverter jwtAuthenticationConverter() {
         var converter = new ReactiveJwtAuthenticationConverter();
