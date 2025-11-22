@@ -61,7 +61,9 @@ public class OrderService {
         // 1. OBTENER ENTIDADES NECESARIAS
         Cart cart = findCartOrThrow(cartId);
         User user = findUserOrThrow(userId);
+        System.out.println("Log(linea 64): cartId = " + cartId + " userId = " + userId);
         if (cart.getItems().isEmpty()) {
+            System.out.println("El carro esta vacio");
             throw new IllegalArgumentException("Cannot create an order from an empty cart.");
         }
 
@@ -71,9 +73,9 @@ public class OrderService {
         order.setAddressId(addressId);
         order.setStatus(OrderStatus.PENDING);
         order.setTotalAmount(0.0);
-
+        System.out.print("Log(linea 75): order.userId:" + order.getUserId() + " order.addressId:" + order.getAddressId() + " order.getStatus:" + order.getStatus() + " order.getTotalAmount: " + order.getTotalAmount());
         Order savedOrder = orderRepository.save(order);
-
+        System.out.println("Log(linea 77): cartId = " + cartId + " userId = " + userId);
         double calculatedTotal = 0.0;
 
         // 3. TRANSFERENCIA DE ITEMS Y RESERVA DE STOCK

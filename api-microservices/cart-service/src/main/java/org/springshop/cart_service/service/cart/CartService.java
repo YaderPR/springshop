@@ -57,7 +57,7 @@ public class CartService {
         }
 
         public List<CartResponseDto> getAllCarts() {
-                return cartRepository.findAll().stream()
+                return cartRepository.findAllByOrderByIdDesc().stream()
                                 .map(CartMapper::toResponseDto)
                                 .collect(Collectors.toList());
         }

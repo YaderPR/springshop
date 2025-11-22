@@ -57,13 +57,17 @@ public class OrderController {
         return ResponseEntity.badRequest()
             .body(Map.of("error", "Faltan IDs de carrito, usuario o dirección."));
       }
+      System.out.println("cartId: " + cartId + " userId: " + userId + " addressId: " + addressId);
       Order newOrder = orderService.createOrderFromCart(cartId, userId, addressId);
-            // 🔑 Pasar el redirectUrl al servicio de checkout
+      // 🔑 Pasar el redirectUrl al servicio de checkout
+        System.out.println("Minimo hasta aqui estoy llegando, soy la linea 63");
+        System.out.println("Minimo hasta aqui estoy llegando, soy la linea 64 y orderId es " + newOrder.getId());
       String checkoutUrl = checkoutService.createCheckoutSession(
                 newOrder.getId(), 
                 cartId, 
                 redirectUrl
             );
+        System.out.println("Minimo hasta aqui estoy llegando, soy la linea 70 y ");
       tempOrderId = newOrder.getId();
       // URL de redirección
       return ResponseEntity.ok(Map.of(

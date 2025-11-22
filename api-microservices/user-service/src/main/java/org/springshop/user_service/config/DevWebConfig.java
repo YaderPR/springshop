@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.lang.NonNull;
 //configuración de cors
-@Profile("default")
+@Profile("test")
 @Configuration
 public class DevWebConfig {
 
