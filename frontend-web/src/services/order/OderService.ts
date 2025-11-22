@@ -1,8 +1,8 @@
 import axios from 'axios';
-import type { CheckoutRequestDto, CheckoutResponseDto, OrderResponseDto, OrderUpdateStatus } from '../../types/order.types'; 
+import type { CheckoutRequestDto, CheckoutResponseDto, OrderResponseDto, updateOrderStatus } from '../../types/Order.types'; 
 
 const orderApi = axios.create({
-  baseURL: "http://localhost:8087/api/v2/orders",
+  baseURL: "http://localhost:8080/api/v2/orders",
   headers: { "Content-Type" : "application/json" },
 });
 
@@ -59,7 +59,7 @@ export async function startCheckout(
 
 export async function updateOrderStatus(
   id: number, 
-  statusUpdate: OrderUpdateStatus, 
+  statusUpdate: updateOrderStatus, 
   token: string
 ): Promise<OrderResponseDto> {
   try {

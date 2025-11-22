@@ -7,7 +7,7 @@
     CartItemResponseDto
   } from '../../types/cart.types';
 
-  const CART_API_BASE_URL = 'http://localhost:8086/api/v2/carts';
+  const CART_API_BASE_URL = 'http://localhost:8080/api/v2/carts';
 
   class CartService {
     // ========== CARRITOS ANÓNIMOS ==========

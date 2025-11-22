@@ -6,15 +6,16 @@ import type {
   UserProfileResponse  
 } from '../../types/User.types';
 
-
 const userApi = axios.create ({
-    baseURL: "http://localhost:8091/api/v2/users",
-    headers: {"Content-Type": "application/json"}
+  baseURL: "http://localhost:8080/api/v2/users",
+  headers: {"Content-Type": "application/json"}
 });
+
+// --- Métodos existentes (sin cambios, solo contexto) ---
 
 export async function getUsers(token: string): Promise<UserResponse[]> {
   try {
-    const { data } = await userApi.get<UserResponse[]>('', { // Llama a la baseURL
+    const { data } = await userApi.get<UserResponse[]>('', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -25,7 +26,6 @@ export async function getUsers(token: string): Promise<UserResponse[]> {
     throw new Error(err.response?.data?.message || "Error al obtener usuarios");
   }
 }
-
 
 export async function getUserById(id: number, token: string): Promise<UserResponse> {
   try {
@@ -41,13 +41,19 @@ export async function getUserById(id: number, token: string): Promise<UserRespon
   }
 }
 
+// --- CAMBIOS APLICADOS AQUÍ ---
 
-export async function syncUser(subject: string): Promise<UserResponse> {
+export async function syncUser(token: string): Promise<UserResponse> {
   try {
+    // Ahora usamos el token en el header Authorization estándar
     const { data } = await userApi.post<UserResponse>(
       '/me/sync',
-      null, // Sin body
-      { headers: { 'X-Auth-Subject': subject } }
+      null, // Body se mantiene vacío si el backend solo necesita el token para extraer la info
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
     );
     return data;
   } catch (err: any) {
@@ -56,10 +62,14 @@ export async function syncUser(subject: string): Promise<UserResponse> {
   }
 }
 
+// NOTA: Esta función enviará "Bearer temp_guest_..." al backend.
+// Asegúrate de que tu backend acepte tokens que no sean JWT reales para este caso.
 export async function createTemporaryUser(): Promise<UserResponse> {
-  const tempSub = `temp_guest_${Date.now()}`;
-  return syncUser(tempSub);
+  const tempToken = `temp_guest_${Date.now()}`; 
+  return syncUser(tempToken);
 }
+
+// --- Resto de métodos ---
 
 export async function createGuestUser(profileData: UserProfileRequest): Promise<UserProfileResponse> {
   try {
@@ -76,8 +86,10 @@ export async function createGuestUser(profileData: UserProfileRequest): Promise<
 
 export async function getUserBySub(userSub: string): Promise<UserResponse> {
   const { data } = await userApi.get<UserResponse>(`/${userSub}`)
+  return data;
 }
 
 export async function getProfilePictureUrl(userId: number): Promise<UserProfilePictureURLResponse>{
   const { data } = await userApi.get<UserProfilePictureURLResponse>(`/${userId}/profile-url`)
+  return data;
 }

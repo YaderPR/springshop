@@ -6,11 +6,11 @@ import type {
   Supplement, 
   WorkoutAccessory,
   ApparelCategory,
-  WorkoutAccessoryCategory
+  workoutAccessoryCategory
 } from "../../types/Product";
 
 const api = axios.create({
-  baseURL: "http://localhost:8085/api/v2/products",
+  baseURL: "http://localhost:8080/api/v2/products",
   headers: {
     "Content-Type": "application/json",
   },
@@ -101,8 +101,8 @@ export async function deleteWorkoutAccessory(id: number): Promise<void> {
   await api.delete(`/workout-accessories/${id}`);
 }
 
-export async function getWorkoutAccessoryCategories(): Promise<WorkoutAccessoryCategory[]> {
-  const { data } = await api.get<WorkoutAccessoryCategory[]>("/workoutaccessories/categories");
+export async function getWorkoutAccessoryCategories(): Promise<workoutAccessoryCategory[]> {
+  const { data } = await api.get<workoutAccessoryCategory[]>("/workoutaccessories/categories");
   return data;
 }
 
@@ -142,13 +142,13 @@ export async function deleteApparelCategory(id: number): Promise<void> {
 
 // --- CATEGORÍAS DE WORKOUT ACCESSORIES (ACCESORIOS) ---
 
-export async function createWorkoutAccessoryCategory(data: { name: string }): Promise<WorkoutAccessoryCategory> {
-  const { data: newCategory } = await api.post<WorkoutAccessoryCategory>("/workoutaccessories/categories", data);
+export async function createWorkoutAccessoryCategory(data: { name: string }): Promise<workoutAccessoryCategory> {
+  const { data: newCategory } = await api.post<workoutAccessoryCategory>("/workoutaccessories/categories", data);
   return newCategory;
 }
 
-export async function updateWorkoutAccessoryCategory(id: number, data: { name: string }): Promise<WorkoutAccessoryCategory> {
-  const { data: updatedCategory } = await api.put<WorkoutAccessoryCategory>(`/workoutaccessories/categories/${id}`, data);
+export async function updateWorkoutAccessoryCategory(id: number, data: { name: string }): Promise<workoutAccessoryCategory> {
+  const { data: updatedCategory } = await api.put<workoutAccessoryCategory>(`/workoutaccessories/categories/${id}`, data);
   return updatedCategory;
 }
 

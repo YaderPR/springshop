@@ -1,7 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+
 import './index.css'
 import App from './App.tsx'
 import { ReactKeycloakProvider } from '@react-keycloak/web'
@@ -10,12 +9,12 @@ import Keycloak from 'keycloak-js'
 const storedToken = localStorage.getItem('kc_token');
 const storedRefreshToken = localStorage.getItem('kc_refreshToken');
 
+// const keycloakConfig = new KeycloakConfig
+
 const keycloakClient = new Keycloak({
-  url: 'http://localhost:8080', 
-  realm: 'springshop-realm',
-  clientId: 'springshop-frontend',
-  token: storedToken ?? undefined,
-  refreshToken: storedRefreshToken ?? undefined, 
+  url: 'http://localhost:9090', 
+  realm: 'Springshop-realm',
+  clientId: 'springshop-frontend', 
 });
 
 const initOptions = {

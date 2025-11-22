@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cartService } from '../services/cart/CartService';
-import { getUserById, createGuestUser, createTemporaryUser } from '../services/user/UserService'; 
+import { getUserById, createGuestUser, createTemporaryUser, syncUser } from '../services/user/UserService'; 
 import type { UserProfileRequest } from '../types/User.types';
 import { useKeycloak } from '@react-keycloak/web'; 
 

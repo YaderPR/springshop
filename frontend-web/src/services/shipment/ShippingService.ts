@@ -12,7 +12,7 @@ export interface ShippingAddressResponse extends ShippingAddressRequest {
     id: number;
 }
 
-const API_SHIPPING_URL = "http://localhost:8090/api/v2/addresses";
+const API_SHIPPING_URL = "http://localhost:8080/api/v2/addresses";
 
 export async function createShippingAddress (
     addressData: ShippingAddressRequest
