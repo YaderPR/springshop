@@ -1,29 +1,33 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { createShippingAddress } from '../../../services/shipment/ShippingService';
-import type { ShippingAddressResponse } from '../../../services/shipment/ShippingService';
+import type { ShippingAddressRequest, ShippingAddressResponse } from '../../../services/shipment/ShippingService';
 
 interface ShippingAddressFormState {
     
     street: string;
-    country: string;
     state: string;
     zipCode: string;
     country: string;
+    city: string;
     phoneNumber?: string;
     userId: number;
 }
-
+const userIdString = localStorage.getItem('app_user_id');
+const userId = userIdString ? parseInt(userIdString) : null;
+console.log("userIdString from localStorage:", userIdString);
 interface ShippingFormProps {
   onShippingSubmit: (savedAddress: ShippingAddressResponse | null) => void; 
 }
 
-const initialAddress: ShippingAddress = {
+const initialAddress: ShippingAddressFormState = {
     
     street: '',
     state: '',
     zipCode: '',
     country: '',
+    city: '',
     phoneNumber: '',
+    userId: userId || 0,
 };
 
 const ShippingForm: React.FC<ShippingFormProps> = ({ onShippingSubmit }) => {
@@ -41,13 +45,14 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ onShippingSubmit }) => {
     setIsSubmitting(true);
     setError(null);
 
-    const addressPayload: Omit<ShippingAddressRequest, 'userId'> = {
+    const addressPayload = {
         street: address.street,
         country: address.country,
         city: address.city,
         state: address.state,
         zipCode: address.zipCode,
         phoneNumber: address.phoneNumber || undefined,
+        userId: address.userId
     };
 
     try {
@@ -165,6 +170,7 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ onShippingSubmit }) => {
       {/* Botón de Envío */}
       <button 
         type="submit"
+        onClick={() => console.log(address)}
         disabled={isSubmitting}
         className="w-full mt-4 bg-secondary text-primary font-bold py-2 rounded-full hover:bg-lime-400 transition-all disabled:opacountry-50 shadow-[0_0_15px_rgba(137,254,0,.7)]"
       >

@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { useCartManager } from '../../hooks/useCartManager';
 import { Loader2 } from 'lucide-react';
-import ShippingForm from '../../components/shop/checkout/ShippingForm'; 
-import type { ShippingAddressResponse } from '../../components/shop/checkout/ShippingForm'; 
 
 import { startCheckout } from '../../services/order/OderService';
 import { useKeycloak } from '@react-keycloak/web';
+import type { ShippingAddressResponse } from '../../services/shipment/ShippingService';
+import ShippingForm from '../../components/Shop/Checkout/ShippingForm';
 
 
 export default function CheckoutPage() {
     // Obtenemos los IDs y el estado de Keycloak
     const { cartId, userId } = useCartManager();
     const { keycloak, initialized } = useKeycloak(); // <-- Añadido
-
     // Estados de esta página
     const [addressId, setAddressId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +35,7 @@ export default function CheckoutPage() {
             setError("Faltan datos (Carrito, Usuario o Dirección) para continuar.");
             return;
         }
-        
+        console.log("CheckoutPage - cartId:", cartId, "userId:", userId, "addressId:", addressId);
         // Verificamos que tengamos el token
         if (!initialized || !keycloak.token) {
             setError("Sesión no válida. Por favor, inicie sesión de nuevo.");
@@ -48,13 +47,14 @@ export default function CheckoutPage() {
         setError(null);
 
         try {
+            console.log("CheckoutPage - cartId:", cartId, "userId:", userId, "addressId:", addressId, "desde el try.. catch");
             // Llamamos a la FUNCIÓN 'startCheckout' directamente
             const response = await startCheckout(
-                { cartId, userId, addressId }, // DTO
-                keycloak.token               // ¡Token!
+                { cartId, userId, addressId}, // DTO       // ¡Token!
             );
 
             // ¡ÉXITO! Redirigimos a Stripe
+
             if (response.checkoutUrl) {
                 window.location.href = response.checkoutUrl;
             } else {

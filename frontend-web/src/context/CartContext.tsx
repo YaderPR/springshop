@@ -1,5 +1,5 @@
 // context/CartContext.tsx
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, type ReactNode } from 'react';
 import { useCartManager } from '../hooks/useCartManager';
 // ?? Importa el hook Y el nuevo TIPO de item
 import { useCart as useCartHook } from '../hooks/useCart'; 
@@ -50,7 +50,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const loading = cartManagerLoading || cartLoading;
 
   const addToCart = async (product: Product) => {
-    if (!cartId) {
+    if (cartId == null) {
       throw new Error('Carrito no inicializado');
     }
     // Asegúrate que el DTO sea correcto (productId y quantity)

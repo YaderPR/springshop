@@ -1,8 +1,7 @@
 // hooks/useUser.ts
 import { useState, useEffect } from 'react';
-import { getUserBySub, getUserById } from '../services/user/userService';
-import { UserResponse } from '../types/User.types';
-
+import { type UserResponse } from '../types/User.types';
+import { getUserById, getUserBySub } from '../services/user/UserService';
 export const useUser = (userId?: number) => {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -14,7 +13,7 @@ export const useUser = (userId?: number) => {
     setLoading(true);
     setError(null);
     try {
-      const userData = await userService.getUserById(id);
+      const userData = await getUserById(id);
       setUser(userData);
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Error al cargar usuario';
@@ -29,7 +28,7 @@ export const useUser = (userId?: number) => {
     setLoading(true);
     setError(null);
     try {
-      const userData = await userService.getUserBySub(userSub);
+      const userData = await getUserBySub(userSub);
       setUser(userData);
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Error al cargar usuario';
