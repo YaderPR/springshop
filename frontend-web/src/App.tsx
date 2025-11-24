@@ -1,19 +1,19 @@
-import React from "react";
+//import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Navbar from "./components/shared/layout/Navbar";
-import Footer from "./components/shared/layout/Footer";
+import Navbar from "./components/Shared/Layout/Navbar";
+import Footer from "./components/Shared/Layout/Footer";
 import { CartProvider } from "./context/CartContext";
 import CartDrawer from "./components/shop/cart/CartDrawer"; 
-import HomePage from "./pages/shop/HomePage";
-import CheckoutPage from "./pages/shop/CheckoutPage";
-import PagoExitoso from "./pages/shop/PagoExitoso";
-import ProductGridPage from "./pages/Shop/ProductGridPage";
+import HomePage from "./pages/Shop/HomePage";
+import CheckoutPage from "./pages/Shop/CheckoutPage";
+import PagoExitoso from "./pages/Shop/PagoExitoso";
+
 import ContactPage from "./pages/Shop/ContactPage"
-import AdminCategories from "./pages/admin/AdminCategories";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminProducts from "./pages/admin/AdminProducts";
-import AdminUsers from "./pages/admin/AdminUsers";
+import AdminCategories from "./pages/Admin/AdminCategories";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminOrders from "./pages/Admin/AdminOrders";
+import AdminProducts from "./pages/Admin/AdminProducts";
+import AdminUsers from "./pages/Admin/AdminUsers";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import MyOrderPage from "./components/Shop/Checkout/MyOrderPage";
 

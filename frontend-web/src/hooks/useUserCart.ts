@@ -1,6 +1,6 @@
 // hooks/useUserCart.ts
 import { useState, useEffect } from 'react';
-import { cartService } from '../services/cartService';
+import { cartService } from '../services/cart/CartService';
 
 export const useUserCart = (userId: number) => {
   const [currentCartId, setCurrentCartId] = useState<number | null>(null);
@@ -16,7 +16,7 @@ export const useUserCart = (userId: number) => {
     try {
       // En una implementación real, buscarías el carrito activo del usuario
       // Por ahora, creamos uno nuevo cada vez (puedes ajustar esta lógica)
-      const newCart = await cartService.createCart(userId);
+      const newCart = await cartService.createUserCart(userId);
       setCurrentCartId(newCart.id);
       return newCart.id;
     } catch (err: any) {
