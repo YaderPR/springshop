@@ -2,7 +2,6 @@ import React from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 import { Link } from 'react-router-dom';
-import CheckoutButton from '../Checkout/CheckoutButton';
 
 
 interface CartDrawerProps {

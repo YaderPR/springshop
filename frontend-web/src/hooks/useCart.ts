@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { cartService } from '../services/cart/cartService';
 
 import { getProductById } from '../services/product/ProductService'; 
 import type { Product } from '../types/Product';
 import type { CartItemResponseDto, CartItemCreateRequestDto, CartItemUpdateRequestDto } from '../types/cart.types';
+import { cartService } from '../services/cart/CartService';
 
 
 // (Esto es lo que tu CartDrawer espera)

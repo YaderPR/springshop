@@ -25,7 +25,7 @@ public class AddressController {
     }
 
     @PostMapping
-    public ResponseEntity<AddressResponseDto> createAddress(@Valid @RequestBody AddressRequestDto requestDto) { // Añadimos
+    public ResponseEntity<AddressResponseDto> createAddress(@RequestBody AddressRequestDto requestDto) { // Añadimos
                                                                                                                 // @Valid
 
         AddressResponseDto responseDto = addressService.createAddress(requestDto);

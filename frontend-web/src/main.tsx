@@ -1,52 +1,30 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import { ReactKeycloakProvider } from '@react-keycloak/web'
-import Keycloak from 'keycloak-js'
+// main.tsx (o index.tsx)
 
-const storedToken = localStorage.getItem('kc_token');
-const storedRefreshToken = localStorage.getItem('kc_refreshToken');
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { ReactKeycloakProvider } from '@react-keycloak/web';
 
-const keycloakClient = new Keycloak({
-  url: 'http://localhost:8080', 
-  realm: 'springshop-realm',
-  clientId: 'springshop-frontend',
-  token: storedToken ?? undefined,
-  refreshToken: storedRefreshToken ?? undefined, 
-});
+import './index.css';
+import App from './App.tsx';
+import { handleTokens, keycloakClient } from './components/Auth/keycloak.client.ts';
+import { INIT_OPTIONS } from './components/Auth/keycloak.config.ts';
 
-const initOptions = {
-  onLoad: 'check-sso',
-  checkLoginIframe: false,
-  pkceMethod: 'S256',
-};
 
-const handleTokens = (tokens: { token?: string; refreshToken?: string }) => {
-  if (tokens.token) {
-    localStorage.setItem('kc_token', tokens.token);
-  }
-  if (tokens.refreshToken) {
-    localStorage.setItem('kc_refreshToken', tokens.refreshToken);
-  }
-};
+const rootElement = document.getElementById('root');
 
-const originalLogout = keycloakClient.logout;
-keycloakClient.logout = (options) => {
-  localStorage.removeItem('kc_token');
-  localStorage.removeItem('kc_refreshToken');
-  return originalLogout.call(keycloakClient, options);
-};
+if (!rootElement) {
+    throw new Error('El elemento root no fue encontrado en el DOM.');
+}
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ReactKeycloakProvider
-      authClient={keycloakClient}
-      initOptions={initOptions}
-    >
-      <App />
-    </ReactKeycloakProvider>
-  </StrictMode>,
-)
+createRoot(rootElement).render(
+    <StrictMode>
+        <ReactKeycloakProvider
+            authClient={keycloakClient}
+            initOptions={INIT_OPTIONS}
+            // Usar onTokens para persistir el token al obtener uno nuevo o refrescar
+            onTokens={handleTokens}
+        >
+            <App />
+        </ReactKeycloakProvider>
+    </StrictMode>,
+);
