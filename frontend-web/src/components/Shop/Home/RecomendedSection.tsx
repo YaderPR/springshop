@@ -1,28 +1,45 @@
 import React, { useRef, useState, useEffect } from 'react';
 import ProductCard from '../../Shop/Product/ProductCard';
-import type { Product } from "../../../types/Product";
-import { getProducts, getApparels } from '../../../services/product/ProductService';
+// 1. Importamos AnyProduct para el tipado correcto
+import type { AnyProduct } from "../../../types/Product"; 
+// 2. Importamos los servicios específicos para traer la data completa
+import { 
+  getApparels, 
+  getSupplements, 
+  getWorkoutAccessories 
+} from '../../../services/product/ProductService';
 
 export default function RecommendedSection() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  const [products, setProducts] = useState<Product[]>([]);
+  // 3. CORRECCIÓN DE TIPO: Usamos AnyProduct[] en lugar de Product[]
+  const [products, setProducts] = useState<AnyProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [productsData, apparelsData] = await Promise.all([
-          getProducts(),
+        // 4. CORRECCIÓN DE DATA: Traemos todo de los endpoints específicos
+        // Esto asegura que 'flavor', 'material', etc., vengan en la respuesta
+        const [apparelsData, supplementsData, accessoriesData] = await Promise.all([
           getApparels(),
+          getSupplements(),
+          getWorkoutAccessories(),
         ]);
 
-        const apparelIds = new Set(apparelsData.map((a) => a.id));
-        const genericProductsData = productsData.filter(product => !apparelIds.has(product.id));
-        const allProducts = [...genericProductsData, ...apparelsData];
+        // Combinamos todos los productos
+        const allProducts = [
+            ...apparelsData, 
+            ...supplementsData, 
+            ...accessoriesData
+        ];
 
-        setProducts(allProducts.slice(0, 5)); 
+        // Opcional: Mezclarlos aleatoriamente para que no salgan siempre en el mismo orden
+        // allProducts.sort(() => Math.random() - 0.5);
+
+        // Tomamos los primeros 5 o los que necesites
+        setProducts(allProducts.slice(0, 6)); 
 
       } catch (error) {
         console.error("Error al cargar productos recomendados:", error);
@@ -51,18 +68,21 @@ export default function RecommendedSection() {
           className="flex overflow-x-auto pb-6 pt-6 pl-6 no-scrollbar gap-6" 
         >
           {isLoading ? (
-            <p className="text-white">Cargando productos...</p>
+            <div className="flex gap-4">
+                 {/* Skeleton loading simple */}
+                 {[1,2,3].map(i => <div key={i} className="w-72 h-96 bg-gray-800 rounded-xl animate-pulse"></div>)}
+            </div>
           ) : (
             products.map((product) => (
-              <div key={product.id} className="flex-none w-72"> 
-                
+              <div key={`${product.id}-${product.name}`} className="flex-none w-72"> 
+                {/* Ahora 'product' es de tipo AnyProduct, compatible con ProductCard */}
                 <ProductCard product={product} /> 
-
               </div>
             ))
           )}
         </div>
 
+        {/* Botones de Scroll */}
         <button 
           onClick={() => scroll('left')}
           className="absolute top-1/2 left-0 sm:left-4 lg:left-12 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white p-3 rounded-full z-10 transition-colors"

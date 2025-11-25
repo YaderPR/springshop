@@ -30,7 +30,7 @@ export interface Supplement extends Product {
 export interface WorkoutAccessory extends Product {
   material: string;
   dimensions: string;
-  weight:: number;
+  weight: number;
   color: string; 
   workoutAccessoryCategoryId?: number;
   workoutAccessoryCategoryName?: string;

@@ -18,7 +18,9 @@ const HomePage: React.FC = () => {
         onSelectCategory={setSelectedCategory}
       />
       
-      <RecommendedSection className="no-scrollbar"/>
+      <div className="no-scrollbar">
+        <RecommendedSection />
+      </div>
       <CtaSection />
     </main>
   );

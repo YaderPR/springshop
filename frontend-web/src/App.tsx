@@ -16,6 +16,8 @@ import AdminProducts from "./pages/Admin/AdminProducts";
 import AdminUsers from "./pages/Admin/AdminUsers";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import MyOrderPage from "./components/Shop/Checkout/MyOrderPage";
+import ProductDetail from "./components/Shop/Product/ProductDetail";
+import FAQPage from "./pages/Shop/FaqPage";
 
 export default function App() {
   return (
@@ -27,7 +29,7 @@ export default function App() {
           <CartDrawer /> 
           
           {/* ¡ARREGLO! Quitamos 'container mx-auto' de aquí */}
-          <main className="flex-1 container mx-auto"> 
+          <main className="flex-1 p-4 container mx-auto"> 
 
             {/* ¡ARREGLO! Solo hay UN <Routes> que envuelve TODO */}
             <Routes>
@@ -36,9 +38,11 @@ export default function App() {
               </Route>
 
               {/* --- 2. RUTAS PÚBLICAS (Independientes) --- */}
+              <Route path="/product/:type/:id" element={<ProductDetail />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/pago-exitoso" element={<PagoExitoso />} />
               <Route path="/contacto" element={<ContactPage />} />
+              <Route path="/faq" element={<FAQPage />} />
 
               <Route 
                 path="/mis-pedidos" 

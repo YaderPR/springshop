@@ -9,7 +9,7 @@ import {
 } from '../../../services/product/ProductService'; 
 import ProductCard from './ProductCard'; 
 // Importamos el tipo desde HomePage
-import type { CategoryFilter } from '../../../pages/shop/HomePage';
+import type { CategoryFilter } from '../../../pages/Shop/HomePage';
 
 interface Props {
   selectedCategory: CategoryFilter;

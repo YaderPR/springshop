@@ -142,7 +142,7 @@ export default function CategoryManager({
             key={cat.id}
             className="flex items-center justify-between p-4 bg-primary border border-gray-700 rounded-lg"
           >
-            <span className="text-lg">{cat.name} (ID: {cat.id})</span>
+            <span className="text-lg">{cat.name} </span>
             <div className="flex gap-3">
               <button
                 onClick={() => handleEdit(cat)}
