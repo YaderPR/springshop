@@ -243,12 +243,12 @@ class CartService {
         itemId: number,
         item: CartItemUpdateRequestDto
     ): Promise<CartItemResponseDto> {
-        await cartApi.put(`/${cartId}/items/${itemId}`, item);
+        const { data } = await cartApi.put(`/${cartId}/items/${itemId}`, item);
         // Según la definición, este PUT devuelve el DTO del ítem, aunque solo necesitamos el 200/204.
         // Asumiendo que quieres el DTO de vuelta:
         // const { data } = await cartApi.put<CartItemResponseDto>(...); return data;
         // Pero para simplificar el flujo y dado que el Flutter code no lo retornaba explícitamente:
-        const { data } = await cartApi.get<CartItemResponseDto>(`/${cartId}/items/${itemId}`);
+    
         return data; // O deberías devolver el DTO de la respuesta PUT si lo tienes.
     }
 
