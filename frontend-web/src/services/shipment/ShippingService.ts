@@ -15,11 +15,13 @@ export interface ShippingAddressRequest {
     userId: number; // Aunque el backend debería ignorar esto, se mantiene para tipado
 }
 
+const API_SHIPPING_URL = "http://localhost:8080/api/v2/addresses";
+
 export interface ShippingAddressResponse extends ShippingAddressRequest {
     id: number;
 }
 
-const API_SHIPPING_URL = "http://localhost:8080/api/v2/addresses";
+
 
 // -----------------------------------------------------
 // 2. CONFIGURACIÓN DEL CLIENTE AXIOS CON INTERCEPTORES
@@ -101,7 +103,24 @@ shippingApi.interceptors.response.use(
 // -----------------------------------------------------
 // 3. MÉTODOS DE SERVICIO (USANDO 'shippingApi')
 // -----------------------------------------------------
+export const getLastAddressByUser = async (userId: number): Promise<ShippingAddressResponse | null> => {
+    try {
+        const response = await shippingApi.get(`${API_SHIPPING_URL}/users/${userId}/latest`);
+        return response.data;
+    } catch (error: any) {
+        // Si es 404, significa que no tiene dirección, devolvemos null sin lanzar error
+        if (error.response && error.response.status === 404) {
+            return null;
+        }
+        throw error;
+    }
+};
 
+// 2. Actualizar dirección existente
+export const updateShippingAddress = async (id: number, data: ShippingAddressRequest): Promise<ShippingAddressResponse> => {
+    const response = await shippingApi.put(`${API_SHIPPING_URL}/${id}`, data);
+    return response.data;
+};
 export async function createShippingAddress (
     addressData: ShippingAddressRequest
 ): Promise<ShippingAddressResponse> {

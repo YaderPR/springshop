@@ -1,6 +1,7 @@
 import { useKeycloak } from "@react-keycloak/web";
 import { Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react"; 
+import type { JSX } from "react";
 
 interface Props {
   children: JSX.Element;

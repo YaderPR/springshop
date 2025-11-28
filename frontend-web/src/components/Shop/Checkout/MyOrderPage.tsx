@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useKeycloak } from '@react-keycloak/web';
-import { getOrders } from '../../../services/order/OderService';
-import type { OrderResponseDto } from '../../types/Order.types';
+// Asegúrate de que el nombre del archivo coincida (OrderService vs OderService)
+import { getOrders } from '../../../services/order/OderService'; 
+import type { OrderResponseDto } from '../../../types/Order.types';
 import { Loader2, AlertTriangle, CheckCircle, CircleAlert, PackageSearch } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
@@ -17,7 +18,7 @@ export default function MyOrderPage() {
       return; 
     }
     
-    // 2. Si no está logueado, no debería estar aquí.
+    // Si no está logueado, no debería estar aquí.
     if (!keycloak.authenticated) {
       setLoading(false);
       setError("Necesitas iniciar sesión para ver tus órdenes.");
@@ -28,9 +29,12 @@ export default function MyOrderPage() {
       setLoading(true);
       setError(null);
       try {
-        // 3. Llamamos a la misma función que usa el admin
-        const data = await getOrders(keycloak.token!);
-        data.sort((a, b) => b.id - a.id); // Ordenamos por más reciente
+        // CORRECCIÓN: Llamamos a la función SIN argumentos.
+        // El interceptor de Axios ya se encarga de inyectar el token.
+        const data = await getOrders();
+        
+        // Ordenamos por ID descendente (el más nuevo primero)
+        data.sort((a, b) => b.id - a.id); 
         setOrders(data);
       } catch (err: any) {
         setError(err.message || "Un error desconocido ocurrió.");
@@ -40,7 +44,7 @@ export default function MyOrderPage() {
     };
 
     loadOrders();
-  }, [initialized, keycloak.token]);
+  }, [initialized, keycloak.authenticated]); // Dependencia actualizada a authenticated
 
   // --- Renderizado Condicional ---
   if (loading) {
@@ -100,13 +104,13 @@ export default function MyOrderPage() {
                 </div>
                 <div className="text-sm text-gray-400">
                   <span>Fecha: {new Date(order.createAt).toLocaleDateString()}</span>
+                  <span className="ml-4 text-gray-500">Items: {order.items ? order.items.length : 0}</span>
                 </div>
               </div>
               <div className="mt-4 sm:mt-0 sm:text-right flex-shrink-0">
                 <div className="text-2xl font-bold text-secondary mb-2">
                   ${order.totalAmount.toFixed(2)}
                 </div>
-                {/* No ponemos "Ver Detalles" ya que un usuario normal no necesita ver el modal de admin */}
               </div>
             </div>
           ))

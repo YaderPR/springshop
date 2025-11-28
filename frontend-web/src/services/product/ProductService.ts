@@ -155,3 +155,18 @@ export async function updateWorkoutAccessoryCategory(id: number, data: { name: s
 export async function deleteWorkoutAccessoryCategory(id: number): Promise<void> {
   await api.delete(`/workoutaccessories/categories/${id}`);
 }
+
+export async function getApparelById(id: number): Promise<Apparel> {
+  const { data } = await api.get<Apparel>(`/apparels/${id}`);
+  return data;
+}
+
+export async function getSupplementById(id: number): Promise<Supplement> {
+  const { data } = await api.get<Supplement>(`/supplements/${id}`);
+  return data;
+}
+
+export async function getWorkoutAccessoryById(id: number): Promise<WorkoutAccessory> {
+  const { data } = await api.get<WorkoutAccessory>(`/workout-accessories/${id}`);
+  return data;
+}

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Shared/Layout/Navbar";
 import Footer from "./components/Shared/Layout/Footer";
 import { CartProvider } from "./context/CartContext";
-import CartDrawer from "./components/shop/cart/CartDrawer"; 
+import CartDrawer from "./components/Shop/Cart/CartDrawer"; 
 import HomePage from "./pages/Shop/HomePage";
 import CheckoutPage from "./pages/Shop/CheckoutPage";
 import PagoExitoso from "./pages/Shop/PagoExitoso";
@@ -16,6 +16,10 @@ import AdminProducts from "./pages/Admin/AdminProducts";
 import AdminUsers from "./pages/Admin/AdminUsers";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import MyOrderPage from "./components/Shop/Checkout/MyOrderPage";
+import ProductDetail from "./components/Shop/Product/ProductDetail";
+import FAQPage from "./pages/Shop/FAQPage";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function App() {
   return (
@@ -27,8 +31,8 @@ export default function App() {
           <CartDrawer /> 
           
           {/* ¡ARREGLO! Quitamos 'container mx-auto' de aquí */}
-          <main className="flex-1 container mx-auto"> 
-
+          <main className="flex-1 p-4 container mx-auto"> 
+            <ToastContainer position="top-center" autoClose={3000} />
             {/* ¡ARREGLO! Solo hay UN <Routes> que envuelve TODO */}
             <Routes>
               <Route path="/" element={<HomePage />}>
@@ -36,9 +40,11 @@ export default function App() {
               </Route>
 
               {/* --- 2. RUTAS PÚBLICAS (Independientes) --- */}
+              <Route path="/product/:type/:id" element={<ProductDetail />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/pago-exitoso" element={<PagoExitoso />} />
               <Route path="/contacto" element={<ContactPage />} />
+              <Route path="/faq" element={<FAQPage />} />
 
               <Route 
                 path="/mis-pedidos" 

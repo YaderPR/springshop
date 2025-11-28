@@ -1,14 +1,12 @@
 import React from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
-import { useCart } from '../../../context/CartContext';
+import { useCart } from '../../../context/CartContext'; // Ajusta esto según tu estructura real
 import { Link } from 'react-router-dom';
-
 
 interface CartDrawerProps {
   isCartOpen?: boolean;
   closeCart?: () => void;
 }
-
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }) => {
   const { 
@@ -20,6 +18,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
     clearCart,
     cartId
   } = useCart();
+
+  // Ordenamos los items por ID para que mantengan su posición
+  // Creamos una copia con [...cartItems] para no mutar el estado original
+  const sortedCartItems = [...cartItems].sort((a, b) => a.id - b.id);
 
   const handleQuantityChange = async (itemId: number, productId: number, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -36,7 +38,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
   const handleClearCart = async () => {
     await clearCart();
   };
-
 
   if (!isCartOpen) return null;
 
@@ -94,8 +95,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
             </div>
           ) : (
             <div className="p-4 space-y-4">
-              {/* Cart Items */}
-              {cartItems.map((item) => {
+              {/* Cart Items: Usamos sortedCartItems aquí */}
+              {sortedCartItems.map((item) => {
                 const productName = item.product?.name || `Producto #${item.productId}`;
                 const productImage = item.product?.imageUrl || '/images/placeholder-product.jpg';
                 const productPrice = item.product?.price || item.price || 0;
@@ -190,7 +191,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
             </div>
             
             <p className="text-xs text-gray-500 text-center">
-              ¿Necesitas ayuda? <a href="#" className="text-secondary hover:underline">Contáctanos</a>
+              ¿Necesitas ayuda? 
+              <Link to="/contacto" className='text-gray-500'>
+                <span className='text-secondary hover:text-underline'> Contáctanos</span> 
+              </Link>
             </p>
           </div>
         )}

@@ -15,7 +15,7 @@ import type {
   AnyProduct,
   Category,
   ApparelCategory,
-  WorkoutAccessoryCategory,
+  workoutAccessoryCategory,
   Apparel,
   Supplement,
   WorkoutAccessory,

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import CategoryManager from '../../components/admin/CategoryManager';
+import { useState } from 'react';
+import CategoryManager from '../../components/Admin/CategoryManager';
 import * as ProductService from '../../services/product/ProductService'; 
 type CategoryTab = 'apparel' | 'workout' | 'generic';
 
@@ -36,16 +36,11 @@ export default function AdminCategories() {
         >
           Accesorios (Workout)
         </button>
-        {/* <button
-          onClick={() => setActiveTab('generic')}
-          className={getTabClass('generic')}
-        >
-          Genéricas (Suplementos)
-        </button> */}
+        
       </div>
 
       {/* --- 2. Contenido de Pestañas (Renderizado Condicional) --- */}
-      <div className="p-4 bg-primary/30 rounded-lg">
+      <div className="p-4 bg-primary/30 rounded-lg text-secondary/70 ">
         {activeTab === 'apparel' && (
           <CategoryManager
             title="Subcategorías de Ropa"
@@ -66,15 +61,7 @@ export default function AdminCategories() {
           />
         )}
 
-        {/* {activeTab === 'generic' && (
-          <CategoryManager
-            title="Categorías Genéricas (para Suplementos)"
-            fetchCategories={ProductService.getCategories}
-            createCategory={ProductService.createCategory}
-            updateCategory={ProductService.updateCategory}
-            deleteCategory={ProductService.deleteCategory}
-          />
-        )} */}
+        
       </div>
     </div>
   );

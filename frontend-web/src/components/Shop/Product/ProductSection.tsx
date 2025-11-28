@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import { useState, useEffect } from 'react'; 
 import CategorySidebar from "../../Shared/Layout/CategorySidebar";
 import type { AnyProduct } from "../../../types/Product"; // <-- Usamos AnyProduct
 import { 
@@ -9,7 +9,7 @@ import {
 } from '../../../services/product/ProductService'; 
 import ProductCard from './ProductCard'; 
 // Importamos el tipo desde HomePage
-import type { CategoryFilter } from '../../../pages/shop/HomePage';
+import type { CategoryFilter } from '../../../pages/Shop/HomePage';
 
 interface Props {
   selectedCategory: CategoryFilter;

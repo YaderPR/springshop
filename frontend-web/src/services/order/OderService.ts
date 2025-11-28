@@ -1,6 +1,6 @@
 import axios, { AxiosError, type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
-import type { CheckoutRequestDto, CheckoutResponseDto, OrderResponseDto, updateOrderStatus } from '../../types/Order.types'; 
-import { keycloakClient } from '../../components/Auth/keycloak.client'; // Asegúrate de la ruta correcta
+import type { CheckoutRequestDto, CheckoutResponseDto, OrderResponseDto, UpdateOrderStatus } from '../../types/Order.types'; 
+import { keycloakClient } from '../../components/Auth/keycloak.client';
 
 const orderApi: AxiosInstance = axios.create({
   baseURL: "http://localhost:8080/api/v2/orders",
@@ -24,7 +24,6 @@ const processQueue = (error: any, token: string | null = null) => {
         if (error) {
             prom.reject(error);
         } else {
-            // Reintentar usando la instancia 'orderApi'
             prom.resolve(orderApi(prom.originalRequest)); 
         }
     });
@@ -83,7 +82,7 @@ orderApi.interceptors.response.use(
 
 
 // -----------------------------------------------------
-// 2. MÉTODOS DE SERVICIO (Sin el argumento 'token')
+// 2. MÉTODOS DE SERVICIO 
 // -----------------------------------------------------
 
 /**
@@ -137,7 +136,7 @@ export async function startCheckout(
  */
 export async function updateOrderStatus(
   id: number, 
-  statusUpdate: updateOrderStatus, 
+  statusUpdate: UpdateOrderStatus, 
 ): Promise<OrderResponseDto> {
   try {
     const { data } = await orderApi.patch<OrderResponseDto>(

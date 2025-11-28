@@ -1,8 +1,4 @@
-// userService.ts
-
 import axios, { AxiosError, type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
-
-// Clave constante para localStorage
 const USER_ID_KEY = 'app_user_id';
 
 // Utilidad simple para guardar el ID
