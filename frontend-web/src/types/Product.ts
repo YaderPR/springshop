@@ -1,4 +1,6 @@
-export interface Product { //ProductResponse
+// types/Product.ts
+
+export interface Product {
   id: number;
   name: string;
   description: string;
@@ -9,6 +11,9 @@ export interface Product { //ProductResponse
   categoryName?: string;
 }
 
+// --------------------
+// Tipos Específicos
+// --------------------
 
 export interface Apparel extends Product {
   size: string;
@@ -21,7 +26,7 @@ export interface Apparel extends Product {
 export interface Supplement extends Product {
   brand: string;
   flavor: string;
-  size: string;
+  size: string; 
   ingredients: string;
   usageInstructions: string;
   warnings: string;
@@ -31,27 +36,32 @@ export interface WorkoutAccessory extends Product {
   material: string;
   dimensions: string;
   weight: number;
-  color: string; 
+  color: string;
   workoutAccessoryCategoryId?: number;
   workoutAccessoryCategoryName?: string;
 }
 
-//Categorías
+// Unión de tipos para el formulario
+export type AnyProduct = Apparel | Supplement | WorkoutAccessory;
+
+// --------------------
+// Categorías
+// --------------------
 
 export interface Category { 
   id: number;
   name: string;
-  imageUrl: string;
+  imageUrl?: string; 
 }
 
 export interface ApparelCategory {
   id: number;
   name: string;
+  imageUrl?: string;
 }
 
 export interface workoutAccessoryCategory {
   id: number;
   name: string;
+  imageUrl?: string;
 }
-
-export type AnyProduct = Apparel | Supplement | WorkoutAccessory;

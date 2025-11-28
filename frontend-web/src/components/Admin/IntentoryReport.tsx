@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getApparels, getSupplements, getWorkoutAccessories } from '../../services/product/ProductService';
 import type { AnyProduct } from '../../types/Product';
 import { Loader2, AlertTriangle, PackageSearch } from 'lucide-react';
 import { useKeycloak } from '@react-keycloak/web'; 
 import ExportButtons from '../Shared/Common/ExportButtons'; 
-// import { div } from 'framer-motion/client'; // <-- Esta línea no es necesaria y puede causar errores
 
 const LOW_STOCK_THRESHOLD = 100;
 

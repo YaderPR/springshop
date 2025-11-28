@@ -1,13 +1,12 @@
-import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { motion, type Variants } from "framer-motion";
 
-// Variantes para el círculo exterior
-const circleVariants = {
+// Definimos las variantes con el tipo correcto
+const circleVariants: Variants = {
   hidden: { scale: 0 },
   visible: { 
     scale: 1,
     transition: {
-      type: "spring",
+      type: "spring", // TypeScript ahora sabe que esto es válido
       stiffness: 260,
       damping: 20,
       delay: 0.1,
@@ -15,15 +14,14 @@ const circleVariants = {
   },
 };
 
-// Variantes para el icono del check
-const checkVariants = {
+const checkVariants: Variants = {
   hidden: { pathLength: 0, opacity: 0 },
   visible: { 
     pathLength: 1, 
     opacity: 1,
     transition: { 
       duration: 0.4,
-      ease: "easeInOut",
+      ease: "easeInOut", // TypeScript ahora acepta este literal
       delay: 0.3 
     }
   },

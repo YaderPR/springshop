@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from "react"; 
 import {
-  ShoppingCart, Menu, X, Search, LogIn, LogOut,
-  LayoutGrid, Package, FolderTree, ShoppingBag, Users, ChevronDown, 
-  Shirt, Dumbbell, Sparkles
+  ShoppingCart, Menu, X, LogOut, LogIn,
+  LayoutGrid, Package, FolderTree, ShoppingBag, Users, ChevronDown
 } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { useCart } from "../../../context/CartContext";
-import CartDrawer from "../../shop/cart/CartDrawer"; 
+import CartDrawer from "../../Shop/Cart/CartDrawer"; 
 import { useKeycloak } from "@react-keycloak/web";
 import { motion, AnimatePresence } from "framer-motion"; 
 
@@ -34,10 +33,10 @@ export default function Navbar() {
   const { keycloak, initialized } = useKeycloak();
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const adminMenuRef = useRef<HTMLDivElement>(null);
-  useClickOutside(adminMenuRef, () => setIsAdminMenuOpen(false)); 
+  //useClickOutside(adminMenuRef, () => setIsAdminMenuOpen(false)); 
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const categoryMenuRef = useRef<HTMLDivElement>(null);
-  useClickOutside(categoryMenuRef, () => setIsCategoryMenuOpen(false));
+  //useClickOutside(categoryMenuRef, () => setIsCategoryMenuOpen(false));
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 

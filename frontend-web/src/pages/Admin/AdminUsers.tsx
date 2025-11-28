@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useKeycloak } from '@react-keycloak/web';
 import { getUsers } from '../../services/user/UserService';
 import type { UserResponse } from '../../types/User.types';
-import { Loader2, AlertTriangle, User, ShieldCheck, Edit } from 'lucide-react';
-import UserDetailModal from '../../components/admin/UserDetailModal';
+import { Loader2, AlertTriangle, User, Edit } from 'lucide-react';
+import UserDetailModal from '../../components/Admin/UserDetailModal';
 import ExportButtons from '../../components/Shared/Common/ExportButtons';
 
 const reportColumns = [
@@ -19,20 +19,27 @@ export default function AdminUsers() {
   const [error, setError] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [refreshSignal, setRefreshSignal] = useState(false);
+  
   const triggerRefresh = () => setRefreshSignal(prev => !prev);
 
-
   useEffect(() => {
-    if (!initialized || !keycloak.token) {
-      setLoading(false);
-      setError(initialized ? "No se encontró token." : "Keycloak no está inicializado.");
-      return;
+    // Verificamos inicialización y autenticación básica
+    if (!initialized || !keycloak.authenticated) {
+       // Si no está inicializado, esperamos. Si inicializó pero no hay token/auth, detenemos carga.
+       if (initialized && !keycloak.authenticated) {
+         setLoading(false);
+         setError("No estás autenticado.");
+       }
+       return;
     }
+
     const loadUsers = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getUsers(keycloak.token);
+        // CORRECCIÓN: Llamamos a getUsers() SIN argumentos.
+        // El interceptor en UserService inyecta el token automáticamente.
+        const data = await getUsers();
         setUsers(data);
       } catch (err: any) {
         setError(err.message || "Un error desconocido ocurrió.");
@@ -40,8 +47,9 @@ export default function AdminUsers() {
         setLoading(false);
       }
     };
+
     loadUsers();
-  }, [initialized, keycloak.token, refreshSignal]);
+  }, [initialized, keycloak.authenticated, refreshSignal]); // Dependencia keycloak.authenticated es más segura que .token
 
   if (loading) {
      return (
@@ -50,6 +58,7 @@ export default function AdminUsers() {
       </div>
     );
   }
+
   if (error) {
      return (
       <div className="flex items-center justify-center h-64 bg-red-900/20 border border-red-700 p-6 rounded-lg">
@@ -65,12 +74,12 @@ export default function AdminUsers() {
   return (
     <> 
       <div>
-        {/* --- NUEVO: Contenedor para título y botones --- */}
+        {/* --- Título y botones --- */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-secondary">
             Administrar Usuarios
           </h1>
-          {/* Añadimos los botones de exportación */}
+          {/* Botones de exportación */}
           {!loading && users.length > 0 && (
             <ExportButtons
               data={users}
@@ -80,7 +89,7 @@ export default function AdminUsers() {
           )}
         </div>
         
-        {/* Contenedor de Tarjetas de Usuario (sin cambios) */}
+        {/* Contenedor de Tarjetas de Usuario */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {users.length > 0 ? (
             users.map((user) => (
@@ -88,7 +97,6 @@ export default function AdminUsers() {
                 key={user.id} 
                 className="bg-primary border border-gray-700 rounded-lg shadow-md p-4 flex flex-col justify-between"
               >
-                {/* ... (Tu JSX de la tarjeta de usuario es correcto) ... */}
                 <div>
                   <div className="flex items-center gap-4 mb-3">
                     <div className="flex-shrink-0 p-2 bg-gray-700 rounded-full">
@@ -104,16 +112,16 @@ export default function AdminUsers() {
                     </div>
                   </div>
                   <div className="space-y-1 text-sm text-gray-300 border-t border-gray-700 pt-3">
-                    <p className="flex justify-between">
+                    <div className="flex justify-between">
                       <span className="text-gray-500">Sub (Auth ID):</span>
-                      <span className="truncate max-w-[200px]">{user.sub}</span>
-                    </p>
+                      <span className="truncate max-w-[150px]" title={user.sub}>{user.sub}</span>
+                    </div>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => setSelectedUserId(user.id)}
-                  className="mt-4 w-full flex items-center justify-center gap-2 text-blue-500 hover:text-white border border-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center"
+                  className="mt-4 w-full flex items-center justify-center gap-2 text-blue-500 hover:text-white border border-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center transition-colors"
                 >
                   <Edit size={16} />
                   Editar
@@ -128,7 +136,7 @@ export default function AdminUsers() {
         </div>
       </div>
       
-      {/* Modal (sin cambios) */}
+      {/* Modal */}
       <UserDetailModal
         userId={selectedUserId}
         onClose={() => setSelectedUserId(null)}

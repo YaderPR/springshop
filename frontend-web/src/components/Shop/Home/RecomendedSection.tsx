@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import ProductCard from '../../Shop/Product/ProductCard';
 // 1. Importamos AnyProduct para el tipado correcto
 import type { AnyProduct } from "../../../types/Product"; 

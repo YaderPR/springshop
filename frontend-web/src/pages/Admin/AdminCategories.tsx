@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CategoryManager from '../../components/Admin/CategoryManager';
 import * as ProductService from '../../services/product/ProductService'; 
 type CategoryTab = 'apparel' | 'workout' | 'generic';

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Shared/Layout/Navbar";
 import Footer from "./components/Shared/Layout/Footer";
 import { CartProvider } from "./context/CartContext";
-import CartDrawer from "./components/shop/cart/CartDrawer"; 
+import CartDrawer from "./components/Shop/Cart/CartDrawer"; 
 import HomePage from "./pages/Shop/HomePage";
 import CheckoutPage from "./pages/Shop/CheckoutPage";
 import PagoExitoso from "./pages/Shop/PagoExitoso";
@@ -17,7 +17,9 @@ import AdminUsers from "./pages/Admin/AdminUsers";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import MyOrderPage from "./components/Shop/Checkout/MyOrderPage";
 import ProductDetail from "./components/Shop/Product/ProductDetail";
-import FAQPage from "./pages/Shop/FaqPage";
+import FAQPage from "./pages/Shop/FAQPage";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function App() {
   return (
@@ -30,7 +32,7 @@ export default function App() {
           
           {/* ¡ARREGLO! Quitamos 'container mx-auto' de aquí */}
           <main className="flex-1 p-4 container mx-auto"> 
-
+            <ToastContainer position="top-center" autoClose={3000} />
             {/* ¡ARREGLO! Solo hay UN <Routes> que envuelve TODO */}
             <Routes>
               <Route path="/" element={<HomePage />}>

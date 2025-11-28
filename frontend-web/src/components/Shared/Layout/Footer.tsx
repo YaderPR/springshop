@@ -1,4 +1,3 @@
-import React from 'react';
 import { Facebook, Instagram, Youtube } from 'lucide-react';
 
 // --- Íconos personalizados SVG (Para X y WhatsApp) ---

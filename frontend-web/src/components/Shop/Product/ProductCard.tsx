@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { useCart } from "../../../context/CartContext";
 import type { 
-  AnyProduct, 
-  Apparel, 
+  AnyProduct,  
   Supplement, 
   WorkoutAccessory 
 } from "../../../types/Product"; 
-import { Loader2, Eye } from "lucide-react"; // Importamos un ícono para ver detalles
+import { Loader2 } from "lucide-react"; // Importamos un ícono para ver detalles
 import { Link } from "react-router-dom";
 
 interface ProductCardProps {
   product: AnyProduct;
 }
+
 
 // Helper para obtener el detalle específico
 const ProductSpecificDetail: React.FC<{ product: AnyProduct }> = ({ product }) => {

@@ -5,8 +5,8 @@
 // Usar variables de entorno para las credenciales.
 // Si no están definidas, se usarán valores por defecto para desarrollo.
 export const KEYCLOAK_URL = import.meta.env.VITE_KEYCLOAK_URL || 'http://localhost:9090';
-export const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM || 'master';
-export const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'springshop-web';
+export const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM || 'Springshop-realm';
+export const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'springshop-frontend';
 
 // Opciones de Inicialización para ReactKeycloakProvider
 export const INIT_OPTIONS: Keycloak.KeycloakInitOptions = {

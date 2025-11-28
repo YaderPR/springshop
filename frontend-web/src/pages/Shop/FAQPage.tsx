@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, ChevronUp, HelpCircle, Truck, CreditCard, RefreshCw, ShieldCheck, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
