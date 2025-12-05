@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { startCheckout as startBackendCheckout } from "../services/order/OderService";
 import { useCart } from "../context/CartContext";
-import { toast } from "react-toastify"; // <--- Importamos de react-toastify
+import { toast } from "react-toastify"; 
 
 export const useStripeCheckout = () => {
   const { cartId, userId } = useCart();
@@ -35,7 +35,7 @@ export const useStripeCheckout = () => {
       const response = await startBackendCheckout(checkoutRequest);
 
       if (response && response.checkoutUrl) {
-        toast.update(toastId, { render: "Redirigiendo...", type: "success", isLoading: false, autoClose: 2000 });
+        toast.update(toastId, { render: "Redirigiendo...", type: "success", isLoading: false, autoClose: 2000 }); 
         window.location.href = response.checkoutUrl;
       } else {
         toast.update(toastId, { render: "Error al obtener URL", type: "error", isLoading: false, autoClose: 3000 });

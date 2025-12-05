@@ -18,6 +18,7 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import MyOrderPage from "./components/Shop/Checkout/MyOrderPage";
 import ProductDetail from "./components/Shop/Product/ProductDetail";
 import FAQPage from "./pages/Shop/FAQPage";
+import UserProfilePage from "./pages/Shop/UserProfilePage";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -51,6 +52,15 @@ export default function App() {
                 element={
                   <ProtectedRoute> 
                     <MyOrderPage />
+                  </ProtectedRoute>
+                } 
+              />
+
+              <Route 
+                path="/perfil" 
+                element={
+                  <ProtectedRoute> 
+                    <UserProfilePage />
                   </ProtectedRoute>
                 } 
               />

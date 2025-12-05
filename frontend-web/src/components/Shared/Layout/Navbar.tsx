@@ -9,43 +9,15 @@ import CartDrawer from "../../Shop/Cart/CartDrawer";
 import { useKeycloak } from "@react-keycloak/web";
 import { motion, AnimatePresence } from "framer-motion"; 
 
-const useClickOutside = (ref: React.RefObject<HTMLDivElement>, handler: () => void) => {
-  useEffect(() => {
-    const listener = (event: MouseEvent | TouchEvent) => {
-      if (!ref.current || ref.current.contains(event.target as Node)) {
-        return;
-      }
-      handler();
-    };
-    document.addEventListener("mousedown", listener);
-    document.addEventListener("touchstart", listener);
-    return () => {
-      document.removeEventListener("mousedown", listener);
-      document.removeEventListener("touchstart", listener);
-    };
-  }, [ref, handler]);
-};
-
 export default function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { cartItems } = useCart();
   const { keycloak, initialized } = useKeycloak();
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
-  const adminMenuRef = useRef<HTMLDivElement>(null);
-  //useClickOutside(adminMenuRef, () => setIsAdminMenuOpen(false)); 
-  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
-  const categoryMenuRef = useRef<HTMLDivElement>(null);
-  //useClickOutside(categoryMenuRef, () => setIsCategoryMenuOpen(false));
+  const adminMenuRef = useRef<HTMLDivElement>(null); 
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
-
-  const closeAllMenus = () => {
-    setIsMobileMenuOpen(false);
-    setIsAdminMenuOpen(false);
-    
-  };
-
   const handleLogin = () => keycloak.login();
   const handleLogout = () => keycloak.logout({ redirectUri: window.location.origin });
   const isAdmin = initialized && keycloak.authenticated && keycloak.hasRealmRole("admin");
@@ -69,7 +41,7 @@ export default function Navbar() {
                 Shop
               </Link>
 
-              <div className="relative" ref={categoryMenuRef}>
+              <div className="relative" >
                 <Link to="/mis-pedidos" className="flex items-center gap-1 hover:text-secondary transition-colors">
                   Mis pedidos
                 </Link>
@@ -81,7 +53,7 @@ export default function Navbar() {
               </Link>
 
               {/* Dropdown de Admin */}
-              {isAdmin && (
+              {isAdmin ? (
                 <div className="relative" ref={adminMenuRef}>
                   <button
                     onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
@@ -119,9 +91,14 @@ export default function Navbar() {
                         </nav>
                       </motion.div>
                     )}
-                  </AnimatePresence>
+                  </AnimatePresence>  
                 </div>
-              )}
+              ) : isUser ? (
+                <Link to="/perfil" className="hover:text-secondary transition-colors">
+                  Mi Perfil
+                </Link>
+              ) : null}
+              
             </div>
 
   
@@ -149,9 +126,9 @@ export default function Navbar() {
                   </button>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-300 hidden sm:block">
+                    <Link to="/perfil" className="text-sm text-gray-300 hidden sm:block hover:text-secondary transition-colors">
                       Hola, {keycloak.tokenParsed?.preferred_username || 'Usuario'}
-                    </span>
+                    </Link>
                     <button onClick={handleLogout} className="bg-gray-600 text-white font-semibold px-4 py-1.5 rounded-full hover:bg-gray-500 transition-colors flex items-center gap-2">
                       <LogOut size={16} /> Logout
                     </button>
@@ -180,7 +157,87 @@ export default function Navbar() {
               exit={{ height: 0, opacity: 0 }}
               className="md:hidden bg-primary text-gray-100 shadow-inner overflow-hidden"
             >
+              <div className="flex flex-col p-4 space-y-4">
+                <Link 
+                  to="/" 
+                  className="hover:text-secondary transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Shop
+                </Link>
+                <Link 
+                  to="/mis-pedidos" 
+                  className="hover:text-secondary transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Mis pedidos
+                </Link>
+                <Link 
+                  to="/contacto" 
+                  className="hover:text-secondary transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Contactanos
+                </Link>
 
+                {/* Sección Admin Móvil */}
+                {isAdmin && (
+                  <div className="border-t border-gray-700 pt-4">
+                    <p className="text-secondary font-semibold mb-2 flex items-center gap-2">
+                      <LayoutGrid size={16} /> Panel Admin
+                    </p>
+                    <div className="flex flex-col space-y-3 pl-4 border-l border-gray-700 ml-1">
+                      <NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => isActive ? "text-secondary" : "text-gray-300"}>
+                        Dashboard
+                      </NavLink>
+                      <NavLink to="/admin/products" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => isActive ? "text-secondary" : "text-gray-300"}>
+                        Productos
+                      </NavLink>
+                      <NavLink to="/admin/categories" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => isActive ? "text-secondary" : "text-gray-300"}>
+                        Categorías
+                      </NavLink>
+                      <NavLink to="/admin/orders" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => isActive ? "text-secondary" : "text-gray-300"}>
+                        Órdenes
+                      </NavLink>
+                      <NavLink to="/admin/users" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => isActive ? "text-secondary" : "text-gray-300"}>
+                        Usuarios
+                      </NavLink>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sección Usuario / Auth Móvil */}
+                <div className="border-t border-gray-700 pt-4">
+                  {!initialized ? (
+                    <div className="w-full h-10 bg-gray-700 rounded animate-pulse"></div>
+                  ) : !keycloak.authenticated ? (
+                    <button 
+                      onClick={() => { handleLogin(); setIsMobileMenuOpen(false); }}
+                      className="w-full bg-secondary text-primary font-bold py-2 rounded-lg hover:bg-lime-400 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <LogIn size={18} /> Iniciar Sesión
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      <Link 
+                        to="/perfil" 
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-2 text-secondary font-medium"
+                      >
+                        <Users size={18} /> 
+                        Hola, {keycloak.tokenParsed?.preferred_username || 'Usuario'}
+                      </Link>
+                      
+                      <button 
+                        onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                        className="w-full bg-gray-700 text-white font-medium py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <LogOut size={18} /> Cerrar Sesión
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

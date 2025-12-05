@@ -69,7 +69,6 @@ export default function InventoryReport() {
   }
 
   // --- ARREGLO 1: Renderizado de Error ---
-  // Ahora solo devuelve UN elemento div
   if (error) {
     return (
       <div className="flex items-center justify-center h-64 bg-red-900/20 border border-red-700 p-6 rounded-lg">
@@ -83,10 +82,8 @@ export default function InventoryReport() {
   }
 
   // --- ARREGLO 2: Renderizado de Éxito ---
-  // Envolvemos todo en un div padre (o un Fragment <>)
-  // y añadimos los ExportButtons AQUÍ, en la vista de éxito.
   return (
-    <div className="space-y-4"> {/* <-- Div padre añadido */}
+    <div className="space-y-4">
       
       {/* Botones de Exportación */}
       <div className="flex justify-end">
@@ -97,7 +94,6 @@ export default function InventoryReport() {
         />
       </div>
 
-      {/* Tabla (tu código original) */}
       <div className="bg-primary border border-gray-700 rounded-lg shadow-md">
         <table className="w-full text-sm text-left text-gray-300">
           <thead className="text-xs uppercase bg-gray-700 text-gray-400">

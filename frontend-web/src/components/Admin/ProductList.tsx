@@ -179,7 +179,10 @@ export default function ProductList({ refreshSignal, onEdit }: Props) {
               ring-1 ring-lime-400/20 
               transition-all duration-300
               hover:ring-secondary
-              hover:shadow-[0_0_15px_rgba(137,254,0,.7)] flex items-center gap-4 text-gray-100"
+              hover:shadow-[0_0_15px_rgba(137,254,0,.7)] 
+              flex items-center 
+              gap-4 
+              text-gray-100"
               >
                 <img
                   src={p.imageUrl}

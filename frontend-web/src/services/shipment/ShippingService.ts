@@ -12,7 +12,7 @@ export interface ShippingAddressRequest {
     country: string;
     zipCode: string;
     phoneNumber?: string;
-    userId: number; // Aunque el backend debería ignorar esto, se mantiene para tipado
+    userId: number;
 }
 
 const API_SHIPPING_URL = "http://localhost:8080/api/v2/addresses";

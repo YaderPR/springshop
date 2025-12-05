@@ -30,7 +30,7 @@ export default function UserDetailModal({ userId, onClose, onSave }: Props) {
       setLoading(true);
       setError(null);
       try {
-        const data = await getUserById(userId, keycloak.token);
+        const data = await getUserById(userId);
         setUser(data);
         setUsername(data.username || ''); // Poner el username en el estado del formulario
       } catch (err: any) {
@@ -48,19 +48,6 @@ export default function UserDetailModal({ userId, onClose, onSave }: Props) {
     e.preventDefault();
     setIsSaving(true);
     setError(null);
-
-    // --- LÓGICA DE ACTUALIZACIÓN (PARA EL FUTURO) ---
-    // try {
-    //   await updateUserService(userId, { username }, keycloak.token);
-    //   onSave(); // Refresca la lista en AdminUsers.tsx
-    //   onClose(); // Cierra el modal
-    // } catch (err: any) {
-    //   setError(err.message);
-    // } finally {
-    //   setIsSaving(false);
-    // }
-    // -----------------------------------------------
-
     // Por ahora, solo simulamos y cerramos
     alert("Funcionalidad de guardado aún no implementada en el backend.");
     setIsSaving(false);

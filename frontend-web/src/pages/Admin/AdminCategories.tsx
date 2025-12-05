@@ -59,9 +59,8 @@ export default function AdminCategories() {
             updateCategory={ProductService.updateWorkoutAccessoryCategory}
             deleteCategory={ProductService.deleteWorkoutAccessoryCategory}
           />
-        )}
+        )}  
 
-        
       </div>
     </div>
   );

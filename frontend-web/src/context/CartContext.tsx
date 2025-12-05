@@ -1,19 +1,17 @@
 // context/CartContext.tsx
 import React, { createContext, useContext, type ReactNode } from 'react';
 import { useCartManager } from '../hooks/useCartManager';
-// ?? Importa el hook Y el nuevo TIPO de item
 import { useCart as useCartHook } from '../hooks/useCart'; 
 import type { FullCartItem } from '../hooks/useCart';
 import type { Product } from '../types/Product';
 
 interface CartContextType {
-  // ?? CAMBIA EL TIPO AQUÍ
-  cartItems: FullCartItem[]; // <-- CAMBIADO
+ 
+  cartItems: FullCartItem[]; 
   total: number;
   loading: boolean;
   error: string | null;
   
-  // ... (el resto de la interfaz no cambia)
   addToCart: (product: Product) => Promise<void>;
   removeFromCart: (itemId: number) => Promise<void>;
   updateCartItem: (itemId: number, productId: number, quantity: number) => Promise<void>;

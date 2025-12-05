@@ -23,12 +23,11 @@ export interface CheckoutRequestDto {
   cartId: number;
   userId: number;
   addressId: number;
-  redirectUrl: string; // Agregado según api-docs
+  redirectUrl: string;
 }
 
-// Respuesta del Checkout (La API devuelve un Map<String, String>, asumimos esta estructura)
 export interface CheckoutResponseDto {
-  checkoutUrl?: string; // Opcional porque es un Map dinámico
+  checkoutUrl?: string; 
   orderId?: string;
   [key: string]: string | undefined; // Firma de índice por si el API devuelve otras claves
 }

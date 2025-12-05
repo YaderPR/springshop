@@ -5,20 +5,17 @@ import type { Product } from '../types/Product';
 import type { CartItemResponseDto, CartItemCreateRequestDto, CartItemUpdateRequestDto } from '../types/cart.types';
 import { cartService } from '../services/cart/CartService';
 
-
-// (Esto es lo que tu CartDrawer espera)
 export interface FullCartItem extends CartItemResponseDto {
   product: Product; 
 }
 
 export const useCart = (cartId?: number) => {
-  // ?? 3. CAMBIA EL TIPO DE ESTADO
+
   const [cartItems, setCartItems] = useState<FullCartItem[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ?? 4. REESCRIBE loadCartItems PARA FUSIONAR
   const loadCartItems = async (id: number) => {
     if (!id) return;
 
@@ -76,11 +73,6 @@ export const useCart = (cartId?: number) => {
       setLoading(false);
     }
   };
-
-  // 5. addItem, updateItem, removeItem, clearCart
-  //    ¡NO NECESITAN CAMBIOS!
-  //    Todos llaman a loadCartItems() al final,
-  //    que ahora se encarga de la fusión automáticamente.
 
   const addItem = async (item: CartItemCreateRequestDto) => {
     if (!cartId) return;

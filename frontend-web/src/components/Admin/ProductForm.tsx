@@ -271,7 +271,7 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
         setMessage("Producto actualizado correctamente");
       } else {
         await createFunction(payload);
-        setMessage("Producto creado correctamente");
+        setMessage("✅Producto creado correctamente");
         // Reset solo si es creación
         setBaseFormData(initialBaseState);
         setSpecificFormData(initialSpecificState);
@@ -321,12 +321,6 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
               <textarea name="warnings" placeholder="Advertencias" value={specificFormData.warnings} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600" />
             </div>
             
-            <select name="categoryId" value={specificFormData.categoryId ?? ""} onChange={handleChange} className="w-full p-3 rounded bg-gray-800 border border-gray-600">
-              <option value="">Seleccione una categoría Genérica</option>
-              {categories.generic.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
           </>
         );
       case "WORKOUT_ACCESSORY":
@@ -364,7 +358,7 @@ export default function ProductForm({ onCreated, productToEdit, onCancelEdit }: 
             onChange={handleTypeChange}
             className="w-full p-3 rounded bg-gray-800 border border-gray-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             required
-            disabled={!!productToEdit} // Deshabilitar cambio de tipo al editar
+            disabled={!!productToEdit} 
           >
             <option value="APPAREL">Categoría: Ropa</option>
             <option value="SUPPLEMENT">Categoría: Suplemento</option>

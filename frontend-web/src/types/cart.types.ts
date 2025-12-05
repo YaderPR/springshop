@@ -16,7 +16,6 @@ export interface CartItem {
   product?: Product; // Para información adicional del producto
 }
 
-// Usamos el Product que ya definiste
 export interface Product {
   id: number;
   name: string;

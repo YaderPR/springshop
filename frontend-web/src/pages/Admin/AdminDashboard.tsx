@@ -3,7 +3,7 @@ import { useKeycloak } from "@react-keycloak/web";
 import { getOrders } from "../../services/order/OderService";
 import { getUsers } from "../../services/user/UserService";
 import type { OrderResponseDto } from "../../types/Order.types";
-import type { UserResponse } from "../../types/User.types";
+
 import {
   Loader2,
   AlertTriangle,
@@ -64,8 +64,8 @@ const DashboardSummary = () => {
       setError(null);
       try {
         const [ordersData, usersData] = await Promise.all([
-          getOrders(keycloak.token!),
-          getUsers(keycloak.token!),
+          getOrders(),
+          getUsers(),
         ]);
 
         const sales = ordersData.reduce(

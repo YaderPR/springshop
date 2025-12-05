@@ -9,14 +9,10 @@ type UpdateFunc = (id: number, data: { name: string }) => Promise<Category>;
 type DeleteFunc = (id: number) => Promise<void>;
 
 interface Props {
-  // Las 4 funciones CRUD que le pasaremos
-  //aquì va la imagen de la categoría
-  
   fetchCategories: FetchFunc;
   createCategory: CreateFunc;
   updateCategory: UpdateFunc;
   deleteCategory: DeleteFunc;
-  // Un título para saber qué estamos editando
   title: string;
 }
 

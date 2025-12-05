@@ -36,7 +36,7 @@ export default function AdminOrders() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getOrders(keycloak.token);
+        const data = await getOrders();
         setOrders(data);
       } catch (err: any) {
         setError(err.message || "Un error desconocido ocurrió.");

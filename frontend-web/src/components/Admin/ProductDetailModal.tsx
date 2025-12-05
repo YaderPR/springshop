@@ -1,8 +1,6 @@
-// src/components/Products/ProductDetailModal.tsx (CORREGIDO)
-import React, { useState, useEffect } from 'react'; // <-- Importamos useState/useEffect
+import { useState, useEffect } from 'react'; 
 import type { AnyProduct } from '../../types/Product';
-import { X, Trash2, AlertTriangle } from 'lucide-react'; // <-- Importamos AlertTriangle
-// import SecureImage from '../Common/SecureImage';
+import { X, Trash2, AlertTriangle } from 'lucide-react'; 
 
 interface Props {
   product: AnyProduct | null;
@@ -31,7 +29,7 @@ export default function ProductDetailModal({ product, onClose, onDelete, categor
   return (
     // Overlay (fondo oscuro)
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center shadow-sm bg-primary bg-opacity-10 backdrop-blur-sm p-4" // <-- Padding para móviles
+      className="fixed inset-0 z-50 flex items-center justify-center shadow-sm bg-primary bg-opacity-80 backdrop-blur-sm p-4" // <-- Padding para móviles
       onClick={onClose} 
     >
       {/* Contenedor del Modal */}
@@ -48,19 +46,17 @@ export default function ProductDetailModal({ product, onClose, onDelete, categor
         </button>
 
         {/* Contenido del Modal */}
-        {/* --- ¡AQUÍ ESTÁ EL ARREGLO DE LAYOUT! --- */}
+    
         <div className="flex flex-col md:flex-row gap-6">
           
-          {/* --- COLUMNA 1: IMAGEN (40% de ancho en desktop)  esto fue disque corregido, aquí es el control z--- */}
           <div className="w-full md:w-2/5 flex-shrink-0">
             <img
               src={product.imageUrl}
               alt={product.name}
-              className="w-full h-auto object-cover rounded-lg" // <-- w-full para llenar su div padre
+              className="w-full h-auto object-cover rounded-lg" 
             />
           </div>
 
-          {/* --- COLUMNA 2: INFORMACIÓN (60% de ancho en desktop) --- */}
           <div className="w-full md:w-3/5 flex-1 space-y-3">
             <h2 className="text-3xl font-bold text-secondary">{product.name}</h2>
             <p className="text-lg text-gray-300">{product.description}</p>
@@ -76,13 +72,12 @@ export default function ProductDetailModal({ product, onClose, onDelete, categor
               <p><strong>ID Producto:</strong> {product.id}</p>
             </div>
             
-            {/* --- ¡AQUÍ ESTÁ EL ARREGLO DE UX (BORRADO)! --- */}
             <div className="pt-4 border-t border-gray-700">
 
-              {/* 1. Botón de Eliminar (se muestra por defecto) */}
+              {/* 1. Botón de Eliminar  */}
               {!isConfirmingDelete && (
                 <button
-                  onClick={() => setIsConfirmingDelete(true)} // <-- Muestra la confirmación
+                  onClick={() => setIsConfirmingDelete(true)} 
                   className="w-full flex items-center justify-center gap-2 bg-red-700 hover:bg-red-800 text-white font-bold py-3 rounded-lg focus:outline-none transition-all"
                 >
                   <Trash2 size={18} />
@@ -90,7 +85,7 @@ export default function ProductDetailModal({ product, onClose, onDelete, categor
                 </button>
               )}
 
-              {/* 2. Confirmación (se muestra al hacer clic) */}
+              {/* 2. Confirmación  */}
               {isConfirmingDelete && (
                 <div className="p-4 rounded-lg bg-red-900 bg-opacity-30 border border-red-700">
                   <h4 className="flex items-center gap-2 text-lg font-semibold text-red-400">

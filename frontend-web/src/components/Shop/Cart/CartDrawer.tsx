@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; // Ajusta esto según tu estructura real
 import { Link } from 'react-router-dom';
+import ProductDefault from '../../../assets/product-default.png';
 
 interface CartDrawerProps {
   isCartOpen?: boolean;
@@ -44,7 +45,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
   return (
     <div className="fixed inset-0 z-50 flex backdrop-blur-lg">
       <div 
-        className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out ${
+        className={`fixed inset-0 bg-primary transition-opacity duration-300 ease-in-out ${
           isCartOpen ? "opacity-50 backdrop-blur-sm" : "opacity-0 pointer-events-none"
         }`}
         onClick={closeCart}
@@ -80,7 +81,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
           {loading ? (
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="ml-2 text-gray-600">Cargando...</span>
+              <span className="ml-2 text-gray-600">Cargando sus productos...</span>
             </div>
           ) : cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-end py-12 px-4">
@@ -95,10 +96,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
             </div>
           ) : (
             <div className="p-4 space-y-4">
-              {/* Cart Items: Usamos sortedCartItems aquí */}
               {sortedCartItems.map((item) => {
                 const productName = item.product?.name || `Producto #${item.productId}`;
-                const productImage = item.product?.imageUrl || '/images/placeholder-product.jpg';
+                const productImage = item.product?.imageUrl || `${ProductDefault} `;
                 const productPrice = item.product?.price || item.price || 0;
 
                 return (
@@ -106,7 +106,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isCartOpen = false, closeCart }
                     {/* Product Image */}
                     <div className="flex-shrink-0 text-gray-50">
                       <img
-                        src={productImage}
+                        src={productImage ||  `${ProductDefault} `}
                         alt={productName}
                         className="w-16 h-16 object-cover rounded-md"
                       />
